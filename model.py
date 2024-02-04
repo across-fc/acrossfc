@@ -1,9 +1,5 @@
 from enum import Enum
-from typing import List, Dict, NamedTuple, Optional
-
-class FFL_Zone(Enum):
-    ANABASEIOS= 54
-    ABYSSOS = 49
+from typing import List, NamedTuple, Optional
 
 class FFL_Boss(Enum):
     # Also known as 'encounter' in the FFLogs API
@@ -22,10 +18,6 @@ class FFL_Difficulty(Enum):
     SAVAGE = 101
     NORMAL = 100
 
-class Tier(NamedTuple):
-    zone: FFL_Zone
-    difficulty: FFL_Difficulty
-
 class TrackedEncounter(NamedTuple):
     name: str
     boss: FFL_Boss
@@ -35,6 +27,15 @@ class GuildMember(NamedTuple):
     id: int
     name: str
     rank: int
+
+class ClearRate(NamedTuple):
+    clears: int
+    eligible_members: int
+
+    @property
+    def clear_rate(self):
+        return self.clears / self.eligible_members
+
 
 # All the encounters we want to track
 TRACKED_ENCOUNTERS: List[TrackedEncounter] = [

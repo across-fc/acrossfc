@@ -1,15 +1,14 @@
 # stdlib
 import os
-import json
 import argparse
 import logging
-from typing import Tuple
+from typing import Tuple, Dict
 
 # 3rd-party
 from tabulate import tabulate
 
 # Local
-from model import TRACKED_ENCOUNTERS
+from model import TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
 from fflogs_client import FFLogsAPIClient
 
 LOG_FORMAT = '%(asctime)s.%(msecs)03d [%(levelname)s] %(filename)s:%(lineno)d: %(message)s'
@@ -70,7 +69,7 @@ if __name__ == "__main__":
     client_id, client_secret = get_secrets(args.secrets_folder)
     ffl_client = FFLogsAPIClient(client_id=client_id, client_secret=client_secret)
 
-    rates = ffl_client.get_clear_rates(
+    encounter_clear_rates: Dict[TrackedEncounter, ClearRate] = ffl_client.get_clear_rates(
         args.guild_id,
         guild_rank_filter=lambda rank: rank < 7,
         tracked_encounters=TRACKED_ENCOUNTERS)
@@ -78,8 +77,8 @@ if __name__ == "__main__":
     table = [
         [
             encounter.name,
-            f"{rates[encounter][0]} / {rates[encounter][1]}", 
-            f"{rates[encounter][0] * 100 / rates[encounter][1]:.2f}%"
+            f"{encounter_clear_rates[encounter].clears} / {encounter_clear_rates[encounter].eligible_members}", 
+            f"{encounter_clear_rates[encounter].clear_rate * 100:.2f}%"
         ]
         for encounter in TRACKED_ENCOUNTERS
     ]

@@ -8,7 +8,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
 # Local
-from model import FFL_Boss, GuildMember, TrackedEncounter, TRACKED_ENCOUNTERS
+from model import GuildMember, TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
@@ -107,7 +107,7 @@ class FFLogsAPIClient:
             guild_id: int,
             guild_rank_filter: Callable[[int], bool],
             tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
-        ) -> Dict[TrackedEncounter, Tuple[int, int]]:
+        ) -> Dict[TrackedEncounter, ClearRate]:
         LOG.info(f'Getting clear rates for guild {guild_id}...')
 
         clears: Dict[TrackedEncounter, int] = {
@@ -130,7 +130,7 @@ class FFLogsAPIClient:
                     clears[encounter] += 1
         
         ret = {
-            encounter: (clears.get(encounter, 0), eligible_members)
+            encounter: ClearRate(clears.get(encounter, 0), eligible_members)
             for encounter in tracked_encounters
         }
 
