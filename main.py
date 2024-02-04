@@ -5,6 +5,9 @@ import argparse
 import logging
 from typing import Tuple
 
+# 3rd-party
+from tabulate import tabulate
+
 # Local
 from model import TRACKED_ENCOUNTERS
 from fflogs_client import FFLogsAPIClient
@@ -59,10 +62,14 @@ if __name__ == "__main__":
         guild_rank_filter=lambda rank: rank < 7,
         tracked_encounters=TRACKED_ENCOUNTERS)
     
-    formatted_rates = {
-        encounter.name: f"{rates[encounter][0]} / {rates[encounter][1]} " \
-            f"({rates[encounter][0] * 100 / rates[encounter][1]:.2f}%)"
+    table = [
+        [
+            encounter.name,
+            f"{rates[encounter][0]} / {rates[encounter][1]}", 
+            f"{rates[encounter][0] * 100 / rates[encounter][1]:.2f}%"
+        ]
         for encounter in TRACKED_ENCOUNTERS
-    }
+    ]
 
-    print(json.dumps(formatted_rates, indent=2))
+    print(tabulate(table,
+                   headers=['Encounter', 'FC clears', 'FC clear rate']))
