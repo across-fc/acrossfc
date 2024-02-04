@@ -1,0 +1,8 @@
+*.tmp
+*.pyc
+.virtualenv
+.vscode
+__pycache__
+
+# Secrets folder
+.secrets
