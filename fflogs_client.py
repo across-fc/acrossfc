@@ -25,7 +25,7 @@ class FFLogsAPIClient:
             })
         if resp.status_code != 200:
             raise RuntimeError('Unable to get authorization token from the FFLogs API.', resp.text)
-        
+
         access_token = resp.json()['access_token']
 
         # Select your transport with a defined url endpoint
@@ -83,7 +83,7 @@ class FFLogsAPIClient:
                     difficulty: {encounter.difficulty.value if encounter.difficulty is not None else 'null'}
                 ),
             """
-        
+
         # Query footer
         query_str += """
                     }
@@ -128,7 +128,7 @@ class FFLogsAPIClient:
                 )
                 for encounter in cleared_encounters:
                     clears[encounter] += 1
-        
+
         ret = {
             encounter: ClearRate(clears.get(encounter, 0), eligible_members)
             for encounter in tracked_encounters
