@@ -67,9 +67,9 @@ if __name__ == "__main__":
         logging.getLogger('fflogs_client').setLevel(logging.DEBUG)
 
     client_id, client_secret = get_secrets(args.secrets_folder)
-    ffl_client = FFLogsAPIClient(client_id=client_id, client_secret=client_secret)
+    fflogs_client = FFLogsAPIClient(client_id=client_id, client_secret=client_secret)
 
-    encounter_clear_rates: Dict[TrackedEncounter, ClearRate] = ffl_client.get_clear_rates(
+    encounter_clear_rates: Dict[TrackedEncounter, ClearRate] = fflogs_client.get_clear_rates(
         args.guild_id,
         guild_rank_filter=lambda rank: rank < 7,
         tracked_encounters=TRACKED_ENCOUNTERS)
