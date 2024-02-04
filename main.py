@@ -44,9 +44,22 @@ def get_secrets(secrets_folder: str) -> Tuple[str, str]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--secrets_folder', '-s', action='store', type=str, default='.secrets')
-    parser.add_argument('--guild_id', '-g', action='store', type=int, default=ACROSS_FFLOGS_GUILD_ID)
-    parser.add_argument('--verbose', '-v', action='store_true', default=False)
+    parser.add_argument('--secrets_folder',
+                        '-s',
+                        action='store',
+                        type=str, default='.secrets',
+                        help="Path to the secrets folder.")
+    parser.add_argument('--guild_id',
+                        '-g',
+                        action='store',
+                        type=int,
+                        default=ACROSS_FFLOGS_GUILD_ID,
+                        help="FFLogs guild ID")
+    parser.add_argument('--verbose',
+                        '-v',
+                        action='store_true',
+                        default=False,
+                        help="Turn on verbose logging")
     args = parser.parse_args()
 
     # Verbose logging
