@@ -107,7 +107,7 @@ class FFLogsAPIClient:
             guild_id: int,
             guild_rank_filter: Callable[[int], bool],
             tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
-        ) -> Dict[TrackedEncounter, float]:
+        ) -> Dict[TrackedEncounter, Tuple[int, int]]:
         LOG.info(f'Getting clear rates for guild {guild_id}...')
 
         clears: Dict[TrackedEncounter, int] = {
@@ -130,7 +130,7 @@ class FFLogsAPIClient:
                     clears[encounter] += 1
         
         ret = {
-            encounter: clears.get(encounter, 0.0) / eligible_members
+            encounter: (clears.get(encounter, 0), eligible_members)
             for encounter in tracked_encounters
         }
 

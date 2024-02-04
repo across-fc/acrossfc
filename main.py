@@ -60,7 +60,8 @@ if __name__ == "__main__":
         tracked_encounters=TRACKED_ENCOUNTERS)
     
     formatted_rates = {
-        encounter.name: f"{rates[encounter] * 100:.2f}%"
+        encounter.name: f"{rates[encounter][0]} / {rates[encounter][1]} " \
+            f"({rates[encounter][0] * 100 / rates[encounter][1]:.2f}%)"
         for encounter in TRACKED_ENCOUNTERS
     }
 
