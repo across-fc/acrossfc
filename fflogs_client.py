@@ -1,6 +1,6 @@
 # stdlib
 import logging
-from typing import Dict, List, Tuple, Callable
+from typing import Dict, List, Callable
 
 # 3rd-party
 import requests
@@ -64,10 +64,10 @@ class FFLogsAPIClient:
         return ret
 
     def get_cleared_fights_for_user(
-            self,
-            user_id: int,
-            tracked_encounters: List[TrackedEncounter]
-        ) -> List[TrackedEncounter]:
+        self,
+        user_id: int,
+        tracked_encounters: List[TrackedEncounter]
+    ) -> List[TrackedEncounter]:
         # Query header
         query_str = """
             query getCharacterData($id: Int!) {
@@ -103,11 +103,11 @@ class FFLogsAPIClient:
         return ret
 
     def get_clear_rates(
-            self,
-            guild_id: int,
-            guild_rank_filter: Callable[[int], bool],
-            tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
-        ) -> Dict[TrackedEncounter, ClearRate]:
+        self,
+        guild_id: int,
+        guild_rank_filter: Callable[[int], bool],
+        tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
+    ) -> Dict[TrackedEncounter, ClearRate]:
         LOG.info(f'Getting clear rates for guild {guild_id}...')
 
         clears: Dict[TrackedEncounter, int] = {

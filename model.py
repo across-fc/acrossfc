@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List, NamedTuple, Optional
 
+
 class FFL_Boss(Enum):
     # Also known as 'encounter' in the FFLogs API
     KOKYTOS = 88
@@ -14,19 +15,23 @@ class FFL_Boss(Enum):
     UWU = 1061
     UCOB = 1060
 
+
 class FFL_Difficulty(Enum):
     SAVAGE = 101
     NORMAL = 100
+
 
 class TrackedEncounter(NamedTuple):
     name: str
     boss: FFL_Boss
     difficulty: Optional[FFL_Difficulty]
 
+
 class GuildMember(NamedTuple):
     id: int
     name: str
     rank: int
+
 
 class ClearRate(NamedTuple):
     clears: int
