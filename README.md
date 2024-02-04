@@ -32,8 +32,10 @@ usage: main.py [-h] [--secrets_folder SECRETS_FOLDER] [--guild_id GUILD_ID] [--v
 options:
   -h, --help            show this help message and exit
   --secrets_folder SECRETS_FOLDER, -s SECRETS_FOLDER
+                        Path to the secrets folder.
   --guild_id GUILD_ID, -g GUILD_ID
-  --verbose, -v
+                        FFLogs guild ID
+  --verbose, -v         Turn on verbose logging
 ```
 
 **Using a different secrets folder:**
@@ -45,7 +47,7 @@ options:
 ```
 > python main.py -g <fflogs_guild_id>
 ```
-* Note that the tool will automatically filter out guild members with a rank higher than 5 (4 on the site) because that's how my FC works.
+* Note that the tool will automatically filter out guild members with a rank higher than 6 (5 on the site) because that's how my FC works.
 
 **Verbose mode**
 ```
