@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     rates = ffl_client.get_clear_rates(
         args.guild_id,
-        guild_rank_filter=lambda rank: rank < 6,
+        guild_rank_filter=lambda rank: rank < 7,
         tracked_encounters=TRACKED_ENCOUNTERS)
     
     formatted_rates = {
