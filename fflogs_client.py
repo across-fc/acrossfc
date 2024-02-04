@@ -73,7 +73,7 @@ class FFLogsAPIClient:
             query getCharacterData($id: Int!) {
                 characterData {
                     character(id: $id) {
-            """ 
+            """
 
         # Add all the tracked encounters to the query
         for encounter in tracked_encounters:
