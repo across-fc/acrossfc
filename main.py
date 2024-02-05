@@ -5,7 +5,6 @@ import argparse
 import logging
 from datetime import timedelta
 from typing import Tuple, Dict, List
-from collections import defaultdict
 
 # 3rd-party
 from tabulate import tabulate
