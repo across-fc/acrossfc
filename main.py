@@ -72,7 +72,22 @@ def print_clear_rates(database: Database):
                    headers=['Encounter', 'FC clears', 'FC clear rate']))
 
 
+def print_ppl_with_clear(database: Database, encounter: TrackedEncounter):
+    cleared_members = database.get_cleared_members_by_encounter(encounter)
+    sorted_names = sorted([
+        f"{member.name} ({member.id})"
+        for member in cleared_members
+    ])
+
+    print()
+    print(f'People who have cleared {encounter.name}:')
+    print('-------------------------------------------------')
+    for i, name in enumerate(sorted_names):
+        print(f"{i+1:>2}: {name}")
+
+
 def print_ppl_without_encounter(database: Database, encounter: TrackedEncounter):
+    # TODO: rename function to ppl_without_clear
     uncleared_members = database.get_uncleared_members_by_encounter(encounter)
 
     print()
@@ -232,6 +247,13 @@ if __name__ == "__main__":
     toxic.add_argument('--encounter', '-e', action='store', required=True, type=str,
                        help=f"Encounter to check stats for. Possible values: "
                        "{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
+    
+    ppl_with_clear_parser = subparsers.add_parser('ppl_with_clear',
+                                                  help="Prints the list of people with a clear of a certain fight.")
+    # TODO: Change this to apply to all subparsers, and handle default as "all"
+    ppl_with_clear_parser.add_argument('--encounter', '-e', action='store', required=True, type=str,
+                                       help=f"Encounter to check stats for. Possible values: "
+                                       "{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
 
     args = parser.parse_args()
 
@@ -270,6 +292,8 @@ if __name__ == "__main__":
         print_cleared_roles(database)
     elif args.command == 'cleared_jobs_by_member':
         print_cleared_jobs_by_member(database)
+    elif args.command == 'ppl_with_clear':
+        print_ppl_with_clear(database, NAME_TO_TRACKED_ENCOUNTER_MAP[args.encounter])
     elif args.command == 'ppl_without_clear':
         print_ppl_without_encounter(database, NAME_TO_TRACKED_ENCOUNTER_MAP[args.encounter])
     elif args.command == 'cleared_today':

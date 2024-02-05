@@ -69,6 +69,12 @@ class Database:
 
         return ret
 
+    def get_cleared_members_by_encounter(
+        self,
+        encounter: TrackedEncounter
+    ) -> Set[GuildMember]:
+        return self.cleared_members_by_encounter[encounter]
+
     def get_uncleared_members_by_encounter(
         self,
         encounter: TrackedEncounter
