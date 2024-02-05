@@ -171,6 +171,13 @@ def print_most_cleared_jobs(database: Database):
             print(f'{i:>2}: {item[0].name} ({len(item[1])}: {", ".join(job.acronym for job in item[1])})')
 
 
+def print_who_cleared_today(database: Database, encounter: TrackedEncounter):
+    encounter_clear_chart = database.get_clear_chart()[encounter]
+
+    print(encounter_clear_chart[-1][0].isoformat())
+    print(encounter_clear_chart[-1][1] ^ encounter_clear_chart[-2][1])
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--secrets_folder',
@@ -234,4 +241,7 @@ if __name__ == "__main__":
     # print_clear_chart(database)
     # print_clear_order(database)
     # print_cleared_job_categories(database)
-    print_most_cleared_jobs(database)
+    # print_most_cleared_jobs(database)
+
+    from model import P12S
+    print_who_cleared_today(database, P12S)

@@ -91,11 +91,11 @@ TRACKED_ENCOUNTERS: List[TrackedEncounter] = [
     P11S,
     P12S_P1,
     P12S,
-    TOP,
-    DSR,
-    TEA,
     UWU,
     UCOB,
+    TEA,
+    DSR,
+    TOP,
 ]
 
 MRD = Job('Marauder', 'MRD', JobCategory.TANK, None)
