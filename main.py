@@ -3,14 +3,14 @@ import os
 import json
 import argparse
 import logging
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import Tuple, Dict, List
 
 # 3rd-party
 from tabulate import tabulate
 
 # Local
-from model import TrackedEncounter, GuildMember, Clear, ClearRate, TRACKED_ENCOUNTERS, P9S, P10S
+from model import TrackedEncounter, GuildMember, Clear, ClearRate, TRACKED_ENCOUNTERS
 from fflogs_client import FFLogsAPIClient
 from database import Database
 
@@ -192,7 +192,9 @@ if __name__ == "__main__":
             database.save(args.save_db_to_filename)
 
     # print_clear_rates(database)
+    # from model import P9S
     # print_ppl_without_encounter(database, P9S)
+    # from model import P10S
     # print_ppl_without_encounter(database, P10S)
     # print_clear_chart(database)
     print_clear_order(database)

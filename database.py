@@ -1,7 +1,7 @@
 # stdlib
 import logging
 import pickle
-from datetime import datetime, date
+from datetime import date
 from typing import List, Set, Tuple, Dict, Callable, Optional
 from collections import defaultdict
 
