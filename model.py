@@ -1,7 +1,7 @@
 # stdlib
 from datetime import datetime
 from enum import Enum
-from typing import List, NamedTuple, Optional
+from typing import List, Dict, NamedTuple, Optional
 
 
 class FFL_Boss(Enum):
@@ -77,7 +77,7 @@ class ClearRate(NamedTuple):
 P9S = TrackedEncounter('P9S', FFL_Boss.KOKYTOS, FFL_Difficulty.SAVAGE)
 P10S = TrackedEncounter('P10S', FFL_Boss.PANDAEMONIUM, FFL_Difficulty.SAVAGE)
 P11S = TrackedEncounter('P11S', FFL_Boss.THEMIS, FFL_Difficulty.SAVAGE)
-P12S_P1 = TrackedEncounter('P12S (P1)', FFL_Boss.ATHENA, FFL_Difficulty.SAVAGE)
+P12S_P1 = TrackedEncounter('P12S_P1', FFL_Boss.ATHENA, FFL_Difficulty.SAVAGE)
 P12S = TrackedEncounter('P12S', FFL_Boss.PALLAS_ATHENA, FFL_Difficulty.SAVAGE)
 TOP = TrackedEncounter('TOP', FFL_Boss.TOP, None)
 DSR = TrackedEncounter('DSR', FFL_Boss.DSR, None)
@@ -97,6 +97,11 @@ TRACKED_ENCOUNTERS: List[TrackedEncounter] = [
     DSR,
     TOP,
 ]
+
+NAME_TO_TRACKED_ENCOUNTER_MAP: Dict[str, TrackedEncounter] = {
+    e.name: e
+    for e in TRACKED_ENCOUNTERS
+}
 
 MRD = Job('Marauder', 'MRD', JobCategory.TANK, None)
 WAR = Job('Warrior', 'WAR', JobCategory.TANK, None)

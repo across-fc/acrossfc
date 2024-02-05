@@ -137,7 +137,7 @@ def print_clear_order(database: Database):
         print(tabulate(table, tablefmt="tsv"))
 
 
-def print_cleared_job_categories(database: Database):
+def print_cleared_roles(database: Database):
     cleared_jobs = database.get_cleared_jobs()
     table = []
     for encounter in cleared_jobs:
@@ -155,7 +155,7 @@ def print_cleared_job_categories(database: Database):
     print(tabulate(table, headers=[cat.name for cat in JobCategory], tablefmt="tsv"))
 
 
-def print_most_cleared_jobs(database: Database):
+def print_cleared_jobs_by_member(database: Database):
     cleared_jobs = database.get_cleared_jobs()
     for encounter in cleared_jobs:
         # Manually do a group-by. itertools.groupby seems to be oddly random...
@@ -206,6 +206,19 @@ if __name__ == "__main__":
                         action='store',
                         default=None,
                         help="Filename to load the database from")
+    subparsers = parser.add_subparsers(dest='command')
+    subparsers.add_parser('clear_chart', help="Prints a chart of clears over time based on the current roster.")
+    subparsers.add_parser('clear_order', help="Prints the order of clears based on the current roster.")
+    subparsers.add_parser('cleared_roles', help="Prints the cleared roles based on the current roster.")
+    subparsers.add_parser('cleared_jobs_by_member', help="Prints the cleared jobs for each member.")
+    
+    # Toxic
+    toxic = subparsers.add_parser('ppl_without_clear',
+                                  help="Prints the list of people without a clear of a certain fight.")
+    toxic.add_argument('--encounter', '-e', action='store', required=True, type=str,
+                       help=f"Encounter to check stats for. Possible values: "
+                       "{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
+
     args = parser.parse_args()
 
     # Verbose logging
@@ -233,15 +246,18 @@ if __name__ == "__main__":
             LOG.info(f'Saving database to {args.save_db_to_filename}...')
             database.save(args.save_db_to_filename)
 
-    # print_clear_rates(database)
-    # from model import P9S
-    # print_ppl_without_encounter(database, P9S)
-    # from model import P10S
-    # print_ppl_without_encounter(database, P10S)
-    # print_clear_chart(database)
-    # print_clear_order(database)
-    # print_cleared_job_categories(database)
-    # print_most_cleared_jobs(database)
+    if args.command is None:
+        print_clear_rates(database)
+    elif args.command == 'clear_chart':
+        print_clear_chart(database)
+    elif args.command == 'clear_order':
+        print_clear_order(database)
+    elif args.command == 'cleared_roles':
+        print_cleared_roles(database)
+    elif args.command == 'cleared_jobs_by_member':
+        print_cleared_jobs_by_member(database)
+    elif args.command == 'ppl_without_clear':
+        print_ppl_without_encounter(database, args.encounter)
 
     from model import P12S
     print_who_cleared_today(database, P12S)
