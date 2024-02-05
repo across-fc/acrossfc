@@ -5,12 +5,13 @@ import argparse
 import logging
 from datetime import timedelta
 from typing import Tuple, Dict, List
+from collections import defaultdict
 
 # 3rd-party
 from tabulate import tabulate
 
 # Local
-from model import TrackedEncounter, GuildMember, Clear, ClearRate, JobCategory, TRACKED_ENCOUNTERS
+from model import TrackedEncounter, GuildMember, Clear, ClearRate, Job, JobCategory, TRACKED_ENCOUNTERS
 from fflogs_client import FFLogsAPIClient
 from database import Database
 
@@ -154,6 +155,22 @@ def print_cleared_job_categories(database: Database):
     print(tabulate(table, headers=[cat.name for cat in JobCategory], tablefmt="tsv"))
 
 
+def print_most_cleared_jobs(database: Database):
+    cleared_jobs = database.get_cleared_jobs()
+    for encounter in cleared_jobs:
+        # Manually do a group-by. itertools.groupby seems to be oddly random...
+        member_cleared_jobs: Dict[GuildMember, List[Job]] = defaultdict(list)
+        for member_cleared_job in cleared_jobs[encounter]:
+            member_cleared_jobs[member_cleared_job[0]].append(member_cleared_job[1])
+        member_cleared_jobs = sorted(member_cleared_jobs.items(), key=lambda i: len(i[1]), reverse=True)
+
+        print()
+        print(encounter.name)
+        print('-------------------------')
+        for i, item in enumerate(member_cleared_jobs):
+            print(f'{i:>2}: {item[0].name} ({len(item[1])}: {", ".join(job.acronym for job in item[1])})')
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--secrets_folder',
@@ -216,4 +233,5 @@ if __name__ == "__main__":
     # print_ppl_without_encounter(database, P10S)
     # print_clear_chart(database)
     # print_clear_order(database)
-    print_cleared_job_categories(database)
+    # print_cleared_job_categories(database)
+    print_most_cleared_jobs(database)
