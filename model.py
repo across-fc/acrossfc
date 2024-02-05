@@ -88,15 +88,26 @@ class ClearRate(NamedTuple):
 
 
 # All the encounters we want to track
+P9S = TrackedEncounter('P9S', FFL_Boss.KOKYTOS, FFL_Difficulty.SAVAGE)
+P10S = TrackedEncounter('P10S', FFL_Boss.PANDAEMONIUM, FFL_Difficulty.SAVAGE)
+P11S = TrackedEncounter('P11S', FFL_Boss.THEMIS, FFL_Difficulty.SAVAGE)
+P12S_P1 = TrackedEncounter('P12S (P1)', FFL_Boss.ATHENA, FFL_Difficulty.SAVAGE)
+P12S = TrackedEncounter('P12S', FFL_Boss.PALLAS_ATHENA, FFL_Difficulty.SAVAGE)
+TOP = TrackedEncounter('TOP', FFL_Boss.TOP, None)
+DSR = TrackedEncounter('DSR', FFL_Boss.DSR, None)
+TEA = TrackedEncounter('TEA', FFL_Boss.TEA, None)
+UWU = TrackedEncounter('UWU', FFL_Boss.UWU, None)
+UCOB = TrackedEncounter('UCOB', FFL_Boss.UCOB, None)
+
 TRACKED_ENCOUNTERS: List[TrackedEncounter] = [
-    TrackedEncounter('P9S', FFL_Boss.KOKYTOS, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P10S', FFL_Boss.PANDAEMONIUM, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P11S', FFL_Boss.THEMIS, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P12S (P1)', FFL_Boss.ATHENA, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P12S', FFL_Boss.PALLAS_ATHENA, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('TOP', FFL_Boss.TOP, None),
-    TrackedEncounter('DSR', FFL_Boss.DSR, None),
-    TrackedEncounter('TEA', FFL_Boss.TEA, None),
-    TrackedEncounter('UWU', FFL_Boss.UWU, None),
-    TrackedEncounter('UCOB', FFL_Boss.UCOB, None),
+    P9S,
+    P10S,
+    P11S,
+    P12S_P1,
+    P12S,
+    TOP,
+    DSR,
+    TEA,
+    UWU,
+    UCOB,
 ]
