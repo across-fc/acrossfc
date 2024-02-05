@@ -11,7 +11,16 @@ from collections import defaultdict
 from tabulate import tabulate
 
 # Local
-from model import TrackedEncounter, GuildMember, Clear, ClearRate, Job, JobCategory, TRACKED_ENCOUNTERS
+from model import (
+    TrackedEncounter,
+    GuildMember,
+    Clear,
+    ClearRate,
+    Job,
+    JobCategory,
+    TRACKED_ENCOUNTERS,
+    NAME_TO_TRACKED_ENCOUNTER_MAP
+)
 from fflogs_client import FFLogsAPIClient
 from database import Database
 
@@ -211,7 +220,8 @@ if __name__ == "__main__":
     subparsers.add_parser('clear_order', help="Prints the order of clears based on the current roster.")
     subparsers.add_parser('cleared_roles', help="Prints the cleared roles based on the current roster.")
     subparsers.add_parser('cleared_jobs_by_member', help="Prints the cleared jobs for each member.")
-    
+    subparsers.add_parser('cleared_today', help="Prints who cleared a certain encounter today")
+
     # Toxic
     toxic = subparsers.add_parser('ppl_without_clear',
                                   help="Prints the list of people without a clear of a certain fight.")
@@ -257,7 +267,8 @@ if __name__ == "__main__":
     elif args.command == 'cleared_jobs_by_member':
         print_cleared_jobs_by_member(database)
     elif args.command == 'ppl_without_clear':
-        print_ppl_without_encounter(database, args.encounter)
-
-    from model import P12S
-    print_who_cleared_today(database, P12S)
+        print_ppl_without_encounter(database, NAME_TO_TRACKED_ENCOUNTER_MAP[args.encounter])
+    elif args.command == 'cleared_today':
+        # TODO: Fix this
+        from model import P12S
+        print_who_cleared_today(database, P12S)
