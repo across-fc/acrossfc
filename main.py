@@ -5,12 +5,13 @@ import argparse
 import logging
 from datetime import timedelta
 from typing import Tuple, Dict, List
+from collections import defaultdict
 
 # 3rd-party
 from tabulate import tabulate
 
 # Local
-from model import TrackedEncounter, GuildMember, Clear, ClearRate, TRACKED_ENCOUNTERS
+from model import TrackedEncounter, GuildMember, Clear, ClearRate, JobCategory, TRACKED_ENCOUNTERS
 from fflogs_client import FFLogsAPIClient
 from database import Database
 
@@ -136,6 +137,24 @@ def print_clear_order(database: Database):
         print(tabulate(table, tablefmt="tsv"))
 
 
+def print_cleared_job_categories(database: Database):
+    cleared_jobs = database.get_cleared_jobs()
+    table = []
+    for encounter in cleared_jobs:
+        cleared_cat_counts = {
+            cat: 0
+            for cat in JobCategory
+        }
+        for cleared_job in cleared_jobs[encounter]:
+            cleared_cat_counts[cleared_job[1].main_category] += 1
+            if cleared_job[1].sub_category is not None:
+                cleared_cat_counts[cleared_job[1].sub_category] += 1
+
+        table.append([encounter.name] + [cleared_cat_counts[cat] for cat in JobCategory])
+
+    print(tabulate(table, headers=[cat.name for cat in JobCategory], tablefmt="tsv"))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--secrets_folder',
@@ -197,4 +216,5 @@ if __name__ == "__main__":
     # from model import P10S
     # print_ppl_without_encounter(database, P10S)
     # print_clear_chart(database)
-    print_clear_order(database)
+    # print_clear_order(database)
+    print_cleared_job_categories(database)

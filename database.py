@@ -6,7 +6,7 @@ from typing import List, Set, Tuple, Dict, Callable, Optional
 from collections import defaultdict
 
 # Local
-from model import TrackedEncounter, GuildMember, Clear, ClearRate, TRACKED_ENCOUNTERS
+from model import TrackedEncounter, GuildMember, Clear, ClearRate, Job, TRACKED_ENCOUNTERS, JOBS
 
 LOG = logging.getLogger(__name__)
 
@@ -118,3 +118,16 @@ class Database:
                     encounter_cumulative_clears_by_date[clear.encounter][-1] = new_datapoint
 
         return encounter_cumulative_clears_by_date
+
+    def get_cleared_jobs(self) -> Dict[TrackedEncounter, Set[Tuple[GuildMember, Job]]]:
+        spec_name_to_job = {
+            job.name: job
+            for job in JOBS
+        }
+
+        encounter_cleared_jobs = defaultdict(set)
+        for clear in self.clears:
+            new_datapoint = (clear.member, spec_name_to_job[clear.spec])
+            encounter_cleared_jobs[clear.encounter].add(new_datapoint)  # Set will automatically de-dupe
+
+        return encounter_cleared_jobs

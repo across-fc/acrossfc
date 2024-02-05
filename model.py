@@ -35,36 +35,22 @@ class GuildMember(NamedTuple):
     rank: int
 
 
-class Job(Enum):
-    MRD = 'Marauder'
-    WAR = 'Warrior'
-    GLA = 'Gladiator'
-    PLD = 'Paladin'
-    DRK = 'DarkKnight'
-    GNB = 'Gunbreaker'
-    CNJ = 'Conjurer'
-    WHM = 'WhiteMage'
-    ACN = 'Arcanist'
-    SCH = 'Scholar'
-    AST = 'Astrologian'
-    SGE = 'Sage'
-    LNC = 'Lancer'
-    DRG = 'Dragoon'
-    PGL = 'Pugilist'
-    MNK = 'Monk'
-    ROG = 'Rogue'
-    NIN = 'Ninja'
-    SAM = 'Samurai'
-    RPR = 'Reaper'
-    ARC = 'Archer'
-    BRD = 'Bard'
-    MCH = 'Machinist'
-    DNC = 'Dancer'
-    THM = 'Thaumaturge'
-    BLM = 'BlackMage'
-    SMN = 'Summoner'
-    RDM = 'RedMage'
-    BLU = 'BlueMage'
+class JobCategory(Enum):
+    TANK = 'Tank'
+    HEALER = 'Healer'
+    REGEN_HEALER = 'Regen Healer'
+    SHIELD_HEALER = 'Shield Healer'
+    DPS = 'DPS'
+    MELEE_DPS = 'Melee DPS'
+    PRANGED_DPS = 'Physical Ranged DPS'
+    CASTER_DPS = 'Caster DPS'
+
+
+class Job(NamedTuple):
+    name: str
+    acronym: str
+    main_category: JobCategory
+    sub_category: Optional[JobCategory]
 
 
 class Clear(NamedTuple):
@@ -110,4 +96,66 @@ TRACKED_ENCOUNTERS: List[TrackedEncounter] = [
     TEA,
     UWU,
     UCOB,
+]
+
+MRD = Job('Marauder', 'MRD', JobCategory.TANK, None)
+WAR = Job('Warrior', 'WAR', JobCategory.TANK, None)
+GLA = Job('Gladiator', 'GLA', JobCategory.TANK, None)
+PLD = Job('Paladin', 'PLD', JobCategory.TANK, None)
+DRK = Job('DarkKnight', 'DRK', JobCategory.TANK, None)
+GNB = Job('Gunbreaker', 'GNB', JobCategory.TANK, None)
+CNJ = Job('Conjurer', 'CNJ', JobCategory.HEALER, JobCategory.REGEN_HEALER)
+WHM = Job('WhiteMage', 'WHM', JobCategory.HEALER, JobCategory.REGEN_HEALER)
+SCH = Job('Scholar', 'SCH', JobCategory.HEALER, JobCategory.SHIELD_HEALER)
+AST = Job('Astrologian', 'AST', JobCategory.HEALER, JobCategory.REGEN_HEALER)
+SGE = Job('Sage', 'SGE', JobCategory.HEALER, JobCategory.SHIELD_HEALER)
+LNC = Job('Lancer', 'LNC', JobCategory.DPS, JobCategory.MELEE_DPS)
+DRG = Job('Dragoon', 'DRG', JobCategory.DPS, JobCategory.MELEE_DPS)
+PGL = Job('Pugilist', 'PGL', JobCategory.DPS, JobCategory.MELEE_DPS)
+MNK = Job('Monk', 'MNK', JobCategory.DPS, JobCategory.MELEE_DPS)
+ROG = Job('Rogue', 'ROG', JobCategory.DPS, JobCategory.MELEE_DPS)
+NIN = Job('Ninja', 'NIN', JobCategory.DPS, JobCategory.MELEE_DPS)
+SAM = Job('Samurai', 'SAM', JobCategory.DPS, JobCategory.MELEE_DPS)
+RPR = Job('Reaper', 'RPR', JobCategory.DPS, JobCategory.MELEE_DPS)
+ARC = Job('Archer', 'ARC', JobCategory.DPS, JobCategory.PRANGED_DPS)
+BRD = Job('Bard', 'BRD', JobCategory.DPS, JobCategory.PRANGED_DPS)
+MCH = Job('Machinist', 'MCH', JobCategory.DPS, JobCategory.PRANGED_DPS)
+DNC = Job('Dancer', 'DNC', JobCategory.DPS, JobCategory.PRANGED_DPS)
+THM = Job('Thaumaturge', 'THM', JobCategory.DPS, JobCategory.CASTER_DPS)
+BLM = Job('BlackMage', 'BLM', JobCategory.DPS, JobCategory.CASTER_DPS)
+ACN = Job('Arcanist', 'ACN', JobCategory.DPS, JobCategory.CASTER_DPS)
+SMN = Job('Summoner', 'SMN', JobCategory.DPS, JobCategory.CASTER_DPS)
+RDM = Job('RedMage', 'RDM', JobCategory.DPS, JobCategory.CASTER_DPS)
+BLU = Job('BlueMage', 'BLU', JobCategory.DPS, JobCategory.CASTER_DPS)
+
+JOBS = [
+    MRD,
+    WAR,
+    GLA,
+    PLD,
+    DRK,
+    GNB,
+    CNJ,
+    WHM,
+    SCH,
+    AST,
+    SGE,
+    LNC,
+    DRG,
+    PGL,
+    MNK,
+    ROG,
+    NIN,
+    SAM,
+    RPR,
+    ARC,
+    BRD,
+    MCH,
+    DNC,
+    THM,
+    BLM,
+    ACN,
+    SMN,
+    RDM,
+    BLU
 ]
