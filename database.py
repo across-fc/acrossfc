@@ -38,7 +38,6 @@ class Database:
 
         self.cleared_members_by_encounter: Dict[TrackedEncounter, Set[GuildMember]] = defaultdict(set)
         for clear in self.clears:
-            print(f"{clear.encounter.name}: {clear.member.name}")
             self.cleared_members_by_encounter[clear.encounter].add(clear.member)
 
     def save(self, filename: str):

@@ -184,7 +184,10 @@ def print_who_cleared_today(database: Database, encounter: TrackedEncounter):
     encounter_clear_chart = database.get_clear_chart()[encounter]
 
     print(encounter_clear_chart[-1][0].isoformat())
-    print(encounter_clear_chart[-1][1] ^ encounter_clear_chart[-2][1])
+    print(", ".join(
+        member.name
+        for member in (encounter_clear_chart[-1][1] ^ encounter_clear_chart[-2][1])
+    ))
 
 
 if __name__ == "__main__":
@@ -225,6 +228,7 @@ if __name__ == "__main__":
     # Toxic
     toxic = subparsers.add_parser('ppl_without_clear',
                                   help="Prints the list of people without a clear of a certain fight.")
+    # TODO: Change this to apply to all subparsers, and handle default as "all"
     toxic.add_argument('--encounter', '-e', action='store', required=True, type=str,
                        help=f"Encounter to check stats for. Possible values: "
                        "{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
