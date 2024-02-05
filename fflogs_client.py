@@ -1,6 +1,7 @@
 # stdlib
 import logging
-from typing import Dict, List, Callable
+from datetime import datetime
+from typing import List
 
 # 3rd-party
 import requests
@@ -8,7 +9,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
 # Local
-from model import GuildMember, TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
+from model import GuildMember, TrackedEncounter, Clear, TRACKED_ENCOUNTERS
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
@@ -59,15 +60,14 @@ class FFLogsAPIClient:
             for d in result['guildData']['guild']['members']['data']
         ]
 
-        # TODO: Log report
-
         return ret
 
-    def get_cleared_fights_for_user(
+    def get_clears_for_member(
         self,
-        user_id: int,
-        tracked_encounters: List[TrackedEncounter]
-    ) -> List[TrackedEncounter]:
+        member: GuildMember,
+        tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
+    ) -> List[Clear]:
+        LOG.info(f'Getting clear data for {member.name}...')
         # Query header
         query_str = """
             query getCharacterData($id: Int!) {
@@ -91,49 +91,32 @@ class FFLogsAPIClient:
             }"""
 
         query = gql(query_str)
-        result = self.gql_client.execute(query, variable_values={'id': user_id})
-        ret = [
-            encounter
-            for encounter in tracked_encounters
-            if result['characterData']['character'][encounter.boss.name]['totalKills'] > 0
-        ]
+        result = self.gql_client.execute(query, variable_values={'id': member.id})
 
-        # TODO: Log report
+        clears: List[Clear] = []
 
-        return ret
+        for i, boss_name in enumerate(result['characterData']['character']):
+            # This assumes results are returned in the same order as given above
+            encounter: TrackedEncounter = tracked_encounters[i]
+            boss_kill_data = result['characterData']['character'][boss_name]
+            if boss_kill_data['totalKills'] == 0:
+                continue
 
-    def get_clear_rates(
-        self,
-        guild_id: int,
-        guild_rank_filter: Callable[[int], bool],
-        tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
-    ) -> Dict[TrackedEncounter, ClearRate]:
-        LOG.info(f'Getting clear rates for guild {guild_id}...')
-
-        clears: Dict[TrackedEncounter, int] = {
-            encounter: 0
-            for encounter in tracked_encounters
-        }
-
-        fc_roster: List[GuildMember] = self.get_fc_roster(guild_id)
-        eligible_members = 0
-
-        for member in fc_roster:
-            if guild_rank_filter(member.rank):
-                LOG.debug(f'Getting cleared encounters for {member.name}...')
-                eligible_members += 1
-                cleared_encounters: List[TrackedEncounter] = self.get_cleared_fights_for_user(
-                    member.id,
-                    tracked_encounters=tracked_encounters
+            for kill in result['characterData']['character'][boss_name]['ranks']:
+                clears.append(
+                    Clear(
+                        member,
+                        encounter,
+                        datetime.fromtimestamp(
+                            # Python takes in seconds, API returns milliseconds
+                            kill['startTime'] / 1000
+                        ),
+                        kill['historicalPercent'],
+                        kill['report']['code'],
+                        kill['report']['fightID'],
+                        kill['spec'],
+                        kill['lockedIn'] == 'true'
+                    )
                 )
-                for encounter in cleared_encounters:
-                    clears[encounter] += 1
 
-        ret = {
-            encounter: ClearRate(clears.get(encounter, 0), eligible_members)
-            for encounter in tracked_encounters
-        }
-
-        # TODO: Log report
-
-        return ret
+        return clears

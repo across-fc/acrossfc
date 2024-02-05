@@ -1,15 +1,18 @@
 # stdlib
 import os
+import json
 import argparse
 import logging
-from typing import Tuple, Dict
+from datetime import date, timedelta
+from typing import Tuple, Dict, List
 
 # 3rd-party
 from tabulate import tabulate
 
 # Local
-from model import TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
+from model import TrackedEncounter, GuildMember, Clear, ClearRate, TRACKED_ENCOUNTERS, P9S, P10S
 from fflogs_client import FFLogsAPIClient
+from database import Database
 
 LOG_FORMAT = '%(asctime)s.%(msecs)03d [%(levelname)s] %(filename)s:%(lineno)d: %(message)s'
 logging.basicConfig(level=logging.WARNING, format=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
@@ -41,6 +44,69 @@ def get_secrets(secrets_folder: str) -> Tuple[str, str]:
     return client_id, client_secret
 
 
+def print_clear_rates(database: Database):
+    clear_rates: Dict[TrackedEncounter, ClearRate] = database.get_clear_rates(
+        tracked_encounters=TRACKED_ENCOUNTERS)
+
+    table = [
+        [
+            encounter.name,
+            f"{clear_rates[encounter].clears} / {clear_rates[encounter].eligible_members}",
+            f"{clear_rates[encounter].clear_rate * 100:.2f}%"
+        ]
+        for encounter in TRACKED_ENCOUNTERS
+    ]
+
+    print()
+    print(tabulate(table,
+                   headers=['Encounter', 'FC clears', 'FC clear rate']))
+
+
+def print_ppl_without_encounter(database: Database, encounter: TrackedEncounter):
+    uncleared_members = database.get_uncleared_members_by_encounter(encounter)
+
+    print()
+    print(f'People who have not cleared {encounter.name}')
+    print(json.dumps([
+        f"{member.name} ({member.id})"
+        for member in uncleared_members
+    ], indent=4))
+
+
+def print_clear_chart(database: Database):
+    clear_chart = database.get_clear_chart()
+    earliest_date = sorted([
+        clear_chart[encounter][0][0]
+        for encounter in clear_chart
+    ])[0]
+    latest_date = sorted([
+        clear_chart[encounter][-1][0]
+        for encounter in clear_chart
+    ])[-1]
+
+    table = []
+    current_date = earliest_date
+    while current_date <= latest_date:
+        LOG.debug(f'Processing {current_date.isoformat()}...')
+        clears = [
+            next(
+                (
+                    datapoint[1]
+                    for datapoint in reversed(clear_chart[encounter])
+                    if datapoint[0] <= current_date
+                ),
+                0
+            )
+            for encounter in clear_chart
+        ]
+        table.append([current_date.isoformat()] + clears)
+        current_date += timedelta(days=1)
+
+    print(tabulate(table,
+                   headers=[encounter.name for encounter in clear_chart],
+                   tablefmt="tsv"))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--secrets_folder',
@@ -59,29 +125,44 @@ if __name__ == "__main__":
                         action='store_true',
                         default=False,
                         help="Turn on verbose logging")
+    parser.add_argument('--save_db_to_filename',
+                        '-w',
+                        action='store',
+                        default=None,
+                        help="Filename to save the database to")
+    parser.add_argument('--load_db_from_filename',
+                        '-r',
+                        action='store',
+                        default=None,
+                        help="Filename to load the database from")
     args = parser.parse_args()
 
     # Verbose logging
     if args.verbose:
         LOG.setLevel(logging.DEBUG)
         logging.getLogger('fflogs_client').setLevel(logging.DEBUG)
+        logging.getLogger('database').setLevel(logging.DEBUG)
 
-    client_id, client_secret = get_secrets(args.secrets_folder)
-    fflogs_client = FFLogsAPIClient(client_id=client_id, client_secret=client_secret)
+    if args.load_db_from_filename is not None:
+        LOG.info(f'Loading database from {args.load_db_from_filename}...')
+        database = Database.load(args.load_db_from_filename)
+    else:
+        client_id, client_secret = get_secrets(args.secrets_folder)
+        fflogs_client = FFLogsAPIClient(client_id=client_id, client_secret=client_secret)
+        fc_roster: List[GuildMember] = fflogs_client.get_fc_roster(args.guild_id)
+        fc_clears: List[Clear] = []
+        for member in fc_roster:
+            fc_clears.extend(fflogs_client.get_clears_for_member(member, TRACKED_ENCOUNTERS))
 
-    encounter_clear_rates: Dict[TrackedEncounter, ClearRate] = fflogs_client.get_clear_rates(
-        args.guild_id,
-        guild_rank_filter=lambda rank: rank < 7,
-        tracked_encounters=TRACKED_ENCOUNTERS)
+        database = Database(
+            fc_roster,
+            fc_clears,
+            guild_rank_filter=lambda rank: rank < 7)
+        if args.save_db_to_filename is not None:
+            LOG.info(f'Saving database to {args.save_db_to_filename}...')
+            database.save(args.save_db_to_filename)
 
-    table = [
-        [
-            encounter.name,
-            f"{encounter_clear_rates[encounter].clears} / {encounter_clear_rates[encounter].eligible_members}",
-            f"{encounter_clear_rates[encounter].clear_rate * 100:.2f}%"
-        ]
-        for encounter in TRACKED_ENCOUNTERS
-    ]
-
-    print(tabulate(table,
-                   headers=['Encounter', 'FC clears', 'FC clear rate']))
+    print_clear_rates(database)
+    # print_ppl_without_encounter(database, P9S)
+    # print_ppl_without_encounter(database, P10S)
+    # print_clear_chart(database)

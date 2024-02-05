@@ -1,3 +1,5 @@
+# stdlib
+from datetime import datetime
 from enum import Enum
 from typing import List, NamedTuple, Optional
 
@@ -33,6 +35,49 @@ class GuildMember(NamedTuple):
     rank: int
 
 
+class Job(Enum):
+    MRD = 'Marauder'
+    WAR = 'Warrior'
+    GLA = 'Gladiator'
+    PLD = 'Paladin'
+    DRK = 'DarkKnight'
+    GNB = 'Gunbreaker'
+    CNJ = 'Conjurer'
+    WHM = 'WhiteMage'
+    ACN = 'Arcanist'
+    SCH = 'Scholar'
+    AST = 'Astrologian'
+    SGE = 'Sage'
+    LNC = 'Lancer'
+    DRG = 'Dragoon'
+    PGL = 'Pugilist'
+    MNK = 'Monk'
+    ROG = 'Rogue'
+    NIN = 'Ninja'
+    SAM = 'Samurai'
+    RPR = 'Reaper'
+    ARC = 'Archer'
+    BRD = 'Bard'
+    MCH = 'Machinist'
+    DNC = 'Dancer'
+    THM = 'Thaumaturge'
+    BLM = 'BlackMage'
+    SMN = 'Summoner'
+    RDM = 'RedMage'
+    BLU = 'BlueMage'
+
+
+class Clear(NamedTuple):
+    member: GuildMember
+    encounter: TrackedEncounter
+    start_time: datetime
+    historical_pct: float
+    report_code: str
+    report_fight_id: int
+    spec: Job
+    locked_in: bool
+
+
 class ClearRate(NamedTuple):
     clears: int
     eligible_members: int
@@ -43,15 +88,26 @@ class ClearRate(NamedTuple):
 
 
 # All the encounters we want to track
+P9S = TrackedEncounter('P9S', FFL_Boss.KOKYTOS, FFL_Difficulty.SAVAGE)
+P10S = TrackedEncounter('P10S', FFL_Boss.PANDAEMONIUM, FFL_Difficulty.SAVAGE)
+P11S = TrackedEncounter('P11S', FFL_Boss.THEMIS, FFL_Difficulty.SAVAGE)
+P12S_P1 = TrackedEncounter('P12S (P1)', FFL_Boss.ATHENA, FFL_Difficulty.SAVAGE)
+P12S = TrackedEncounter('P12S', FFL_Boss.PALLAS_ATHENA, FFL_Difficulty.SAVAGE)
+TOP = TrackedEncounter('TOP', FFL_Boss.TOP, None)
+DSR = TrackedEncounter('DSR', FFL_Boss.DSR, None)
+TEA = TrackedEncounter('TEA', FFL_Boss.TEA, None)
+UWU = TrackedEncounter('UWU', FFL_Boss.UWU, None)
+UCOB = TrackedEncounter('UCOB', FFL_Boss.UCOB, None)
+
 TRACKED_ENCOUNTERS: List[TrackedEncounter] = [
-    TrackedEncounter('P9S', FFL_Boss.KOKYTOS, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P10S', FFL_Boss.PANDAEMONIUM, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P11S', FFL_Boss.THEMIS, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P12S (P1)', FFL_Boss.ATHENA, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('P12S', FFL_Boss.PALLAS_ATHENA, FFL_Difficulty.SAVAGE),
-    TrackedEncounter('TOP', FFL_Boss.TOP, None),
-    TrackedEncounter('DSR', FFL_Boss.DSR, None),
-    TrackedEncounter('TEA', FFL_Boss.TEA, None),
-    TrackedEncounter('UWU', FFL_Boss.UWU, None),
-    TrackedEncounter('UCOB', FFL_Boss.UCOB, None),
+    P9S,
+    P10S,
+    P11S,
+    P12S_P1,
+    P12S,
+    TOP,
+    DSR,
+    TEA,
+    UWU,
+    UCOB,
 ]
