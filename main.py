@@ -75,6 +75,16 @@ def print_ppl_without_encounter(database: Database, encounter: TrackedEncounter)
 
 def print_clear_chart(database: Database):
     clear_chart = database.get_clear_chart()
+
+    # Change member list to number of members
+    for encounter in clear_chart:
+        number_of_data_points = len(clear_chart[encounter])
+        for i in range(number_of_data_points):
+            datapoint = clear_chart[encounter][i]
+            clear_chart[encounter][i] = (
+                datapoint[0], len(datapoint[1])
+            )
+
     earliest_date = sorted([
         clear_chart[encounter][0][0]
         for encounter in clear_chart
@@ -105,6 +115,27 @@ def print_clear_chart(database: Database):
     print(tabulate(table,
                    headers=[encounter.name for encounter in clear_chart],
                    tablefmt="tsv"))
+
+
+def print_clear_order(database: Database):
+    clear_chart = database.get_clear_chart()
+
+    for encounter in clear_chart:
+        print()
+        print(encounter.name)
+        print('-----------------------')
+        table = []
+        current_clearees = set()
+        for i, datapoint in enumerate(clear_chart[encounter]):
+            table.append([
+                i+1,
+                datapoint[0],
+                ', '.join([member.name for member in (datapoint[1] ^ current_clearees)])
+            ])
+            current_clearees = datapoint[1]
+        print(tabulate(table, tablefmt="tsv"))
+    
+    print(clear_chart[P10S][0])
 
 
 if __name__ == "__main__":
@@ -162,7 +193,8 @@ if __name__ == "__main__":
             LOG.info(f'Saving database to {args.save_db_to_filename}...')
             database.save(args.save_db_to_filename)
 
-    print_clear_rates(database)
+    # print_clear_rates(database)
     # print_ppl_without_encounter(database, P9S)
     # print_ppl_without_encounter(database, P10S)
     # print_clear_chart(database)
+    print_clear_order(database)

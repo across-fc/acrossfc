@@ -1,7 +1,7 @@
 # stdlib
 import logging
 import pickle
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Set, Tuple, Dict, Callable, Optional
 from collections import defaultdict
 
@@ -81,7 +81,7 @@ class Database:
 
         return ret
 
-    def get_clear_chart(self) -> Dict[TrackedEncounter, List[Tuple[datetime, int]]]:
+    def get_clear_chart(self) -> Dict[TrackedEncounter, List[Tuple[date, Set[GuildMember]]]]:
         # {
         #     <encounter>: [
         #         (<date>, <cleared_members_set>),
@@ -92,30 +92,29 @@ class Database:
         # }
         encounter_cumulative_clears_by_date: Dict[
             TrackedEncounter,
-            List[Tuple[datetime, Set[GuildMember]]]
+            List[Tuple[date, Set[GuildMember]]]
         ] = defaultdict(list)
 
         for clear in sorted(self.clears, key=lambda clear: clear.start_time):
-            current_cleared_members: Set[GuildMember] = \
-                encounter_cumulative_clears_by_date[clear.encounter][-1][1] \
-                if len(encounter_cumulative_clears_by_date[clear.encounter]) > 0 \
-                else set()
-            if clear.member not in current_cleared_members:
+            clear_date = clear.start_time.date()
+            if len(encounter_cumulative_clears_by_date[clear.encounter]) == 0:
                 encounter_cumulative_clears_by_date[clear.encounter].append(
                     (
-                        clear.start_time.date(),
-                        current_cleared_members ^ {clear.member}
+                        clear_date,
+                        {clear.member}
                     )
                 )
+                continue
 
-        # Change member list to number of members
-        for encounter in encounter_cumulative_clears_by_date:
-            number_of_data_points = len(encounter_cumulative_clears_by_date[encounter])
-            LOG.debug(f'{encounter.name}: {number_of_data_points}')
-            for i in range(number_of_data_points):
-                datapoint = encounter_cumulative_clears_by_date[encounter][i]
-                encounter_cumulative_clears_by_date[encounter][i] = (
-                    datapoint[0], len(datapoint[1])
+            current_cleared_members = encounter_cumulative_clears_by_date[clear.encounter][-1][1]
+            if clear.member not in current_cleared_members:
+                new_datapoint = (
+                    clear_date,
+                    current_cleared_members | {clear.member}
                 )
+                if clear_date > encounter_cumulative_clears_by_date[clear.encounter][-1][0]:
+                    encounter_cumulative_clears_by_date[clear.encounter].append(new_datapoint)
+                else:
+                    encounter_cumulative_clears_by_date[clear.encounter][-1] = new_datapoint
 
         return encounter_cumulative_clears_by_date
