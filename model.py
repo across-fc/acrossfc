@@ -1,3 +1,5 @@
+# stdlib
+from datetime import datetime
 from enum import Enum
 from typing import List, NamedTuple, Optional
 
@@ -31,6 +33,49 @@ class GuildMember(NamedTuple):
     id: int
     name: str
     rank: int
+
+
+class Job(Enum):
+    MRD = 'Marauder'
+    WAR = 'Warrior'
+    GLA = 'Gladiator'
+    PLD = 'Paladin'
+    DRK = 'DarkKnight'
+    GNB = 'Gunbreaker'
+    CNJ = 'Conjurer'
+    WHM = 'WhiteMage'
+    ACN = 'Arcanist'
+    SCH = 'Scholar'
+    AST = 'Astrologian'
+    SGE = 'Sage'
+    LNC = 'Lancer'
+    DRG = 'Dragoon'
+    PGL = 'Pugilist'
+    MNK = 'Monk'
+    ROG = 'Rogue'
+    NIN = 'Ninja'
+    SAM = 'Samurai'
+    RPR = 'Reaper'
+    ARC = 'Archer'
+    BRD = 'Bard'
+    MCH = 'Machinist'
+    DNC = 'Dancer'
+    THM = 'Thaumaturge'
+    BLM = 'BlackMage'
+    SMN = 'Summoner'
+    RDM = 'RedMage'
+    BLU = 'BlueMage'
+
+
+class Clear(NamedTuple):
+    member: GuildMember
+    encounter: TrackedEncounter
+    start_time: datetime
+    historical_pct: float
+    report_code: str
+    report_fight_id: int
+    spec: Job
+    locked_in: bool
 
 
 class ClearRate(NamedTuple):

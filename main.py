@@ -2,14 +2,15 @@
 import os
 import argparse
 import logging
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 
 # 3rd-party
 from tabulate import tabulate
 
 # Local
-from model import TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
+from model import TrackedEncounter, GuildMember, Clear, ClearRate, TRACKED_ENCOUNTERS
 from fflogs_client import FFLogsAPIClient
+from database import Database
 
 LOG_FORMAT = '%(asctime)s.%(msecs)03d [%(levelname)s] %(filename)s:%(lineno)d: %(message)s'
 logging.basicConfig(level=logging.WARNING, format=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
@@ -59,6 +60,16 @@ if __name__ == "__main__":
                         action='store_true',
                         default=False,
                         help="Turn on verbose logging")
+    parser.add_argument('--save_db_to_filename',
+                        '-w',
+                        action='store',
+                        default=None,
+                        help="Filename to save the database to")
+    parser.add_argument('--load_db_from_filename',
+                        '-r',
+                        action='store',
+                        default=None,
+                        help="Filename to load the database from")
     args = parser.parse_args()
 
     # Verbose logging
@@ -66,19 +77,31 @@ if __name__ == "__main__":
         LOG.setLevel(logging.DEBUG)
         logging.getLogger('fflogs_client').setLevel(logging.DEBUG)
 
-    client_id, client_secret = get_secrets(args.secrets_folder)
-    fflogs_client = FFLogsAPIClient(client_id=client_id, client_secret=client_secret)
+    if args.load_db_from_filename is not None:
+        LOG.info(f'Loading database from {args.load_db_from_filename}...')
+        database = Database.load(args.load_db_from_filename)
+    else:
+        client_id, client_secret = get_secrets(args.secrets_folder)
+        fflogs_client = FFLogsAPIClient(client_id=client_id, client_secret=client_secret)
+        fc_roster: List[GuildMember] = fflogs_client.get_fc_roster(args.guild_id)
+        fc_clears: List[Clear] = []
+        for member in fc_roster:
+            fc_clears.extend(fflogs_client.get_clears_for_member(member, TRACKED_ENCOUNTERS))
 
-    encounter_clear_rates: Dict[TrackedEncounter, ClearRate] = fflogs_client.get_clear_rates(
-        args.guild_id,
+        database = Database(fc_roster, fc_clears)
+        if args.save_db_to_filename is not None:
+            LOG.info(f'Saving database to {args.save_db_to_filename}...')
+            database.save(args.save_db_to_filename)
+
+    clear_rates = database.get_clear_rates(
         guild_rank_filter=lambda rank: rank < 7,
         tracked_encounters=TRACKED_ENCOUNTERS)
 
     table = [
         [
             encounter.name,
-            f"{encounter_clear_rates[encounter].clears} / {encounter_clear_rates[encounter].eligible_members}",
-            f"{encounter_clear_rates[encounter].clear_rate * 100:.2f}%"
+            f"{clear_rates[encounter].clears} / {clear_rates[encounter].eligible_members}",
+            f"{clear_rates[encounter].clear_rate * 100:.2f}%"
         ]
         for encounter in TRACKED_ENCOUNTERS
     ]
