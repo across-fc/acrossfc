@@ -134,8 +134,6 @@ def print_clear_order(database: Database):
             ])
             current_clearees = datapoint[1]
         print(tabulate(table, tablefmt="tsv"))
-    
-    print(clear_chart[P10S][0])
 
 
 if __name__ == "__main__":
