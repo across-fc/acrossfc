@@ -1,8 +1,10 @@
 # stdlib
 import os
+import sys
 import json
 import argparse
 import logging
+import requests
 from datetime import timedelta
 from typing import Tuple, Dict, List
 from collections import defaultdict
@@ -239,21 +241,22 @@ if __name__ == "__main__":
     subparsers.add_parser('cleared_roles', help="Prints the cleared roles based on the current roster.")
     subparsers.add_parser('cleared_jobs_by_member', help="Prints the cleared jobs for each member.")
     subparsers.add_parser('cleared_today', help="Prints who cleared a certain encounter today")
+    subparsers.add_parser('update_fflogs', help="Updates the FFLogs FC roster")
 
     # Toxic
     toxic = subparsers.add_parser('ppl_without_clear',
                                   help="Prints the list of people without a clear of a certain fight.")
     # TODO: Change this to apply to all subparsers, and handle default as "all"
     toxic.add_argument('--encounter', '-e', action='store', required=True, type=str,
-                       help=f"Encounter to check stats for. Possible values: "
-                       "{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
-    
+                       help="Encounter to check stats for. Possible values: "
+                       f"{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
+
     ppl_with_clear_parser = subparsers.add_parser('ppl_with_clear',
                                                   help="Prints the list of people with a clear of a certain fight.")
     # TODO: Change this to apply to all subparsers, and handle default as "all"
     ppl_with_clear_parser.add_argument('--encounter', '-e', action='store', required=True, type=str,
-                                       help=f"Encounter to check stats for. Possible values: "
-                                       "{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
+                                       help="Encounter to check stats for. Possible values: "
+                                       f"{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
 
     args = parser.parse_args()
 
@@ -262,6 +265,15 @@ if __name__ == "__main__":
         LOG.setLevel(logging.DEBUG)
         logging.getLogger('fflogs_client').setLevel(logging.DEBUG)
         logging.getLogger('database').setLevel(logging.DEBUG)
+
+    if args.command == 'update_fflogs':
+        LOG.info('Updating FFLogs FC roster...')
+        resp = requests.get('https://www.fflogs.com/guild/update/75624')
+        if resp.status_code == 200 and 'success' in resp.text:
+            LOG.info('Successful.')
+            sys.exit(0)
+        else:
+            LOG.error(f'Failed: {resp.text}')
 
     if args.load_db_from_filename is not None:
         LOG.info(f'Loading database from {args.load_db_from_filename}...')
