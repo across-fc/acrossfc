@@ -83,13 +83,12 @@ if __name__ == "__main__":
     subparsers.add_parser('who_cleared_recently', help="Prints who cleared a certain encounter recently")
     subparsers.add_parser('update_fflogs', help="Updates the FFLogs FC roster")
 
-    # Toxic
-    toxic = subparsers.add_parser('ppl_without_clear',
-                                  help="Prints the list of people without a clear of a certain fight.")
+    ppl_without_clear = subparsers.add_parser('ppl_without_clear',
+                                              help="Prints the list of people without a clear of a certain fight.")
     # TODO: Change this to apply to all subparsers, and handle default as "all"
-    toxic.add_argument('--encounter', '-e', action='store', required=True, type=str,
-                       help="Encounter to check stats for. Possible values: "
-                       f"{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
+    ppl_without_clear.add_argument('--encounter', '-e', action='store', required=True, type=str,
+                                   help="Encounter to check stats for. Possible values: "
+                                   f"{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
 
     ppl_with_clear_parser = subparsers.add_parser('ppl_with_clear',
                                                   help="Prints the list of people with a clear of a certain fight.")
