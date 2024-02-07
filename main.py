@@ -123,7 +123,7 @@ if __name__ == "__main__":
         database = Database(
             fc_roster,
             fc_clears,
-            guild_rank_filter=lambda rank: rank < 7)
+            guild_rank_filter=lambda rank: rank != 7)
         if args.save_db_to_filename is not None:
             LOG.info(f'Saving database to {args.save_db_to_filename}...')
             database.save(args.save_db_to_filename)
