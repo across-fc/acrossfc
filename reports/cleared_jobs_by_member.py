@@ -4,12 +4,13 @@ from collections import defaultdict
 
 # Local
 from database import Database
-from model import GuildMember, Job
+from model import GuildMember, Job, TrackedEncounter
 
 
-def cleared_jobs_by_member(database: Database):
+def cleared_jobs_by_member(database: Database, encounters: List[TrackedEncounter]):
     cleared_jobs = database.get_cleared_jobs()
-    for encounter in cleared_jobs:
+
+    for encounter in encounters:
         # Manually do a group-by. itertools.groupby seems to be oddly random...
         member_cleared_jobs: Dict[GuildMember, List[Job]] = defaultdict(list)
         for member_cleared_job in cleared_jobs[encounter]:

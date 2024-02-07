@@ -75,6 +75,12 @@ if __name__ == "__main__":
                         action='store',
                         default=None,
                         help="Filename to load the database from")
+    parser.add_argument('--encounter',
+                        '-e',
+                        action='append',
+                        required=False,
+                        type=str,
+                        help="Encounters to filter results down for.")
     subparsers = parser.add_subparsers(dest='command')
     subparsers.add_parser('clear_chart', help="Prints a chart of clears over time based on the current roster.")
     subparsers.add_parser('clear_order', help="Prints the order of clears based on the current roster.")
@@ -82,20 +88,8 @@ if __name__ == "__main__":
     subparsers.add_parser('cleared_jobs_by_member', help="Prints the cleared jobs for each member.")
     subparsers.add_parser('who_cleared_recently', help="Prints who cleared a certain encounter recently")
     subparsers.add_parser('update_fflogs', help="Updates the FFLogs FC roster")
-
-    ppl_without_clear = subparsers.add_parser('ppl_without_clear',
-                                              help="Prints the list of people without a clear of a certain fight.")
-    # TODO: Change this to apply to all subparsers, and handle default as "all"
-    ppl_without_clear.add_argument('--encounter', '-e', action='store', required=True, type=str,
-                                   help="Encounter to check stats for. Possible values: "
-                                   f"{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
-
-    ppl_with_clear_parser = subparsers.add_parser('ppl_with_clear',
-                                                  help="Prints the list of people with a clear of a certain fight.")
-    # TODO: Change this to apply to all subparsers, and handle default as "all"
-    ppl_with_clear_parser.add_argument('--encounter', '-e', action='store', required=True, type=str,
-                                       help="Encounter to check stats for. Possible values: "
-                                       f"{', '.join(e.name for e in TRACKED_ENCOUNTERS)}")
+    subparsers.add_parser('ppl_without_clear', help="Prints the list of people without a clear of a certain fight.")
+    subparsers.add_parser('ppl_with_clear', help="Prints the list of people with a clear of a certain fight.")
 
     args = parser.parse_args()
 
@@ -132,24 +126,28 @@ if __name__ == "__main__":
         if args.save_db_to_filename is not None:
             LOG.info(f'Saving database to {args.save_db_to_filename}...')
             database.save(args.save_db_to_filename)
+    
+    # Get encounters filter
+    if args.encounter is not None:
+        encounters = [NAME_TO_TRACKED_ENCOUNTER_MAP[e] for e in args.encounter]
+    else:
+        encounters = TRACKED_ENCOUNTERS
 
     if args.command is None:
         reports.clear_rates(database)
     elif args.command == 'clear_chart':
         reports.clear_chart(database)
-    elif args.command == 'clear_order':
-        reports.clear_order(database)
     elif args.command == 'cleared_roles':
         reports.cleared_roles(database)
+    elif args.command == 'clear_order':
+        reports.clear_order(database, encounters)
     elif args.command == 'cleared_jobs_by_member':
-        reports.cleared_jobs_by_member(database)
+        reports.cleared_jobs_by_member(database, encounters)
     elif args.command == 'ppl_with_clear':
-        reports.ppl_with_clear(database, NAME_TO_TRACKED_ENCOUNTER_MAP[args.encounter])
+        reports.ppl_with_clear(database, encounters)
     elif args.command == 'ppl_without_clear':
-        reports.ppl_without_clear(database, NAME_TO_TRACKED_ENCOUNTER_MAP[args.encounter])
+        reports.ppl_without_clear(database, encounters)
     elif args.command == 'who_cleared_recently':
-        # TODO: Fix this
-        from model import P12S
-        reports.who_cleared_recently(database, P12S)
+        reports.who_cleared_recently(database, encounters)
     else:
         raise RuntimeError(f'Unrecognized command: {args.command}')

@@ -1,14 +1,18 @@
+# stdlib
+from typing import List
+
 # 3rd-party
 from tabulate import tabulate
 
 # Local
 from database import Database
+from model import TrackedEncounter
 
 
-def clear_order(database: Database):
+def clear_order(database: Database, encounters: List[TrackedEncounter]):
     clear_chart = database.get_clear_chart()
 
-    for encounter in clear_chart:
+    for encounter in encounters:
         print()
         print(encounter.name)
         print('-----------------------')
