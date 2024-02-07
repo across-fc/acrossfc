@@ -82,6 +82,7 @@ if __name__ == "__main__":
                         type=str,
                         help="Encounters to filter results down for.")
     subparsers = parser.add_subparsers(dest='command')
+    subparsers.add_parser('fc_roster', help="Prints the FC roster")
     subparsers.add_parser('clear_chart', help="Prints a chart of clears over time based on the current roster.")
     subparsers.add_parser('clear_order', help="Prints the order of clears based on the current roster.")
     subparsers.add_parser('cleared_roles', help="Prints the cleared roles based on the current roster.")
@@ -135,6 +136,8 @@ if __name__ == "__main__":
 
     if args.command is None:
         reports.clear_rates(database)
+    elif args.command == 'fc_roster':
+        reports.fc_roster(database)
     elif args.command == 'clear_chart':
         reports.clear_chart(database)
     elif args.command == 'cleared_roles':
