@@ -48,49 +48,71 @@ def get_secrets(secrets_folder: str) -> Tuple[str, str]:
 
 
 if __name__ == "__main__":
+    common_parser = argparse.ArgumentParser(add_help=False)
+    common_parser.add_argument('--secrets_folder',
+                               '-s',
+                               action='store',
+                               type=str, default='.secrets',
+                               help="Path to the secrets folder.")
+    common_parser.add_argument('--guild_id',
+                               '-g',
+                               action='store',
+                               type=int,
+                               default=ACROSS_FFLOGS_GUILD_ID,
+                               help="FFLogs guild ID")
+    common_parser.add_argument('--verbose',
+                               '-v',
+                               action='store_true',
+                               default=False,
+                               help="Turn on verbose logging")
+    common_parser.add_argument('--save_db_to_filename',
+                               '-w',
+                               action='store',
+                               default=None,
+                               help="Filename to save the database to")
+    common_parser.add_argument('--load_db_from_filename',
+                               '-r',
+                               action='store',
+                               default=None,
+                               help="Filename to load the database from")
+    common_parser.add_argument('--encounter',
+                               '-e',
+                               action='append',
+                               type=str,
+                               help="Encounters to filter results down for.")
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--secrets_folder',
-                        '-s',
-                        action='store',
-                        type=str, default='.secrets',
-                        help="Path to the secrets folder.")
-    parser.add_argument('--guild_id',
-                        '-g',
-                        action='store',
-                        type=int,
-                        default=ACROSS_FFLOGS_GUILD_ID,
-                        help="FFLogs guild ID")
-    parser.add_argument('--verbose',
-                        '-v',
-                        action='store_true',
-                        default=False,
-                        help="Turn on verbose logging")
-    parser.add_argument('--save_db_to_filename',
-                        '-w',
-                        action='store',
-                        default=None,
-                        help="Filename to save the database to")
-    parser.add_argument('--load_db_from_filename',
-                        '-r',
-                        action='store',
-                        default=None,
-                        help="Filename to load the database from")
-    parser.add_argument('--encounter',
-                        '-e',
-                        action='append',
-                        required=False,
-                        type=str,
-                        help="Encounters to filter results down for.")
     subparsers = parser.add_subparsers(dest='command')
-    subparsers.add_parser('fc_roster', help="Prints the FC roster")
-    subparsers.add_parser('clear_chart', help="Prints a chart of clears over time based on the current roster.")
-    subparsers.add_parser('clear_order', help="Prints the order of clears based on the current roster.")
-    subparsers.add_parser('cleared_roles', help="Prints the cleared roles based on the current roster.")
-    subparsers.add_parser('cleared_jobs_by_member', help="Prints the cleared jobs for each member.")
-    subparsers.add_parser('who_cleared_recently', help="Prints who cleared a certain encounter recently")
-    subparsers.add_parser('update_fflogs', help="Updates the FFLogs FC roster")
-    subparsers.add_parser('ppl_without_clear', help="Prints the list of people without a clear of a certain fight.")
-    subparsers.add_parser('ppl_with_clear', help="Prints the list of people with a clear of a certain fight.")
+    subparsers.add_parser('clear_rates',
+                          parents=[common_parser],
+                          help="Prints the FC clear rates.")
+    subparsers.add_parser('fc_roster',
+                          parents=[common_parser],
+                          help="Prints the FC roster.")
+    subparsers.add_parser('clear_chart',
+                          parents=[common_parser],
+                          help="Prints a chart of clears over time based on the current roster.")
+    subparsers.add_parser('clear_order',
+                          parents=[common_parser],
+                          help="Prints the order of clears based on the current roster.")
+    subparsers.add_parser('cleared_roles',
+                          parents=[common_parser],
+                          help="Prints the cleared roles based on the current roster.")
+    subparsers.add_parser('cleared_jobs_by_member',
+                          parents=[common_parser],
+                          help="Prints the cleared jobs for each member.")
+    subparsers.add_parser('who_cleared_recently',
+                          parents=[common_parser],
+                          help="Prints who cleared a certain encounter recently")
+    subparsers.add_parser('update_fflogs',
+                          parents=[common_parser],
+                          help="Updates the FFLogs FC roster")
+    subparsers.add_parser('ppl_without_clear',
+                          parents=[common_parser], 
+                          help="Prints the list of people without a clear of a certain fight.")
+    subparsers.add_parser('ppl_with_clear',
+                          parents=[common_parser], 
+                          help="Prints the list of people with a clear of a certain fight.")
 
     args = parser.parse_args()
 
@@ -108,6 +130,7 @@ if __name__ == "__main__":
             sys.exit(0)
         else:
             LOG.error(f'Failed: {resp.text}')
+            sys.exit(1)
 
     if args.load_db_from_filename is not None:
         LOG.info(f'Loading database from {args.load_db_from_filename}...')
@@ -127,14 +150,14 @@ if __name__ == "__main__":
         if args.save_db_to_filename is not None:
             LOG.info(f'Saving database to {args.save_db_to_filename}...')
             database.save(args.save_db_to_filename)
-    
+
     # Get encounters filter
     if args.encounter is not None:
         encounters = [NAME_TO_TRACKED_ENCOUNTER_MAP[e] for e in args.encounter]
     else:
         encounters = TRACKED_ENCOUNTERS
 
-    if args.command is None:
+    if args.command == 'clear_rates':
         reports.clear_rates(database)
     elif args.command == 'fc_roster':
         reports.fc_roster(database)
