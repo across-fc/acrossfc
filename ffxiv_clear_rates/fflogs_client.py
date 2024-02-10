@@ -9,7 +9,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
 # Local
-from model import GuildMember, TrackedEncounter, Clear, TRACKED_ENCOUNTERS
+from ffxiv_clear_rates.model import GuildMember, TrackedEncounter, Clear, TRACKED_ENCOUNTERS
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)

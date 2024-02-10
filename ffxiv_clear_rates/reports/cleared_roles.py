@@ -2,8 +2,8 @@
 from tabulate import tabulate
 
 # Local
-from database import Database
-from model import JobCategory
+from ffxiv_clear_rates.database import Database
+from ffxiv_clear_rates.model import JobCategory
 
 
 def cleared_roles(database: Database):

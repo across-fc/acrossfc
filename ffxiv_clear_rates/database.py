@@ -6,9 +6,10 @@ from typing import List, Set, Tuple, Dict, Callable, Optional
 from collections import defaultdict
 
 # Local
-from model import TrackedEncounter, GuildMember, Clear, ClearRate, Job, TRACKED_ENCOUNTERS, JOBS
+from ffxiv_clear_rates.model import TrackedEncounter, GuildMember, Clear, ClearRate, Job, TRACKED_ENCOUNTERS, JOBS
 
 LOG = logging.getLogger(__name__)
+LOG.setLevel(logging.INFO)
 
 
 class Database:

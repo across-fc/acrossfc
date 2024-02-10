@@ -1,5 +1,5 @@
 # Local
-from database import Database
+from ffxiv_clear_rates.database import Database
 
 
 def fc_roster(database: Database):

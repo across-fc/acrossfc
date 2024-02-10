@@ -6,7 +6,7 @@ from datetime import timedelta
 from tabulate import tabulate
 
 # Local
-from database import Database
+from ffxiv_clear_rates.database import Database
 
 LOG = logging.getLogger(__name__)
 

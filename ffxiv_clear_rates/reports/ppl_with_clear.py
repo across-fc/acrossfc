@@ -2,8 +2,8 @@
 from typing import List
 
 # Local
-from database import Database
-from model import TrackedEncounter
+from ffxiv_clear_rates.database import Database
+from ffxiv_clear_rates.model import TrackedEncounter
 
 
 def ppl_with_clear(database: Database, encounters: List[TrackedEncounter]):
