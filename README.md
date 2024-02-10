@@ -17,13 +17,13 @@ Create a file named `.fcconfig` with the following contents, replacing all `<...
 [DEFAULT]
 fflogs_client_id = <client_id>
 fflogs_client_secret = <client_secret>
-fflogs_guild_id = <fflogs_guild_id>
+fflogs_guild_id = 627...
 
 # Optional: Comma-separated list of ranks to exclude, e.g. 8,17,6
-exclude_guild_ranks = <...>
+exclude_guild_ranks = 7,8,...
 
 # Optional: Discord webhook URL for posting results
-discord_webhook_url = <...>
+discord_webhook_url = https://...
 ```
 
 Put this file in the repository root.
