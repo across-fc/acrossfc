@@ -60,6 +60,14 @@ DSR          21 / 77      27.27%
 TOP          14 / 77      18.18%
 ```
 
+### Publishing reports to Discord
+
+If you have a Discord webhook URL configured in `.fcconfig` (see above), you can use the `-p` argument to automatically publish the report to your webhook:
+
+```
+fcr clear_rates -p
+```
+
 ## Help:
 
 ```
