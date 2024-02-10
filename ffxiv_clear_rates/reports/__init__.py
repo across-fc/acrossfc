@@ -1,4 +1,5 @@
 # flake8: noqa
+from .report import Report
 from .fc_roster import fc_roster
 from .clear_rates import clear_rates
 from .clear_chart import clear_chart

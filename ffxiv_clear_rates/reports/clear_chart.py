@@ -1,17 +1,18 @@
 # stdlib
 import logging
-from datetime import timedelta
+from datetime import date, timedelta
 
 # 3rd-party
 from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
+from .report import Report
 
 LOG = logging.getLogger(__name__)
 
 
-def clear_chart(database: Database):
+def clear_chart(database: Database) -> Report:
     clear_chart = database.get_clear_chart()
 
     # Change member list to number of members
@@ -50,6 +51,14 @@ def clear_chart(database: Database):
         table.append([current_date.isoformat()] + clears)
         current_date += timedelta(days=1)
 
-    print(tabulate(table,
-                   headers=[encounter.name for encounter in clear_chart],
-                   tablefmt="tsv"))
+    data_str = tabulate(table,
+                        headers=[encounter.name for encounter in clear_chart],
+                        tablefmt="tsv")
+
+    return Report(
+        None,
+        f'Across Clear Chart: {date.today()}',
+        None,
+        data_str,
+        None
+    )

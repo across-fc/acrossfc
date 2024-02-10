@@ -30,7 +30,7 @@ Put this file in the repository root.
 
 ## Usage:
 
-Install dependencies:
+Install the project:
 
 ```
 pip install -e .

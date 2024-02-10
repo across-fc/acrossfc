@@ -16,6 +16,7 @@ from .model import (
 from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
 from ffxiv_clear_rates.database import Database
 from ffxiv_clear_rates.config import FC_CONFIG
+from ffxiv_clear_rates.reports import Report
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
@@ -43,6 +44,11 @@ def run():
                                action='append',
                                type=str,
                                help="Encounters to filter results down for.")
+    common_parser.add_argument('--publish',
+                               '-p',
+                               action='store_true',
+                               default=False,
+                               help="Specifies whether to publish results to the webhook link or not.")
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
@@ -121,25 +127,41 @@ def run():
         encounters = TRACKED_ENCOUNTERS
 
     if args.command == 'clear_rates':
-        reports.clear_rates(database)
+        report: Report = reports.clear_rates(database)
     elif args.command == 'fc_roster':
-        reports.fc_roster(database)
+        report: Report = reports.fc_roster(database)
     elif args.command == 'clear_chart':
-        reports.clear_chart(database)
+        report: Report = reports.clear_chart(database)
     elif args.command == 'cleared_roles':
-        reports.cleared_roles(database)
+        report: Report = reports.cleared_roles(database)
     elif args.command == 'clear_order':
-        reports.clear_order(database, encounters)
+        report: Report = reports.clear_order(database, encounters)
     elif args.command == 'cleared_jobs_by_member':
-        reports.cleared_jobs_by_member(database, encounters)
+        report: Report = reports.cleared_jobs_by_member(database, encounters)
     elif args.command == 'ppl_with_clear':
-        reports.ppl_with_clear(database, encounters)
+        report: Report = reports.ppl_with_clear(database, encounters)
     elif args.command == 'ppl_without_clear':
-        reports.ppl_without_clear(database, encounters)
+        report: Report = reports.ppl_without_clear(database, encounters)
     elif args.command == 'who_cleared_recently':
-        reports.who_cleared_recently(database, encounters)
+        report: Report = reports.who_cleared_recently(database, encounters)
     else:
         raise RuntimeError(f'Unrecognized command: {args.command}')
+
+    # Publish results
+    print(report.to_cli_str())
+    print()
+
+    if args.publish:
+        if FC_CONFIG.discord_webhook_url is None:
+            LOG.warning("Unable to publish report to Discord webhook. Please configure it in .fcconfig.")
+        else:
+            resp = requests.post(FC_CONFIG.discord_webhook_url, data={
+                'content': report.to_discord_str()
+            })
+            if resp.status_code != 204:
+                raise RuntimeError(f"Unable to publish report to Discord webhook URL ({resp.status_code}): {resp.text}")
+
+            LOG.info("Report published to Discord webhook.")
 
 
 if __name__ == "__main__":

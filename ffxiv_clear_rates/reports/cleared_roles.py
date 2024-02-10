@@ -4,10 +4,12 @@ from tabulate import tabulate
 # Local
 from ffxiv_clear_rates.database import Database
 from ffxiv_clear_rates.model import JobCategory
+from .report import Report
 
 
-def cleared_roles(database: Database):
+def cleared_roles(database: Database) -> Report:
     cleared_jobs = database.get_cleared_jobs()
+
     table = []
     for encounter in cleared_jobs:
         cleared_cat_counts = {
@@ -21,4 +23,12 @@ def cleared_roles(database: Database):
 
         table.append([encounter.name] + [cleared_cat_counts[cat] for cat in JobCategory])
 
-    print(tabulate(table, headers=[cat.name for cat in JobCategory], tablefmt="tsv"))
+    data_str = tabulate(table, headers=[cat.name for cat in JobCategory], tablefmt="tsv")
+
+    return Report(
+        ':white_check_mark:',
+        'Cleared Roles',
+        None,
+        data_str,
+        None
+    )
