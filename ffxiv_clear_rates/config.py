@@ -1,10 +1,5 @@
 # stdlib
-import logging
 import configparser
-
-LOG = logging.getLogger(__name__)
-LOG.setLevel(logging.INFO)
-
 
 class FCConfig:
     """
@@ -19,7 +14,6 @@ class FCConfig:
 
     """
     def __init__(self, config_filename: str = '.fcconfig'):
-        LOG.info(f"Reading config file {config_filename}...")
         configs = configparser.ConfigParser()
         configs.read(config_filename)
         default_configs = configs['DEFAULT']
