@@ -12,3 +12,6 @@ __pycache__
 
 # Database
 .database*
+
+# Build artifacts
+*.egg-info
