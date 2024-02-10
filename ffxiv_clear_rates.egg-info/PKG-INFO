@@ -1,3 +1,15 @@
+Metadata-Version: 2.1
+Name: ffxiv-clear-rates
+Version: 0.3
+Summary: Simple tool to collect FFXIV clear rates and other data for an FC.
+Author-email: Kohen Chia <kohenchia@gmail.com>
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: requests
+Requires-Dist: aiohttp
+Requires-Dist: gql
+Requires-Dist: tabulate
+
 # ffxiv-clear-rates
 
 Simple tool for tracking FFXIV clear rates.
@@ -36,9 +48,7 @@ Install dependencies:
 pip install -e .
 ```
 
-This will install the `fcr` (read: `ffxiv_clear_rates`) command in your environment, which you can use to get clear rates and other types of clear-related data for your FC.
-
-### Get clear rates:
+Get clear rates:
 
 ```
 fcr clear_rates
@@ -60,17 +70,12 @@ DSR          21 / 77      27.27%
 TOP          14 / 77      18.18%
 ```
 
-## Help:
-
+Check the help text for information on other commands
 ```
-fcr -h
-```
-
-This prints information on other available commands:
-```
-usage: fcr [-h]
-           {clear_rates,fc_roster,clear_chart,clear_order,cleared_roles,cleared_jobs_by_member,who_cleared_recently,update_fflogs,ppl_without_clear,ppl_with_clear}
-           ...
+$ python -m ffxiv_clear_rates.main -h
+usage: main.py [-h]
+               {clear_rates,fc_roster,clear_chart,clear_order,cleared_roles,cleared_jobs_by_member,who_cleared_recently,update_fflogs,ppl_without_clear,ppl_with_clear}
+               ...
 
 positional arguments:
   {clear_rates,fc_roster,clear_chart,clear_order,cleared_roles,cleared_jobs_by_member,who_cleared_recently,update_fflogs,ppl_without_clear,ppl_with_clear}

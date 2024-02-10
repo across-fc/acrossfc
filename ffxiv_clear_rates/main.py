@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
 
 
-if __name__ == "__main__":
+def run():
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument('--verbose',
                                '-v',
@@ -140,3 +140,7 @@ if __name__ == "__main__":
         reports.who_cleared_recently(database, encounters)
     else:
         raise RuntimeError(f'Unrecognized command: {args.command}')
+
+
+if __name__ == "__main__":
+    run()

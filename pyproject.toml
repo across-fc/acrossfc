@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ffxiv-clear-rates"
+description = "Simple tool to collect FFXIV clear rates and other data for an FC."
+version = "0.3"
+authors = [
+    {name = "Kohen Chia", email = "kohenchia@gmail.com"}
+]
+requires-python = ">= 3.12"
+readme = "README.md"
+dependencies = [
+    'requests',
+    'aiohttp',
+    'gql',
+    'tabulate',
+]
+
+[project.scripts]
+fcr = "ffxiv_clear_rates.main:run"

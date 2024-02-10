@@ -1,0 +1,2 @@
+[console_scripts]
+fcr = ffxiv_clear_rates.main:run
