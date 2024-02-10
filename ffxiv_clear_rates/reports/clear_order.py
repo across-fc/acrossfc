@@ -5,8 +5,8 @@ from typing import List
 from tabulate import tabulate
 
 # Local
-from database import Database
-from model import TrackedEncounter
+from ffxiv_clear_rates.database import Database
+from ffxiv_clear_rates.model import TrackedEncounter
 
 
 def clear_order(database: Database, encounters: List[TrackedEncounter]):

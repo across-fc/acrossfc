@@ -5,8 +5,8 @@ from typing import Dict
 from tabulate import tabulate
 
 # Local
-from database import Database
-from model import TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
+from ffxiv_clear_rates.database import Database
+from ffxiv_clear_rates.model import TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
 
 
 def clear_rates(database: Database):

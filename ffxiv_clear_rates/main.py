@@ -6,19 +6,16 @@ import requests
 from typing import List
 
 # Local
-import reports
-from model import (
+from . import reports
+from .model import (
     GuildMember,
     Clear,
     TRACKED_ENCOUNTERS,
     NAME_TO_TRACKED_ENCOUNTER_MAP
 )
-from fflogs_client import FFLogsAPIClient
-from database import Database
-from config import FC_CONFIG
-
-LOG_FORMAT = '%(asctime)s.%(msecs)03d [%(levelname)s] %(module)s / %(filename)s:%(lineno)d: %(message)s'
-logging.basicConfig(level=logging.WARNING, format=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
+from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
+from ffxiv_clear_rates.database import Database
+from ffxiv_clear_rates.config import FC_CONFIG
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)

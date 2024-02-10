@@ -3,8 +3,8 @@ from typing import List, Dict
 from collections import defaultdict
 
 # Local
-from database import Database
-from model import GuildMember, Job, TrackedEncounter
+from ffxiv_clear_rates.database import Database
+from ffxiv_clear_rates.model import GuildMember, Job, TrackedEncounter
 
 
 def cleared_jobs_by_member(database: Database, encounters: List[TrackedEncounter]):
