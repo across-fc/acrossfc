@@ -19,7 +19,9 @@ class FCConfig:
                  production: bool = False):
         configs = configparser.ConfigParser()
         configs.read(config_filename)
-        default_configs = configs['PROD'] if production else configs['DEFAULT']
+        default_configs = configs['DEFAULT']
+        if production:
+            default_configs.update(configs['PROD'])
 
         self.fflogs_client_id = default_configs.get('fflogs_client_id', None)
         self.fflogs_client_secret = default_configs.get('fflogs_client_secret', None)
