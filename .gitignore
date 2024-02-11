@@ -7,8 +7,8 @@ __pycache__
 # FC config
 .fcconfig
 
-# Secrets folder
-.secrets*
+# Secrets
+.*.json
 
 # Database
 .database*
