@@ -14,7 +14,9 @@ __pycache__
 .database*
 
 # Build artifacts
+build/
 *.egg-info
+*.zip
 
 # Test files
 *.ipynb
