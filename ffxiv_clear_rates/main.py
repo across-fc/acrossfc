@@ -104,10 +104,9 @@ def run():
         resp = requests.get(f'https://www.fflogs.com/guild/update/{FC_CONFIG.fflogs_guild_id}')
         if resp.status_code == 200 and 'success' in resp.text:
             LOG.info('Successful.')
-            sys.exit(0)
+            return
         else:
-            LOG.error(f'Failed: {resp.text}')
-            sys.exit(1)
+            raise RuntimeError(f'Failed: {resp.text}')
 
     if args.load_db_from_filename is not None:
         LOG.info(f'Loading database from {args.load_db_from_filename}...')
