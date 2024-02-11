@@ -1,20 +1,15 @@
-#!/usr/bin/env sh
+#!/usr/bin/env zsh
 
 # Create new virtualenv
-python -m venv .lambda
-source .lambda/bin/activate
+python -m venv python
+source python/bin/activate
 pip install .
 
-# Zip up all Python dependencies
-curdir=$(pwd)
-site_packages_path=$(python -c "import sys; print(sys.path[-1])")
-cd $site_packages_path
-zip -r lambda_package.zip .
-cd $curdir
+# Put .fcconfig in the `python` folder so AWS Lambda will find it in PATH
+cp .fcconfig python/.
 
-# Zip up handler script
-mv $site_packages_path/lambda_package.zip .
-zip lambda_package.zip lambda_handler.py .fcconfig
+# Zip up all Python dependencies
+zip -r lambda_layer.zip python
 
 # Cleanup
-rm -fr .lambda
+rm -fr python

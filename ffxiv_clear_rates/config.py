@@ -1,6 +1,7 @@
 # stdlib
 import configparser
 
+
 class FCConfig:
     """
     Loads FC configs from a file.
@@ -38,6 +39,3 @@ class FCConfig:
 
         # Parse Discord webhook URL
         self.discord_webhook_url = default_configs.get('discord_webhook_url', None)
-
-
-FC_CONFIG = FCConfig()

@@ -15,7 +15,7 @@ from .model import (
 )
 from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.config import FC_CONFIG
+from ffxiv_clear_rates.config import FCConfig
 from ffxiv_clear_rates import reports
 from ffxiv_clear_rates.reports import Report
 
@@ -30,6 +30,11 @@ def run():
                                action='store_true',
                                default=False,
                                help="Turn on verbose logging")
+    common_parser.add_argument('--fc_config',
+                               '-c',
+                               action='store',
+                               default='.fcconfig',
+                               help="File to read FC configs from")
     common_parser.add_argument('--save_db_to_filename',
                                '-w',
                                action='store',
@@ -92,6 +97,8 @@ def run():
                           help="Prints the list of people with a clear of a certain fight.")
 
     args = parser.parse_args()
+
+    FC_CONFIG = FCConfig(args.fc_config)
 
     # Verbose logging
     if args.verbose:

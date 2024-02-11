@@ -21,3 +21,6 @@ dependencies = [
 
 [project.scripts]
 fcr = "ffxiv_clear_rates.main:run"
+
+[tool.setuptools.packages.find]
+exclude = ["lambda*"]
