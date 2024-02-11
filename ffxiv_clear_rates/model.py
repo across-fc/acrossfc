@@ -1,5 +1,5 @@
 # stdlib
-from typing import NamedTuple
+from typing import List, Dict, NamedTuple
 
 # 3rd-party
 from peewee import Model, IntegerField, CharField, ForeignKeyField, DateTimeField, FloatField, BooleanField
@@ -73,22 +73,30 @@ ALL_MODELS = [
     Clear
 ]
 
+P9S = TrackedEncounter(name='P9S', encounter_id=88, difficulty_id=101)
+P10S = TrackedEncounter(name='P10S', encounter_id=89, difficulty_id=101)
+P11S = TrackedEncounter(name='P11S', encounter_id=90, difficulty_id=101)
+P12S_P1 = TrackedEncounter(name='P12S_P1', encounter_id=91, difficulty_id=101)
+P12S = TrackedEncounter(name='P12S', encounter_id=92, difficulty_id=101)
+UWU = TrackedEncounter(name='UWU', encounter_id=1061, difficulty_id=None)
+UCOB = TrackedEncounter(name='UCOB', encounter_id=1060, difficulty_id=None)
+TEA = TrackedEncounter(name='TEA', encounter_id=1062, difficulty_id=None)
+DSR = TrackedEncounter(name='DSR', encounter_id=1065, difficulty_id=None)
+TOP = TrackedEncounter(name='TOP', encounter_id=1068, difficulty_id=None)
+
 TRACKED_ENCOUNTERS = [
-    TrackedEncounter(name='P9S', encounter_id=88, difficulty_id=101),
-    TrackedEncounter(name='P10S', encounter_id=89, difficulty_id=101),
-    TrackedEncounter(name='P11S', encounter_id=90, difficulty_id=101),
-    TrackedEncounter(name='P12S_P1', encounter_id=91, difficulty_id=101),
-    TrackedEncounter(name='P12S', encounter_id=92, difficulty_id=101),
-    TrackedEncounter(name='UWU', encounter_id=1061, difficulty_id=None),
-    TrackedEncounter(name='UCOB', encounter_id=1060, difficulty_id=None),
-    TrackedEncounter(name='TEA', encounter_id=1062, difficulty_id=None),
-    TrackedEncounter(name='DSR', encounter_id=1065, difficulty_id=None),
-    TrackedEncounter(name='TOP', encounter_id=1068, difficulty_id=None),
+    P9S, P10S, P11S, P12S_P1, P12S,
+    UWU, UCOB, TEA, DSR, TOP
 ]
 
 NAME_TO_TRACKED_ENCOUNTER_MAP = {
     encounter.name: encounter
     for encounter in TRACKED_ENCOUNTERS
+}
+
+TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP: Dict[str, List[TrackedEncounter]] = {
+    'ANABASEIOS': [P9S, P10S, P11S, P12S_P1, P12S],
+    'ULTIMATE': [UWU, UCOB, TEA, DSR, TOP]
 }
 
 TANK = JobCategory(name='TANK', long_name='Tank')

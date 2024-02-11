@@ -10,7 +10,8 @@ from .model import (
     Member,
     Clear,
     TRACKED_ENCOUNTERS,
-    NAME_TO_TRACKED_ENCOUNTER_MAP
+    NAME_TO_TRACKED_ENCOUNTER_MAP,
+    TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP
 )
 from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
 from ffxiv_clear_rates.database import Database
@@ -42,6 +43,13 @@ def run():
     common_parser.add_argument('--encounter',
                                '-e',
                                action='append',
+                               type=str,
+                               help="Encounters to filter results down for.")
+    common_parser.add_argument('--tier',
+                               '-t',
+                               action='store',
+                               choices=[k.lower() for k in TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP],
+                               default=None,
                                type=str,
                                help="Encounters to filter results down for.")
     common_parser.add_argument('--publish',
@@ -130,12 +138,16 @@ def run():
 
         encounters = [NAME_TO_TRACKED_ENCOUNTER_MAP[e_str] for e_str in args.encounter]
 
+    # Tier will override encounters
+    if args.tier is not None:
+        encounters = TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP[args.tier.upper()]
+
     if args.command == 'clear_rates':
         report: Report = reports.clear_rates(database)
     elif args.command == 'fc_roster':
         report: Report = reports.fc_roster(database)
     elif args.command == 'clear_chart':
-        report: Report = reports.clear_chart(database)
+        report: Report = reports.clear_chart(database, encounters)
     elif args.command == 'cleared_roles':
         report: Report = reports.cleared_roles(database)
     elif args.command == 'clear_order':
