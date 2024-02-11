@@ -1,3 +1,6 @@
+# stdlib
+from datetime import date
+
 # 3rd-party
 from tabulate import tabulate
 
@@ -29,7 +32,7 @@ class ClearedRoles(Report):
 
         super().__init__(
             ':white_check_mark:',
-            'Cleared Roles:',
+            f'Cleared Roles (as of {date.today()}):',
             None,
             data_str,
             None

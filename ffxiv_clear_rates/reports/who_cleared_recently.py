@@ -31,7 +31,7 @@ class WhoClearedRecently(Report):
 
         super().__init__(
             ':white_check_mark:',
-            f'Who cleared recently: {date.today()}',
+            'Who cleared recently:',
             None,
             buffer.getvalue(),
             None

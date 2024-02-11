@@ -1,6 +1,7 @@
 # stdlib
 from io import StringIO
 from typing import List
+from datetime import date
 
 # 3rd-party
 from tabulate import tabulate
@@ -35,7 +36,7 @@ class ClearOrder(Report):
 
         super().__init__(
             ':first_place:',
-            'Clear Order:',
+            f'Clear Order (as of {date.today()}):',
             None,
             buffer.getvalue(),
             None

@@ -32,7 +32,7 @@ class PeopleWithClear(Report):
 
         super().__init__(
             ':white_check_mark:',
-            f'People who have cleared: {date.today()}',
+            f'People who have cleared (as of {date.today()}):',
             'Names displayed in alphabetical order',
             buffer.getvalue(),
             None

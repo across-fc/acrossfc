@@ -1,5 +1,6 @@
 # stdlib
 from io import StringIO
+from datetime import date
 from typing import List, Dict
 from collections import defaultdict
 
@@ -41,12 +42,12 @@ class ClearedJobsByMember(Report):
                     ", ".join(job.tla for job in item[1])
                 ])
             buffer.write(tabulate(table,
-                                headers=['Member', 'Total', 'Jobs'],
-                                tablefmt="simple"))
+                                  headers=['Member', 'Total', 'Jobs'],
+                                  tablefmt="simple"))
 
         super().__init__(
             ':white_check_mark:',
-            'Cleared Jobs by Member:',
+            f'Cleared Jobs by Member (as of {date.today()}):',
             'Names displayed in alphabetical order',
             buffer.getvalue(),
             None

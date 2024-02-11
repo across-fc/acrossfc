@@ -32,7 +32,7 @@ class PeopleWithoutClear(Report):
 
         super().__init__(
             ':no_entry_sign:',
-            f'People who have NOT cleared: {date.today()}',
+            f'People who have NOT cleared (as of {date.today()}):',
             'Names displayed in alphabetical order',
             buffer.getvalue(),
             None
