@@ -7,19 +7,18 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TrackedEncounter, ClearRate, TRACKED_ENCOUNTERS
+from ffxiv_clear_rates.model import TrackedEncounterName, ClearRate, TRACKED_ENCOUNTERS
 from .report import Report
 
 
 def clear_rates(database: Database) -> Report:
-    clear_rates: Dict[TrackedEncounter, ClearRate] = database.get_clear_rates(
-        tracked_encounters=TRACKED_ENCOUNTERS)
+    clear_rates: Dict[TrackedEncounterName, ClearRate] = database.get_clear_rates()
 
     table = [
         [
             encounter.name,
-            f"{clear_rates[encounter].clears} / {clear_rates[encounter].eligible_members}",
-            f"{clear_rates[encounter].clear_rate * 100:.2f}%"
+            f"{clear_rates[encounter.name].clears} / {clear_rates[encounter.name].eligible_members}",
+            f"{clear_rates[encounter.name].clear_rate * 100:.2f}%"
         ]
         for encounter in TRACKED_ENCOUNTERS
     ]

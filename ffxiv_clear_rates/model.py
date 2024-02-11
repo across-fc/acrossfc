@@ -1,69 +1,54 @@
 # stdlib
-from enum import Enum
-from io import StringIO
-from datetime import datetime
-from typing import List, Dict, NamedTuple, Optional
+from typing import NamedTuple
+
+# 3rd-party
+from peewee import Model, IntegerField, CharField, ForeignKeyField, DateTimeField, FloatField, BooleanField
 
 
-class FFL_Boss(Enum):
-    # Also known as 'encounter' in the FFLogs API
-    KOKYTOS = 88
-    PANDAEMONIUM = 89
-    THEMIS = 90
-    ATHENA = 91
-    PALLAS_ATHENA = 92
-    TOP = 1068
-    DSR = 1065
-    TEA = 1062
-    UWU = 1061
-    UCOB = 1060
+class Member(Model):
+    fcid = IntegerField(primary_key=True)
+    name = CharField(255)
+    rank = IntegerField()
 
 
-class FFL_Difficulty(Enum):
-    SAVAGE = 101
-    NORMAL = 100
+class TrackedEncounter(Model):
+    name = CharField(16, primary_key=True)
+    encounter_id = IntegerField()
+    difficulty_id = IntegerField(null=True)
+
+    class Meta:
+        # TODO: See if we really need this
+        indexes = (
+            (('encounter_id', 'difficulty_id'), True),
+        )
 
 
-class TrackedEncounter(NamedTuple):
-    name: str
-    boss: FFL_Boss
-    difficulty: Optional[FFL_Difficulty]
+class JobCategory(Model):
+    name = CharField(32, primary_key=True)
+    long_name = CharField(64)
 
 
-class GuildMember(NamedTuple):
-    id: int
-    name: str
-    rank: int
+class Job(Model):
+    tla = CharField(3, primary_key=True)
+    name = CharField(64)
+    main_category = ForeignKeyField(JobCategory)
+    sub_category = ForeignKeyField(JobCategory, null=True)
 
 
-class JobCategory(Enum):
-    TANK = 'Tank'
-    HEALER = 'Healer'
-    REGEN_HEALER = 'Regen Healer'
-    SHIELD_HEALER = 'Shield Healer'
-    DPS = 'DPS'
-    MELEE_DPS = 'Melee DPS'
-    PRANGED_DPS = 'Physical Ranged DPS'
-    CASTER_DPS = 'Caster DPS'
+class Clear(Model):
+    member = ForeignKeyField(Member)
+    encounter = ForeignKeyField(TrackedEncounter)
+    start_time = DateTimeField()
+    historical_pct = FloatField()
+    report_code = CharField(32)
+    report_fight_id = IntegerField()
+    job = ForeignKeyField(Job)
+    locked_in = BooleanField()
 
 
-class Job(NamedTuple):
-    name: str
-    acronym: str
-    main_category: JobCategory
-    sub_category: Optional[JobCategory]
-
-
-class Clear(NamedTuple):
-    member: GuildMember
-    encounter: TrackedEncounter
-    start_time: datetime
-    historical_pct: float
-    report_code: str
-    report_fight_id: int
-    spec: Job
-    locked_in: bool
-
+# -------------------------
+# Convenience structs and aliases
+# -------------------------
 
 class ClearRate(NamedTuple):
     clears: int
@@ -74,65 +59,87 @@ class ClearRate(NamedTuple):
         return self.clears / self.eligible_members
 
 
-# All the encounters we want to track
-P9S = TrackedEncounter('P9S', FFL_Boss.KOKYTOS, FFL_Difficulty.SAVAGE)
-P10S = TrackedEncounter('P10S', FFL_Boss.PANDAEMONIUM, FFL_Difficulty.SAVAGE)
-P11S = TrackedEncounter('P11S', FFL_Boss.THEMIS, FFL_Difficulty.SAVAGE)
-P12S_P1 = TrackedEncounter('P12S_P1', FFL_Boss.ATHENA, FFL_Difficulty.SAVAGE)
-P12S = TrackedEncounter('P12S', FFL_Boss.PALLAS_ATHENA, FFL_Difficulty.SAVAGE)
-TOP = TrackedEncounter('TOP', FFL_Boss.TOP, None)
-DSR = TrackedEncounter('DSR', FFL_Boss.DSR, None)
-TEA = TrackedEncounter('TEA', FFL_Boss.TEA, None)
-UWU = TrackedEncounter('UWU', FFL_Boss.UWU, None)
-UCOB = TrackedEncounter('UCOB', FFL_Boss.UCOB, None)
+TrackedEncounterName = str
 
-TRACKED_ENCOUNTERS: List[TrackedEncounter] = [
-    P9S,
-    P10S,
-    P11S,
-    P12S_P1,
-    P12S,
-    UWU,
-    UCOB,
-    TEA,
-    DSR,
-    TOP,
+# -------------------------
+# Constant data
+# -------------------------
+
+ALL_MODELS = [
+    Member,
+    TrackedEncounter,
+    JobCategory,
+    Job,
+    Clear
 ]
 
-NAME_TO_TRACKED_ENCOUNTER_MAP: Dict[str, TrackedEncounter] = {
-    e.name: e
-    for e in TRACKED_ENCOUNTERS
+TRACKED_ENCOUNTERS = [
+    TrackedEncounter(name='P9S', encounter_id=88, difficulty_id=101),
+    TrackedEncounter(name='P10S', encounter_id=89, difficulty_id=101),
+    TrackedEncounter(name='P11S', encounter_id=90, difficulty_id=101),
+    TrackedEncounter(name='P12S_P1', encounter_id=91, difficulty_id=101),
+    TrackedEncounter(name='P12S', encounter_id=92, difficulty_id=101),
+    TrackedEncounter(name='TOP', encounter_id=1068, difficulty_id=None),
+    TrackedEncounter(name='DSR', encounter_id=1065, difficulty_id=None),
+    TrackedEncounter(name='TEA', encounter_id=1062, difficulty_id=None),
+    TrackedEncounter(name='UWU', encounter_id=1061, difficulty_id=None),
+    TrackedEncounter(name='UCOB', encounter_id=1060, difficulty_id=None)
+]
+
+NAME_TO_TRACKED_ENCOUNTER_MAP = {
+    encounter.name: encounter
+    for encounter in TRACKED_ENCOUNTERS
 }
 
-MRD = Job('Marauder', 'MRD', JobCategory.TANK, None)
-WAR = Job('Warrior', 'WAR', JobCategory.TANK, None)
-GLA = Job('Gladiator', 'GLA', JobCategory.TANK, None)
-PLD = Job('Paladin', 'PLD', JobCategory.TANK, None)
-DRK = Job('DarkKnight', 'DRK', JobCategory.TANK, None)
-GNB = Job('Gunbreaker', 'GNB', JobCategory.TANK, None)
-CNJ = Job('Conjurer', 'CNJ', JobCategory.HEALER, JobCategory.REGEN_HEALER)
-WHM = Job('WhiteMage', 'WHM', JobCategory.HEALER, JobCategory.REGEN_HEALER)
-SCH = Job('Scholar', 'SCH', JobCategory.HEALER, JobCategory.SHIELD_HEALER)
-AST = Job('Astrologian', 'AST', JobCategory.HEALER, JobCategory.REGEN_HEALER)
-SGE = Job('Sage', 'SGE', JobCategory.HEALER, JobCategory.SHIELD_HEALER)
-LNC = Job('Lancer', 'LNC', JobCategory.DPS, JobCategory.MELEE_DPS)
-DRG = Job('Dragoon', 'DRG', JobCategory.DPS, JobCategory.MELEE_DPS)
-PGL = Job('Pugilist', 'PGL', JobCategory.DPS, JobCategory.MELEE_DPS)
-MNK = Job('Monk', 'MNK', JobCategory.DPS, JobCategory.MELEE_DPS)
-ROG = Job('Rogue', 'ROG', JobCategory.DPS, JobCategory.MELEE_DPS)
-NIN = Job('Ninja', 'NIN', JobCategory.DPS, JobCategory.MELEE_DPS)
-SAM = Job('Samurai', 'SAM', JobCategory.DPS, JobCategory.MELEE_DPS)
-RPR = Job('Reaper', 'RPR', JobCategory.DPS, JobCategory.MELEE_DPS)
-ARC = Job('Archer', 'ARC', JobCategory.DPS, JobCategory.PRANGED_DPS)
-BRD = Job('Bard', 'BRD', JobCategory.DPS, JobCategory.PRANGED_DPS)
-MCH = Job('Machinist', 'MCH', JobCategory.DPS, JobCategory.PRANGED_DPS)
-DNC = Job('Dancer', 'DNC', JobCategory.DPS, JobCategory.PRANGED_DPS)
-THM = Job('Thaumaturge', 'THM', JobCategory.DPS, JobCategory.CASTER_DPS)
-BLM = Job('BlackMage', 'BLM', JobCategory.DPS, JobCategory.CASTER_DPS)
-ACN = Job('Arcanist', 'ACN', JobCategory.DPS, JobCategory.CASTER_DPS)
-SMN = Job('Summoner', 'SMN', JobCategory.DPS, JobCategory.CASTER_DPS)
-RDM = Job('RedMage', 'RDM', JobCategory.DPS, JobCategory.CASTER_DPS)
-BLU = Job('BlueMage', 'BLU', JobCategory.DPS, JobCategory.CASTER_DPS)
+TANK = JobCategory(name='TANK', long_name='Tank')
+HEALER = JobCategory(name='HEALER', long_name='Healer')
+REGEN_HEALER = JobCategory(name='REGEN_HEALER', long_name='Regen Healer')
+SHIELD_HEALER = JobCategory(name='SHIELD_HEALER', long_name='Shield Healer')
+DPS = JobCategory(name='DPS', long_name='DPS')
+MELEE_DPS = JobCategory(name='MELEE_DPS', long_name='Melee DPS')
+PRANGED_DPS = JobCategory(name='PRANGED_DPS', long_name='Physical Ranged DPS')
+CASTER_DPS = JobCategory(name='CASTER_DPS', long_name='Caster DPS')
+
+JOB_CATEGORIES = [
+    TANK,
+    HEALER,
+    REGEN_HEALER,
+    SHIELD_HEALER,
+    DPS,
+    MELEE_DPS,
+    PRANGED_DPS,
+    CASTER_DPS
+]
+
+MRD = Job(tla='MRD', name='Marauder', main_category=TANK.name, sub_category=None)
+WAR = Job(tla='WAR', name='Warrior', main_category=TANK.name, sub_category=None)
+GLA = Job(tla='GLA', name='Gladiator', main_category=TANK.name, sub_category=None)
+PLD = Job(tla='PLD', name='Paladin', main_category=TANK.name, sub_category=None)
+DRK = Job(tla='DRK', name='DarkKnight', main_category=TANK.name, sub_category=None)
+GNB = Job(tla='GNB', name='Gunbreaker', main_category=TANK.name, sub_category=None)
+CNJ = Job(tla='CNJ', name='Conjurer', main_category=HEALER.name, sub_category=REGEN_HEALER.name)
+WHM = Job(tla='WHM', name='WhiteMage', main_category=HEALER.name, sub_category=REGEN_HEALER.name)
+SCH = Job(tla='SCH', name='Scholar', main_category=HEALER.name, sub_category=SHIELD_HEALER.name)
+AST = Job(tla='AST', name='Astrologian', main_category=HEALER.name, sub_category=REGEN_HEALER.name)
+SGE = Job(tla='SGE', name='Sage', main_category=HEALER.name, sub_category=SHIELD_HEALER.name)
+LNC = Job(tla='LNC', name='Lancer', main_category=DPS.name, sub_category=MELEE_DPS.name)
+DRG = Job(tla='DRG', name='Dragoon', main_category=DPS.name, sub_category=MELEE_DPS.name)
+PGL = Job(tla='PGL', name='Pugilist', main_category=DPS.name, sub_category=MELEE_DPS.name)
+MNK = Job(tla='MNK', name='Monk', main_category=DPS.name, sub_category=MELEE_DPS.name)
+ROG = Job(tla='ROG', name='Rogue', main_category=DPS.name, sub_category=MELEE_DPS.name)
+NIN = Job(tla='NIN', name='Ninja', main_category=DPS.name, sub_category=MELEE_DPS.name)
+SAM = Job(tla='SAM', name='Samurai', main_category=DPS.name, sub_category=MELEE_DPS.name)
+RPR = Job(tla='RPR', name='Reaper', main_category=DPS.name, sub_category=MELEE_DPS.name)
+ARC = Job(tla='ARC', name='Archer', main_category=DPS.name, sub_category=PRANGED_DPS.name)
+BRD = Job(tla='BRD', name='Bard', main_category=DPS.name, sub_category=PRANGED_DPS.name)
+MCH = Job(tla='MCH', name='Machinist', main_category=DPS.name, sub_category=PRANGED_DPS.name)
+DNC = Job(tla='DNC', name='Dancer', main_category=DPS.name, sub_category=PRANGED_DPS.name)
+THM = Job(tla='THM', name='Thaumaturge', main_category=DPS.name, sub_category=CASTER_DPS.name)
+BLM = Job(tla='BLM', name='BlackMage', main_category=DPS.name, sub_category=CASTER_DPS.name)
+ACN = Job(tla='ACN', name='Arcanist', main_category=DPS.name, sub_category=CASTER_DPS.name)
+SMN = Job(tla='SMN', name='Summoner', main_category=DPS.name, sub_category=CASTER_DPS.name)
+RDM = Job(tla='RDM', name='RedMage', main_category=DPS.name, sub_category=CASTER_DPS.name)
+BLU = Job(tla='BLU', name='BlueMage', main_category=DPS.name, sub_category=CASTER_DPS.name)
 
 JOBS = [
     MRD,
@@ -165,3 +172,13 @@ JOBS = [
     RDM,
     BLU
 ]
+
+NAME_TO_JOB_MAP = {
+    job.name: job
+    for job in JOBS
+}
+
+TLA_TO_JOB_MAP = {
+    job.tla: job
+    for job in JOBS
+}

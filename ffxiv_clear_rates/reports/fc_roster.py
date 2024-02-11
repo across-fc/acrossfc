@@ -8,7 +8,7 @@ from .report import Report
 
 
 def fc_roster(database: Database) -> Report:
-    members = sorted([f"{member.name} ({member.id})" for member in database.guild_members])
+    members = sorted([f"{member.name} ({member.fcid})" for member in database.get_fc_roster()])
 
     buffer = StringIO()
 

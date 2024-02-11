@@ -1,140 +1,152 @@
 # stdlib
+import tempfile
 import logging
-import pickle
+import shutil
+from typing import List, Dict, Set, Tuple
 from datetime import date
-from typing import List, Set, Tuple, Dict, Callable, Optional
 from collections import defaultdict
 
+# 3rd-party
+from peewee import SqliteDatabase, fn, JOIN, prefetch
+
 # Local
-from ffxiv_clear_rates.model import TrackedEncounter, GuildMember, Clear, ClearRate, Job, TRACKED_ENCOUNTERS, JOBS
+from ffxiv_clear_rates.model import (
+    Member,
+    TrackedEncounter,
+    TrackedEncounterName,
+    JobCategory,
+    Job,
+    Clear,
+    ClearRate,
+    ALL_MODELS,
+    TRACKED_ENCOUNTERS,
+    JOB_CATEGORIES,
+    JOBS
+)
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
 
 
 class Database:
-    """
-    This is a fake database that provides a query-like interface into in-memory state.
-    """
-
-    def __init__(self,
-                 guild_members: List[GuildMember],
-                 clears: List[Clear],
-                 guild_rank_filter: Optional[Callable[[int], bool]] = None):
-        # Filter data by guild_rank
-        if guild_rank_filter is not None:
-            self.guild_members = [
-                member
-                for member in guild_members
-                if guild_rank_filter(member.rank)
-            ]
-            self.clears = [
-                clear
-                for clear in clears
-                if guild_rank_filter(clear.member.rank)
-            ]
-        else:
-            self.guild_members = guild_members
-            self.clears = clears
-
-        self.cleared_members_by_encounter: Dict[TrackedEncounter, Set[GuildMember]] = defaultdict(set)
-        for clear in self.clears:
-            self.cleared_members_by_encounter[clear.encounter].add(clear.member)
+    def __init__(self, db_filename: str):
+        self.db_filename = db_filename
+        self._db = SqliteDatabase(self.db_filename)
 
     def save(self, filename: str):
-        with open(filename, 'wb') as f:
-            pickle.dump([
-                self.guild_members,
-                self.clears
-            ], f)
+        shutil.copy(self.db_filename, filename)
 
     @staticmethod
-    def load(filename: str) -> 'Database':
-        with open(filename, 'rb') as f:
-            guild_members, clears = pickle.load(f)
-            return Database(guild_members, clears)
+    def from_fflogs(members: List[Member], clears: List[Clear]) -> 'Database':
+        db_filename = tempfile.NamedTemporaryFile().name
+        db = Database(db_filename)
 
-    def get_clear_rates(
-        self,
-        tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
-    ) -> Dict[TrackedEncounter, ClearRate]:
+        # Setup database
+        with db._db.bind_ctx(ALL_MODELS):
+            db._db.create_tables(ALL_MODELS)
+            TrackedEncounter.bulk_create(TRACKED_ENCOUNTERS)
+            JobCategory.bulk_create(JOB_CATEGORIES)
+            Job.bulk_create(JOBS)
+            Member.bulk_create(members)
+            Clear.bulk_create(clears, batch_size=50)
+
+        return db
+
+    def get_fc_roster(self) -> List[Member]:
+        with self._db.bind_ctx(ALL_MODELS):
+            return Member.select().order_by(Member.rank, Member.name)
+
+    def get_clear_rates(self) -> Dict[TrackedEncounterName, ClearRate]:
+        with self._db.bind_ctx(ALL_MODELS):
+            eligible_members = Member.select().count()
+            query = (TrackedEncounter
+                     .select(TrackedEncounter, fn.Count(fn.Distinct(Clear.member)).alias('count'))
+                     .join(Clear)
+                     .group_by(TrackedEncounter))
+
         ret = {
-            encounter: ClearRate(
-                len(self.cleared_members_by_encounter.get(encounter, set())),
-                len(self.guild_members)
-            )
-            for encounter in tracked_encounters
+            row.name: ClearRate(row.count, eligible_members)
+            for row in query
         }
 
-        # TODO: Log report
-
         return ret
 
-    def get_cleared_members_by_encounter(
-        self,
-        encounter: TrackedEncounter
-    ) -> Set[GuildMember]:
-        return self.cleared_members_by_encounter[encounter]
+    def get_cleared_members_by_encounter(self, encounter: TrackedEncounter) -> Set[Member]:
+        with self._db.bind_ctx(ALL_MODELS):
+            query = (Member
+                     .select()
+                     .join(Clear)
+                     .where(Clear.encounter == encounter.name)
+                     .distinct())
 
-    def get_uncleared_members_by_encounter(
-        self,
-        encounter: TrackedEncounter
-    ) -> Set[GuildMember]:
-        ret = [
-            member
-            for member in self.guild_members
-            if member not in self.cleared_members_by_encounter[encounter]
-        ]
+        return query
 
-        return ret
+    def get_uncleared_members_by_encounter(self, encounter: TrackedEncounter) -> Set[Member]:
+        with self._db.bind_ctx(ALL_MODELS):
+            members_with_clear = (Member
+                                  .select()
+                                  .join(Clear)
+                                  .where(Clear.encounter == encounter.name)
+                                  .distinct())
 
-    def get_clear_chart(self) -> Dict[TrackedEncounter, List[Tuple[date, Set[GuildMember]]]]:
+            members_without_clear = (Member
+                                     .select()
+                                     .join(members_with_clear,
+                                           JOIN.LEFT_OUTER,
+                                           on=(Member.fcid == members_with_clear.c.fcid))
+                                     .where(members_with_clear.c.fcid >> None))
+
+        return set(members_without_clear)
+
+    def get_clear_order(self) -> Dict[TrackedEncounterName, List[Tuple[date, Set[Member]]]]:
         # {
-        #     <encounter>: [
+        #     <encounter_name>: [
         #         (<date>, <cleared_members_set>),
         #         (<date>, <cleared_members_set>),
         #         (<date>, <cleared_members_set>),
         #         ...
         #     ]
         # }
-        encounter_cumulative_clears_by_date: Dict[
-            TrackedEncounter,
-            List[Tuple[date, Set[GuildMember]]]
-        ] = defaultdict(list)
+        with self._db.bind_ctx(ALL_MODELS):
+            # Get index of members
+            clear_chart = defaultdict(list)
+            query = (Clear
+                     .select(Clear.encounter,
+                             Clear.member,
+                             fn.MIN(fn.DATE(Clear.start_time)).alias('first_clear_date'))
+                     .group_by(Clear.encounter, Clear.member)
+                     .order_by(Clear.encounter, fn.MIN(fn.DATE(Clear.start_time)))
+                     .alias('subquery'))
 
-        for clear in sorted(self.clears, key=lambda clear: clear.start_time):
-            clear_date = clear.start_time.date()
-            if len(encounter_cumulative_clears_by_date[clear.encounter]) == 0:
-                encounter_cumulative_clears_by_date[clear.encounter].append(
-                    (
-                        clear_date,
-                        {clear.member}
+            for row in query:
+                clear_date = date.fromisoformat(row.first_clear_date)
+                encounter_clear_chart = clear_chart[row.encounter.name]
+                if len(encounter_clear_chart) == 0:
+                    encounter_clear_chart.append(
+                        (clear_date, {row.member})
                     )
-                )
-                continue
-
-            current_cleared_members = encounter_cumulative_clears_by_date[clear.encounter][-1][1]
-            if clear.member not in current_cleared_members:
-                new_datapoint = (
-                    clear_date,
-                    current_cleared_members | {clear.member}
-                )
-                if clear_date > encounter_cumulative_clears_by_date[clear.encounter][-1][0]:
-                    encounter_cumulative_clears_by_date[clear.encounter].append(new_datapoint)
                 else:
-                    encounter_cumulative_clears_by_date[clear.encounter][-1] = new_datapoint
+                    last_clear_date = encounter_clear_chart[-1][0]
+                    if clear_date > last_clear_date:
+                        encounter_clear_chart.append(
+                            (clear_date, {row.member})
+                        )
+                    else:
+                        encounter_clear_chart[-1][1].add(row.member)
 
-        return encounter_cumulative_clears_by_date
+        return clear_chart
 
-    def get_cleared_jobs(self) -> Dict[TrackedEncounter, Set[Tuple[GuildMember, Job]]]:
-        spec_name_to_job = {
-            job.name: job
-            for job in JOBS
-        }
-
+    def get_cleared_jobs(self) -> Dict[TrackedEncounterName, Set[Tuple[Member, Job]]]:
         encounter_cleared_jobs = defaultdict(set)
-        for clear in self.clears:
-            new_datapoint = (clear.member, spec_name_to_job[clear.spec])
-            encounter_cleared_jobs[clear.encounter].add(new_datapoint)  # Set will automatically de-dupe
+
+        with self._db.bind_ctx(ALL_MODELS):
+            query = (Clear
+                     .select(Clear.encounter, Clear.member, Clear.job)
+                     .group_by(Clear.encounter, Clear.member, Clear.job)
+                     .order_by(Clear.encounter, Clear.member, Clear.job))
+
+            for row in query:
+                new_datapoint = (row.member, row.job)
+                encounter_cleared_jobs[row.encounter.name].add(new_datapoint)  # Set will automatically de-dupe
 
         return encounter_cleared_jobs
