@@ -1,7 +1,7 @@
 # stdlib
 import logging
 from datetime import datetime
-from typing import List
+from typing import List, Callable
 
 # 3rd-party
 import requests
@@ -9,7 +9,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
 # Local
-from ffxiv_clear_rates.model import GuildMember, TrackedEncounter, Clear, TRACKED_ENCOUNTERS
+from ffxiv_clear_rates.model import Member, TrackedEncounter, Clear, TRACKED_ENCOUNTERS, NAME_TO_JOB_MAP
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
@@ -36,7 +36,7 @@ class FFLogsAPIClient:
         # Create a GraphQL client using the defined transport
         self.gql_client = Client(transport=gql_transport, fetch_schema_from_transport=True)
 
-    def get_fc_roster(self, guild_id: int) -> List[GuildMember]:
+    def get_fc_roster(self, guild_id: int, guild_rank_filter: Callable[[int], bool]) -> List[Member]:
         query = gql(
             """
             query getGuildData($id: Int!) {
@@ -56,15 +56,16 @@ class FFLogsAPIClient:
         )
         result = self.gql_client.execute(query, variable_values={'id': guild_id})
         ret = [
-            GuildMember(d['id'], d['name'], d['guildRank'])
+            Member(fcid=d['id'], name=d['name'], rank=d['guildRank'])
             for d in result['guildData']['guild']['members']['data']
+            if guild_rank_filter(d['guildRank'])
         ]
 
         return ret
 
     def get_clears_for_member(
         self,
-        member: GuildMember,
+        member: Member,
         tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS
     ) -> List[Clear]:
         LOG.info(f'Getting clear data for {member.name}...')
@@ -78,9 +79,9 @@ class FFLogsAPIClient:
         # Add all the tracked encounters to the query
         for encounter in tracked_encounters:
             query_str += f"""
-                {encounter.boss.name}: encounterRankings(
-                    encounterID: {encounter.boss.value},
-                    difficulty: {encounter.difficulty.value if encounter.difficulty is not None else 'null'}
+                {encounter.name}: encounterRankings(
+                    encounterID: {encounter.encounter_id},
+                    difficulty: {encounter.difficulty_id or 'null'}
                 ),
             """
 
@@ -91,7 +92,7 @@ class FFLogsAPIClient:
             }"""
 
         query = gql(query_str)
-        result = self.gql_client.execute(query, variable_values={'id': member.id})
+        result = self.gql_client.execute(query, variable_values={'id': member.fcid})
 
         clears: List[Clear] = []
 
@@ -105,17 +106,17 @@ class FFLogsAPIClient:
             for kill in result['characterData']['character'][boss_name]['ranks']:
                 clears.append(
                     Clear(
-                        member,
-                        encounter,
-                        datetime.fromtimestamp(
+                        member=member.fcid,
+                        encounter=encounter.name,
+                        start_time=datetime.fromtimestamp(
                             # Python takes in seconds, API returns milliseconds
                             kill['startTime'] / 1000
                         ),
-                        kill['historicalPercent'],
-                        kill['report']['code'],
-                        kill['report']['fightID'],
-                        kill['spec'],
-                        kill['lockedIn'] == 'true'
+                        historical_pct=kill['historicalPercent'],
+                        report_code=kill['report']['code'],
+                        report_fight_id=kill['report']['fightID'],
+                        job=NAME_TO_JOB_MAP[kill['spec']],
+                        locked_in=kill['lockedIn'] == 'true'
                     )
                 )
 

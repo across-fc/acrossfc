@@ -6,9 +6,8 @@ import requests
 from typing import List
 
 # Local
-from . import reports
 from .model import (
-    GuildMember,
+    Member,
     Clear,
     TRACKED_ENCOUNTERS,
     NAME_TO_TRACKED_ENCOUNTER_MAP
@@ -16,6 +15,7 @@ from .model import (
 from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
 from ffxiv_clear_rates.database import Database
 from ffxiv_clear_rates.config import FC_CONFIG
+from ffxiv_clear_rates import reports
 from ffxiv_clear_rates.reports import Report
 
 LOG = logging.getLogger(__name__)
@@ -103,28 +103,32 @@ def run():
 
     if args.load_db_from_filename is not None:
         LOG.info(f'Loading database from {args.load_db_from_filename}...')
-        database = Database.load(args.load_db_from_filename)
+        database = Database(db_filename=args.load_db_from_filename)
     else:
         fflogs_client = FFLogsAPIClient(client_id=FC_CONFIG.fflogs_client_id,
                                         client_secret=FC_CONFIG.fflogs_client_secret)
-        fc_roster: List[GuildMember] = fflogs_client.get_fc_roster(FC_CONFIG.fflogs_guild_id)
+
+        fc_roster: List[Member] = fflogs_client.get_fc_roster(
+            guild_id=FC_CONFIG.fflogs_guild_id,
+            guild_rank_filter=lambda rank: rank not in FC_CONFIG.exclude_guild_ranks)
         fc_clears: List[Clear] = []
         for member in fc_roster:
             fc_clears.extend(fflogs_client.get_clears_for_member(member, TRACKED_ENCOUNTERS))
 
-        database = Database(
-            fc_roster,
-            fc_clears,
-            guild_rank_filter=lambda rank: rank not in FC_CONFIG.exclude_guild_ranks)
+        database = Database.from_fflogs(fc_roster, fc_clears)
+
         if args.save_db_to_filename is not None:
             LOG.info(f'Saving database to {args.save_db_to_filename}...')
             database.save(args.save_db_to_filename)
 
-    # Get encounters filter
+    # Sanitize encounter input filter
+    encounters = TRACKED_ENCOUNTERS
     if args.encounter is not None:
-        encounters = [NAME_TO_TRACKED_ENCOUNTER_MAP[e] for e in args.encounter]
-    else:
-        encounters = TRACKED_ENCOUNTERS
+        for e_str in args.encounter:
+            if e_str not in NAME_TO_TRACKED_ENCOUNTER_MAP:
+                raise RuntimeError(f'{e_str} is not a tracked encounter.')
+
+        encounters = [NAME_TO_TRACKED_ENCOUNTER_MAP[e_str] for e_str in args.encounter]
 
     if args.command == 'clear_rates':
         report: Report = reports.clear_rates(database)

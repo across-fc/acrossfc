@@ -7,30 +7,33 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
+from ffxiv_clear_rates.model import TRACKED_ENCOUNTERS
 from .report import Report
 
 LOG = logging.getLogger(__name__)
 
 
 def clear_chart(database: Database) -> Report:
-    clear_chart = database.get_clear_chart()
+    clear_order = database.get_clear_order()
 
     # Change member list to number of members
-    for encounter in clear_chart:
-        number_of_data_points = len(clear_chart[encounter])
+    for encounter_name in clear_order:
+        number_of_data_points = len(clear_order[encounter_name])
+        cumulative_cleared = 0
         for i in range(number_of_data_points):
-            datapoint = clear_chart[encounter][i]
-            clear_chart[encounter][i] = (
-                datapoint[0], len(datapoint[1])
+            datapoint = clear_order[encounter_name][i]
+            cumulative_cleared += len(datapoint[1])
+            clear_order[encounter_name][i] = (
+                datapoint[0], cumulative_cleared
             )
 
     earliest_date = sorted([
-        clear_chart[encounter][0][0]
-        for encounter in clear_chart
+        clear_order[encounter][0][0]
+        for encounter in clear_order
     ])[0]
     latest_date = sorted([
-        clear_chart[encounter][-1][0]
-        for encounter in clear_chart
+        clear_order[encounter][-1][0]
+        for encounter in clear_order
     ])[-1]
 
     table = []
@@ -41,18 +44,18 @@ def clear_chart(database: Database) -> Report:
             next(
                 (
                     datapoint[1]
-                    for datapoint in reversed(clear_chart[encounter])
+                    for datapoint in reversed(clear_order[encounter.name])
                     if datapoint[0] <= current_date
                 ),
                 0
             )
-            for encounter in clear_chart
+            for encounter in TRACKED_ENCOUNTERS
         ]
         table.append([current_date.isoformat()] + clears)
         current_date += timedelta(days=1)
 
     data_str = tabulate(table,
-                        headers=[encounter.name for encounter in clear_chart],
+                        headers=[encounter.name for encounter in TRACKED_ENCOUNTERS],
                         tablefmt="tsv")
 
     return Report(
