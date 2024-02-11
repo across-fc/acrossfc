@@ -8,7 +8,7 @@ def lambda_handler(event, context):
         'clear_rates',
         '-c', '/opt/python/.fcconfig',
         '-s', '/opt/python/.gc_creds.json',
-        '-p'
+        '-pd'
     ]
     run()
     return {

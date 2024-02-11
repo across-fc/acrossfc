@@ -9,29 +9,30 @@ from ffxiv_clear_rates.model import TrackedEncounter
 from .report import Report
 
 
-def who_cleared_recently(database: Database, encounters: List[TrackedEncounter]) -> Report:
-    buffer = StringIO()
+class WhoClearedRecently(Report):
+    def __init__(self, database: Database, encounters: List[TrackedEncounter]):
+        buffer = StringIO()
 
-    for i, encounter in enumerate(encounters):
-        if i > 0:
+        for i, encounter in enumerate(encounters):
+            if i > 0:
+                buffer.write('\n\n')
+
+            encounter_clear_chart = database.get_clear_order()[encounter.name]
+
+            buffer.write(f'[{encounter.name}]')
             buffer.write('\n\n')
 
-        encounter_clear_chart = database.get_clear_order()[encounter.name]
+            clear_date_str = encounter_clear_chart[-1][0].isoformat()
+            clearees = ", ".join(
+                member.name
+                for member in encounter_clear_chart[-1][1]
+            )
+            buffer.write(f"{clear_date_str}: {clearees}")
 
-        buffer.write(f'[{encounter.name}]')
-        buffer.write('\n\n')
-
-        clear_date_str = encounter_clear_chart[-1][0].isoformat()
-        clearees = ", ".join(
-            member.name
-            for member in encounter_clear_chart[-1][1]
+        super().__init__(
+            ':white_check_mark:',
+            f'Who cleared recently: {date.today()}',
+            None,
+            buffer.getvalue(),
+            None
         )
-        buffer.write(f"{clear_date_str}: {clearees}")
-
-    return Report(
-        ':white_check_mark:',
-        f'Who cleared recently: {date.today()}',
-        None,
-        buffer.getvalue(),
-        None
-    )

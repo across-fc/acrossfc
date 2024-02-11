@@ -61,11 +61,16 @@ def run():
                                default=None,
                                type=str,
                                help="Encounters to filter results down for.")
-    common_parser.add_argument('--publish',
-                               '-p',
+    common_parser.add_argument('--publish-to-discord',
+                               '-pd',
                                action='store_true',
                                default=False,
                                help="Specifies whether to publish results to the webhook link or not.")
+    common_parser.add_argument('--publish-to-google-drive',
+                               '-pg',
+                               action='store_true',
+                               default=False,
+                               help="Specifies whether to publish results to Google Drive")
     common_parser.add_argument('--prod',
                                action='store_true',
                                default=False,
@@ -114,6 +119,7 @@ def run():
         logging.getLogger('fflogs_client').setLevel(logging.DEBUG)
         logging.getLogger('database').setLevel(logging.DEBUG)
 
+    # Update FFLogs
     if args.command == 'update_fflogs':
         LOG.info('Updating FFLogs FC roster...')
         resp = requests.get(f'https://www.fflogs.com/guild/update/{FC_CONFIG.fflogs_guild_id}')
@@ -123,6 +129,7 @@ def run():
         else:
             raise RuntimeError(f'Failed: {resp.text}')
 
+    # Load the database from a file or from FFLogs
     if args.load_db_from_filename is not None:
         LOG.info(f'Loading database from {args.load_db_from_filename}...')
         database = Database(db_filename=args.load_db_from_filename)
@@ -156,24 +163,25 @@ def run():
     if args.tier is not None:
         encounters = TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP[args.tier.upper()]
 
+    # Handle commands
     if args.command == 'clear_rates':
-        report: Report = reports.clear_rates(database)
+        report = reports.ClearRates(database)
     elif args.command == 'fc_roster':
-        report: Report = reports.fc_roster(database)
+        report = reports.FCRoster(database)
     elif args.command == 'clear_chart':
-        report: Report = reports.clear_chart(database, encounters)
+        report = reports.ClearChart(database, encounters)
     elif args.command == 'cleared_roles':
-        report: Report = reports.cleared_roles(database)
+        report = reports.ClearedRoles(database)
     elif args.command == 'clear_order':
-        report: Report = reports.clear_order(database, encounters)
+        report = reports.ClearOrder(database, encounters)
     elif args.command == 'cleared_jobs_by_member':
-        report: Report = reports.cleared_jobs_by_member(database, encounters)
+        report = reports.ClearedJobsByMember(database, encounters)
     elif args.command == 'ppl_with_clear':
-        report: Report = reports.ppl_with_clear(database, encounters)
+        report = reports.PeopleWithClear(database, encounters)
     elif args.command == 'ppl_without_clear':
-        report: Report = reports.ppl_without_clear(database, encounters)
+        report = reports.PeopleWithoutClear(database, encounters)
     elif args.command == 'who_cleared_recently':
-        report: Report = reports.who_cleared_recently(database, encounters)
+        report = reports.WhoClearedRecently(database, encounters)
     else:
         raise RuntimeError(f'Unrecognized command: {args.command}')
 
@@ -181,7 +189,7 @@ def run():
     print(report.to_cli_str())
     print()
 
-    if args.publish:
+    if args.publish_to_discord:
         if FC_CONFIG.discord_webhook_url is None:
             LOG.warning("Unable to publish report to Discord webhook. Please configure it in .fcconfig.")
         else:
@@ -192,6 +200,11 @@ def run():
                 raise RuntimeError(f"Unable to publish report to Discord webhook URL ({resp.status_code}): {resp.text}")
 
             LOG.info("Report published to Discord webhook.")
+
+    if args.publish_to_google_drive:
+        published = report.publish_to_gsheets()
+        if published:
+            LOG.info("Report published to Google drive.")
 
 
 if __name__ == "__main__":
