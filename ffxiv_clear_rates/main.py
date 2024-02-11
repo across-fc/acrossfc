@@ -1,5 +1,4 @@
 # stdlib
-import sys
 import argparse
 import logging
 import requests
@@ -94,10 +93,10 @@ def run():
                           parents=[common_parser],
                           help="Updates the FFLogs FC roster")
     subparsers.add_parser('ppl_without_clear',
-                          parents=[common_parser], 
+                          parents=[common_parser],
                           help="Prints the list of people without a clear of a certain fight.")
     subparsers.add_parser('ppl_with_clear',
-                          parents=[common_parser], 
+                          parents=[common_parser],
                           help="Prints the list of people with a clear of a certain fight.")
 
     args = parser.parse_args()
