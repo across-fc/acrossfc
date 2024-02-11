@@ -62,6 +62,10 @@ def run():
                                action='store_true',
                                default=False,
                                help="Specifies whether to publish results to the webhook link or not.")
+    common_parser.add_argument('--prod',
+                               action='store_true',
+                               default=False,
+                               help="Specifies whether to use production configs")
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
@@ -98,7 +102,7 @@ def run():
 
     args = parser.parse_args()
 
-    FC_CONFIG = FCConfig(args.fc_config)
+    FC_CONFIG = FCConfig(config_filename=args.fc_config, production=args.prod)
 
     # Verbose logging
     if args.verbose:

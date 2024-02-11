@@ -14,10 +14,12 @@ class FCConfig:
         DiscordWebhookURL = ...         (optional)
 
     """
-    def __init__(self, config_filename: str = '.fcconfig'):
+    def __init__(self,
+                 config_filename: str = '.fcconfig',
+                 production: bool = False):
         configs = configparser.ConfigParser()
         configs.read(config_filename)
-        default_configs = configs['DEFAULT']
+        default_configs = configs['PROD'] if production else configs['DEFAULT']
 
         self.fflogs_client_id = default_configs.get('fflogs_client_id', None)
         self.fflogs_client_secret = default_configs.get('fflogs_client_secret', None)
