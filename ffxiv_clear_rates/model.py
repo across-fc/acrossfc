@@ -79,11 +79,11 @@ TRACKED_ENCOUNTERS = [
     TrackedEncounter(name='P11S', encounter_id=90, difficulty_id=101),
     TrackedEncounter(name='P12S_P1', encounter_id=91, difficulty_id=101),
     TrackedEncounter(name='P12S', encounter_id=92, difficulty_id=101),
-    TrackedEncounter(name='TOP', encounter_id=1068, difficulty_id=None),
-    TrackedEncounter(name='DSR', encounter_id=1065, difficulty_id=None),
-    TrackedEncounter(name='TEA', encounter_id=1062, difficulty_id=None),
     TrackedEncounter(name='UWU', encounter_id=1061, difficulty_id=None),
-    TrackedEncounter(name='UCOB', encounter_id=1060, difficulty_id=None)
+    TrackedEncounter(name='UCOB', encounter_id=1060, difficulty_id=None),
+    TrackedEncounter(name='TEA', encounter_id=1062, difficulty_id=None),
+    TrackedEncounter(name='DSR', encounter_id=1065, difficulty_id=None),
+    TrackedEncounter(name='TOP', encounter_id=1068, difficulty_id=None),
 ]
 
 NAME_TO_TRACKED_ENCOUNTER_MAP = {
