@@ -14,18 +14,23 @@ class FCConfig:
         DiscordWebhookURL = ...         (optional)
 
     """
-    def __init__(self,
-                 config_filename: str = '.fcconfig',
-                 production: bool = False):
+    def __init__(self):
+        self.initialized = False
+
+    def initialize(self,
+                   config_filename: str = '.fcconfig',
+                   production: bool = False):
         configs = configparser.ConfigParser()
         configs.read(config_filename)
         default_configs = configs['DEFAULT']
         if production:
             default_configs.update(configs['PROD'])
+        self.combined_configs = default_configs
 
-        self.fflogs_client_id = default_configs.get('fflogs_client_id', None)
-        self.fflogs_client_secret = default_configs.get('fflogs_client_secret', None)
-        if self.fflogs_client_id is None or self.fflogs_client_secret is None:
+        # Assert we have FFLogs client credentials
+        fflogs_client_id = default_configs.get('fflogs_client_id', None)
+        fflogs_client_secret = default_configs.get('fflogs_client_secret', None)
+        if fflogs_client_id is None or fflogs_client_secret is None:
             raise RuntimeError(f'"FFLogs API credentials are missing from the [DEFAULT] section in {config_filename}.')
 
         # Parse FFLogs guild ID
@@ -41,5 +46,13 @@ class FCConfig:
             if s.strip() != ''
         )
 
-        # Parse Discord webhook URL
-        self.discord_webhook_url = default_configs.get('discord_webhook_url', None)
+        # Set flag
+        self.initialized = True
+
+    def __getattr__(self, name):
+        if not self.initialized:
+            raise RuntimeError('FCConfig is not initialized yet. Call initialize()')
+        return self.combined_configs.get(name, None)
+
+
+FC_CONFIG = FCConfig()

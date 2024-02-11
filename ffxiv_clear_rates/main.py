@@ -14,8 +14,9 @@ from .model import (
 )
 from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.config import FCConfig
 from ffxiv_clear_rates import reports
+from ffxiv_clear_rates.config import FC_CONFIG
+from ffxiv_clear_rates.reports.gapi import GAPI
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
@@ -110,7 +111,8 @@ def run():
 
     args = parser.parse_args()
 
-    FC_CONFIG = FCConfig(config_filename=args.fc_config, production=args.prod)
+    FC_CONFIG.initialize(config_filename=args.fc_config, production=args.prod)
+    GAPI.initialize(args.gc_creds_file)
 
     # Verbose logging
     if args.verbose:
