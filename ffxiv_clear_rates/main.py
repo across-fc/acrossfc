@@ -34,6 +34,11 @@ def run():
                                action='store',
                                default='.fcconfig',
                                help="File to read FC configs from")
+    common_parser.add_argument('--gc_creds_file',
+                               '-s',
+                               action='store',
+                               default='.gc_creds.json',
+                               help="File to read Google API credentials for")
     common_parser.add_argument('--save_db_to_filename',
                                '-w',
                                action='store',
