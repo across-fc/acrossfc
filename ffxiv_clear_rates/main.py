@@ -16,7 +16,6 @@ from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
 from ffxiv_clear_rates.database import Database
 from ffxiv_clear_rates.config import FCConfig
 from ffxiv_clear_rates import reports
-from ffxiv_clear_rates.reports import Report
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
