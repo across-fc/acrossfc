@@ -1,6 +1,6 @@
 # stdlib
 from io import StringIO
-from typing import Optional
+from typing import Optional, Callable, Any
 
 
 class Report:
@@ -12,12 +12,14 @@ class Report:
                  title: str,
                  header: Optional[str],
                  data: str,
-                 footer: Optional[str]):
+                 footer: Optional[str],
+                 publish_to_gsheets_handler: Optional[Callable[[str], Any]] = None):
         self.emoji = emoji
         self.title = title
         self.header = header
         self.data = data
         self.footer = footer
+        self.publish_to_gsheets_handler = publish_to_gsheets_handler
 
     def to_cli_str(self) -> str:
         buffer = StringIO()
@@ -61,3 +63,7 @@ class Report:
             buffer.write(self.footer)
 
         return buffer.getvalue()
+
+    def publish_to_gsheets(self) -> bool:
+        # Do nothing in the base case
+        return False

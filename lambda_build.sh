@@ -5,8 +5,8 @@ python -m venv python
 source python/bin/activate
 pip install .
 
-# Put .fcconfig in the `python` folder so AWS Lambda will find it in PATH
-cp .fcconfig python/.
+# Put .fcconfig / .gc_creds.json in the `python` folder so AWS Lambda will find it in PATH
+cp .fcconfig .gc_creds.json python/.
 
 # Zip up all Python dependencies
 zip -r lambda_layer.zip python
