@@ -7,7 +7,7 @@ from datetime import date
 from collections import defaultdict
 
 # 3rd-party
-from peewee import SqliteDatabase, fn, JOIN, prefetch
+from peewee import SqliteDatabase, fn, JOIN
 
 # Local
 from ffxiv_clear_rates.model import (
