@@ -39,16 +39,16 @@ def run():
                                action='store',
                                default='.gc_creds.json',
                                help="File to read Google API credentials for")
-    common_parser.add_argument('--save_db_to_filename',
-                               '-w',
-                               action='store',
-                               default=None,
-                               help="Filename to save the database to")
     common_parser.add_argument('--load_db_from_filename',
                                '-r',
                                action='store',
                                default=None,
                                help="Filename to load the database from")
+    common_parser.add_argument('--save_db_to_filename',
+                               '-w',
+                               action='store',
+                               default=None,
+                               help="Filename to save the database to")
     common_parser.add_argument('--encounter',
                                '-e',
                                action='append',
