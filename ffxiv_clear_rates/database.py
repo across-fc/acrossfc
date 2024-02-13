@@ -2,7 +2,7 @@
 import tempfile
 import logging
 import shutil
-from typing import List, Dict, Set, Tuple
+from typing import List, Dict, Set, Tuple, Optional
 from datetime import date
 from collections import defaultdict
 
@@ -21,7 +21,8 @@ from ffxiv_clear_rates.model import (
     ALL_MODELS,
     TRACKED_ENCOUNTERS,
     JOB_CATEGORIES,
-    JOBS
+    JOBS,
+    RDM, GNB
 )
 
 LOG = logging.getLogger(__name__)
@@ -79,6 +80,7 @@ class Database:
                      .where(Clear.encounter == encounter.name)
                      .distinct())
 
+            print(query)
         return query
 
     def get_uncleared_members_by_encounter(self, encounter: TrackedEncounter) -> Set[Member]:

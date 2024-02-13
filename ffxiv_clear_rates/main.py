@@ -10,7 +10,9 @@ from .model import (
     Clear,
     TRACKED_ENCOUNTERS,
     NAME_TO_TRACKED_ENCOUNTER_MAP,
-    TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP
+    TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP,
+    TLA_TO_JOB_MAP,
+    JOBS
 )
 from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
 from ffxiv_clear_rates.database import Database
@@ -61,6 +63,11 @@ def run():
                                default=None,
                                type=str,
                                help="Encounters to filter results down for.")
+    common_parser.add_argument('--job',
+                               '-j',
+                               action='append',
+                               type=str,
+                               help="Jobs to filter results down for.")
     common_parser.add_argument('--publish-to-discord',
                                '-pd',
                                action='store_true',
@@ -164,6 +171,11 @@ def run():
     if args.tier is not None:
         encounters = TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP[args.tier.upper()]
 
+    # Jobs filter
+    jobs = JOBS
+    if args.job is not None:
+        jobs = [TLA_TO_JOB_MAP[j] for j in args.job]
+
     # Handle commands
     if args.command == 'clear_rates':
         report = reports.ClearRates(database)
@@ -176,7 +188,7 @@ def run():
     elif args.command == 'clear_order':
         report = reports.ClearOrder(database, encounters)
     elif args.command == 'cleared_jobs_by_member':
-        report = reports.ClearedJobsByMember(database, encounters)
+        report = reports.ClearedJobsByMember(database, encounters, jobs)
     elif args.command == 'ppl_with_clear':
         report = reports.PeopleWithClear(database, encounters)
     elif args.command == 'ppl_without_clear':

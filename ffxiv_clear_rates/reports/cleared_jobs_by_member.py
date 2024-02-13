@@ -9,12 +9,15 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import Member, Job, TrackedEncounter
+from ffxiv_clear_rates.model import Member, Job, TrackedEncounter, JOBS
 from .report import Report
 
 
 class ClearedJobsByMember(Report):
-    def __init__(self, database: Database, encounters: List[TrackedEncounter]):
+    def __init__(self,
+                 database: Database,
+                 encounters: List[TrackedEncounter],
+                 jobs: List[Job]):
         cleared_jobs = database.get_cleared_jobs()
 
         buffer = StringIO()
@@ -23,11 +26,11 @@ class ClearedJobsByMember(Report):
             if i > 0:
                 buffer.write('\n\n')
 
-            # TODO: Present better. People with same number of job clears should be presented the same
-
             # Manually do a group-by. itertools.groupby seems to be oddly random...
             member_cleared_jobs: Dict[Member, List[Job]] = defaultdict(list)
             for member_cleared_job in cleared_jobs[encounter.name]:
+                if member_cleared_job[1] not in jobs:
+                    continue
                 member_cleared_jobs[member_cleared_job[0]].append(member_cleared_job[1])
 
             member_cleared_jobs = sorted(member_cleared_jobs.items(), key=lambda i: (-len(i[1]), i[0].name))
@@ -44,10 +47,14 @@ class ClearedJobsByMember(Report):
             buffer.write(tabulate(table,
                                   headers=['Member', 'Total', 'Jobs'],
                                   tablefmt="simple"))
+        if jobs != JOBS:
+            title = 'Members who cleared on ' + ', '.join(j.tla for j in jobs) + ' (as of {date.today()}):'
+        else:
+            title = f'Cleared Jobs by Member (as of {date.today()}):'
 
         super().__init__(
             ':white_check_mark:',
-            f'Cleared Jobs by Member (as of {date.today()}):',
+            title,
             'Names displayed in alphabetical order',
             buffer.getvalue(),
             None

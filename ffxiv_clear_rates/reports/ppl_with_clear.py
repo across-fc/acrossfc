@@ -10,7 +10,9 @@ from .report import Report
 
 
 class PeopleWithClear(Report):
-    def __init__(self, database: Database, encounters: List[TrackedEncounter]):
+    def __init__(self,
+                 database: Database,
+                 encounters: List[TrackedEncounter]):
         buffer = StringIO()
 
         for i, encounter in enumerate(encounters):
