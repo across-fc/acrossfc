@@ -48,7 +48,7 @@ class ClearedJobsByMember(Report):
                                   headers=['Member', 'Total', 'Jobs'],
                                   tablefmt="simple"))
         if jobs != JOBS:
-            title = 'Members who cleared on ' + ', '.join(j.tla for j in jobs) + ' (as of {date.today()}):'
+            title = 'Members who cleared on ' + ', '.join(j.tla for j in jobs) + f' (as of {date.today()}):'
         else:
             title = f'Cleared Jobs by Member (as of {date.today()}):'
 

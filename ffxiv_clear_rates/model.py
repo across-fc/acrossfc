@@ -119,6 +119,11 @@ JOB_CATEGORIES = [
     CASTER_DPS
 ]
 
+NAME_TO_JOB_CATEGORIES_MAP = {
+    c.name: c
+    for c in JOB_CATEGORIES
+}
+
 MRD = Job(tla='MRD', name='Marauder', main_category=TANK.name, sub_category=None)
 WAR = Job(tla='WAR', name='Warrior', main_category=TANK.name, sub_category=None)
 GLA = Job(tla='GLA', name='Gladiator', main_category=TANK.name, sub_category=None)

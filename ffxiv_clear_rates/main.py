@@ -68,6 +68,11 @@ def run():
                                action='append',
                                type=str,
                                help="Jobs to filter results down for.")
+    common_parser.add_argument('--job_role',
+                               '-jr',
+                               action='append',
+                               type=str,
+                               help="Job roles to filter results down for.")
     common_parser.add_argument('--publish-to-discord',
                                '-pd',
                                action='store_true',
@@ -175,6 +180,10 @@ def run():
     jobs = JOBS
     if args.job is not None:
         jobs = [TLA_TO_JOB_MAP[j] for j in args.job]
+
+    # Job roles filter
+    if args.job_role is not None:
+        jobs = [j for j in JOBS if j.main_category_id in args.job_role or j.sub_category_id in args.job_role]
 
     # Handle commands
     if args.command == 'clear_rates':
