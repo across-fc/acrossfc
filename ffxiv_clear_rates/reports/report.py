@@ -64,6 +64,10 @@ class Report:
 
         return buffer.getvalue()
 
+    def to_dict(self) -> dict:
+        # Do nothing in the base case
+        return {}
+
     def publish_to_gsheets(self) -> bool:
         # Do nothing in the base case
         return False

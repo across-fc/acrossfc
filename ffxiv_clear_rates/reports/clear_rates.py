@@ -14,14 +14,24 @@ from .report import Report
 class ClearRates(Report):
     def __init__(self, database: Database):
         clear_rates: Dict[TrackedEncounterName, ClearRate] = database.get_clear_rates()
-        table = [
-            [
-                encounter.name,
-                f"{clear_rates[encounter.name].clears} / {clear_rates[encounter.name].eligible_members}",
-                f"{clear_rates[encounter.name].clear_rate * 100:.2f}%"
-            ]
-            for encounter in TRACKED_ENCOUNTERS
-        ]
+
+        table = []
+        self.data_dict = {}
+        for encounter in TRACKED_ENCOUNTERS:
+            cr = clear_rates[encounter.name]
+            table.append(
+                [
+                    encounter.name,
+                    f"{cr.clears} / {cr.eligible_members}",
+                    f"{cr.clear_rate * 100:.2f}%"
+                ]
+            )
+            self.data_dict[encounter.name] = {
+                'clears': cr.clears,
+                'total_eligible': cr.eligible_members,
+                'clear_rate': cr.clear_rate
+            }
+
         data_str = tabulate(table,
                             headers=['Encounter', 'FC clears', 'FC clear rate'])
 
@@ -32,3 +42,6 @@ class ClearRates(Report):
             data_str,
             None
         )
+
+    def to_dict(self):
+        return self.data_dict

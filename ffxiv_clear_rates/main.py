@@ -228,6 +228,8 @@ def run():
         if published:
             LOG.info("Report published to Google drive.")
 
+    return report.to_dict()
+
 
 if __name__ == "__main__":
     run()

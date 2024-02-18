@@ -6,11 +6,11 @@ def lambda_handler(event, context):
     sys.argv = [
         'main.py',
         'fc_roster',
-        '-c', '/opt/python/.fcconfig',
-        '-s', '/opt/python/.gc_creds.json',
-        '-pg'
+        '-pg',
+        '--prod'
     ]
     run()
+
     return {
         'statusCode': 200,
         'body': 'Success'
