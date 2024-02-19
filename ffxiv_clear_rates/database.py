@@ -80,7 +80,6 @@ class Database:
                      .where(Clear.encounter == encounter.name)
                      .distinct())
 
-            print(query)
         return query
 
     def get_uncleared_members_by_encounter(self, encounter: TrackedEncounter) -> Set[Member]:
