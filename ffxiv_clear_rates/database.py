@@ -70,6 +70,11 @@ class Database:
             for row in query
         }
 
+        # Fill in the rest with zeros
+        for encounter in TRACKED_ENCOUNTERS:
+            if encounter.name not in ret:
+                ret[encounter.name] = ClearRate(0, eligible_members)
+
         return ret
 
     def get_cleared_members_by_encounter(self, encounter: TrackedEncounter) -> Set[Member]:

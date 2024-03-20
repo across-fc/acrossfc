@@ -15,11 +15,11 @@ class TrackedEncounter(Model):
     name = CharField(16, primary_key=True)
     encounter_id = IntegerField()
     difficulty_id = IntegerField(null=True)
+    partition_id = IntegerField(null=True)
 
     class Meta:
-        # TODO: See if we really need this
         indexes = (
-            (('encounter_id', 'difficulty_id'), True),
+            (('encounter_id', 'difficulty_id', 'partition_id'), True),
         )
 
 
@@ -78,15 +78,35 @@ P10S = TrackedEncounter(name='P10S', encounter_id=89, difficulty_id=101)
 P11S = TrackedEncounter(name='P11S', encounter_id=90, difficulty_id=101)
 P12S_P1 = TrackedEncounter(name='P12S_P1', encounter_id=91, difficulty_id=101)
 P12S = TrackedEncounter(name='P12S', encounter_id=92, difficulty_id=101)
-UWU = TrackedEncounter(name='UWU', encounter_id=1061, difficulty_id=None)
-UCOB = TrackedEncounter(name='UCOB', encounter_id=1060, difficulty_id=None)
-TEA = TrackedEncounter(name='TEA', encounter_id=1062, difficulty_id=None)
-DSR = TrackedEncounter(name='DSR', encounter_id=1065, difficulty_id=None)
-TOP = TrackedEncounter(name='TOP', encounter_id=1068, difficulty_id=None)
+
+P9S_ECHO = TrackedEncounter(name='P9S_ECHO', encounter_id=88, difficulty_id=101, partition_id=13)
+P10S_ECHO = TrackedEncounter(name='P10S_ECHO', encounter_id=89, difficulty_id=101, partition_id=13)
+P11S_ECHO = TrackedEncounter(name='P11S_ECHO', encounter_id=90, difficulty_id=101, partition_id=13)
+P12S_P1_ECHO = TrackedEncounter(name='P12S_P1_ECHO', encounter_id=91, difficulty_id=101, partition_id=13)
+P12S_ECHO = TrackedEncounter(name='P12S_ECHO', encounter_id=92, difficulty_id=101, partition_id=13)
+
+UWU_EW = TrackedEncounter(name='UWU_EW', encounter_id=1061)
+UWU_SHB = TrackedEncounter(name='UWU_SHB', encounter_id=1048)
+UWU_SB = TrackedEncounter(name='UWU_SB', encounter_id=1042)
+
+UCOB_EW = TrackedEncounter(name='UCOB_EW', encounter_id=1060)
+UCOB_SHB = TrackedEncounter(name='UCOB_SHB', encounter_id=1047)
+UCOB_SB = TrackedEncounter(name='UCOB_SB', encounter_id=1039)
+
+TEA_EW = TrackedEncounter(name='TEA_EW', encounter_id=1062)
+TEA_SHB = TrackedEncounter(name='TEA_SHB', encounter_id=1050)
+
+DSR_EW = TrackedEncounter(name='DSR_EW', encounter_id=1065)
+
+TOP_EW = TrackedEncounter(name='TOP_EW', encounter_id=1068)
 
 TRACKED_ENCOUNTERS = [
     P9S, P10S, P11S, P12S_P1, P12S,
-    UWU, UCOB, TEA, DSR, TOP
+    UWU_EW, UWU_SHB, UWU_SB,
+    UCOB_EW, UCOB_SHB, UCOB_SB,
+    TEA_EW, TEA_SHB,
+    DSR_EW,
+    TOP_EW
 ]
 
 NAME_TO_TRACKED_ENCOUNTER_MAP = {
@@ -96,7 +116,12 @@ NAME_TO_TRACKED_ENCOUNTER_MAP = {
 
 TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP: Dict[str, List[TrackedEncounter]] = {
     'ANABASEIOS': [P9S, P10S, P11S, P12S_P1, P12S],
-    'ULTIMATE': [UWU, UCOB, TEA, DSR, TOP]
+    'ULTIMATE': [
+        UCOB_EW, UCOB_SHB, UCOB_SB,
+        TEA_EW, TEA_SHB,
+        DSR_EW,
+        TOP_EW
+    ]
 }
 
 TANK = JobCategory(name='TANK', long_name='Tank')
