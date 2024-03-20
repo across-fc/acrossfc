@@ -19,7 +19,7 @@ from ffxiv_clear_rates.model import (
     Clear,
     ClearRate,
     ALL_MODELS,
-    TRACKED_ENCOUNTERS,
+    ALL_TRACKED_ENCOUNTERS,
     JOB_CATEGORIES,
     JOBS,
 )
@@ -44,7 +44,7 @@ class Database:
         # Setup database
         with db._db.bind_ctx(ALL_MODELS):
             db._db.create_tables(ALL_MODELS)
-            TrackedEncounter.bulk_create(TRACKED_ENCOUNTERS)
+            TrackedEncounter.bulk_create(ALL_TRACKED_ENCOUNTERS)
             JobCategory.bulk_create(JOB_CATEGORIES)
             Job.bulk_create(JOBS)
             Member.bulk_create(members)
@@ -56,21 +56,22 @@ class Database:
         with self._db.bind_ctx(ALL_MODELS):
             return Member.select().order_by(Member.rank, Member.name)
 
-    def get_clear_rates(self) -> Dict[TrackedEncounterName, ClearRate]:
+    def get_clear_rates(self, include_echo: bool = False) -> Dict[TrackedEncounterName, ClearRate]:
         with self._db.bind_ctx(ALL_MODELS):
             eligible_members = Member.select().count()
             query = (
                 TrackedEncounter.select(
-                    TrackedEncounter, fn.Count(fn.Distinct(Clear.member)).alias("count")
+                    TrackedEncounter.name, fn.Count(fn.Distinct(Clear.member)).alias("count")
                 )
                 .join(Clear)
-                .group_by(TrackedEncounter)
+                .where
+                .group_by(TrackedEncounter.name)
             )
 
         ret = {row.name: ClearRate(row.count, eligible_members) for row in query}
 
         # Fill in the rest with zeros
-        for encounter in TRACKED_ENCOUNTERS:
+        for encounter in ALL_TRACKED_ENCOUNTERS:
             if encounter.name not in ret:
                 ret[encounter.name] = ClearRate(0, eligible_members)
 

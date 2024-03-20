@@ -13,7 +13,7 @@ from ffxiv_clear_rates.model import (
     Member,
     TrackedEncounter,
     Clear,
-    TRACKED_ENCOUNTERS,
+    ALL_TRACKED_ENCOUNTERS,
     NAME_TO_JOB_MAP,
 )
 
@@ -79,7 +79,7 @@ class FFLogsAPIClient:
     def get_clears_for_member(
         self,
         member: Member,
-        tracked_encounters: List[TrackedEncounter] = TRACKED_ENCOUNTERS,
+        tracked_encounters: List[TrackedEncounter] = ALL_TRACKED_ENCOUNTERS,
     ) -> List[Clear]:
         LOG.info(f"Getting clear data for {member.name}...")
         # Query header
@@ -94,7 +94,8 @@ class FFLogsAPIClient:
             query_str += f"""
                 {encounter.name}: encounterRankings(
                     encounterID: {encounter.encounter_id},
-                    difficulty: {encounter.difficulty_id or 'null'}
+                    difficulty: {encounter.difficulty_id or 'null'},
+                    partition: {encounter.partition_id or 'null'}
                 ),
             """
 
@@ -120,7 +121,7 @@ class FFLogsAPIClient:
                 clears.append(
                     Clear(
                         member=member.fcid,
-                        encounter=encounter.name,
+                        encounter=encounter.id,
                         start_time=datetime.fromtimestamp(
                             # Python takes in seconds, API returns milliseconds
                             kill["startTime"]
