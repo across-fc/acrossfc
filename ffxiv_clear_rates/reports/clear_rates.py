@@ -23,24 +23,23 @@ class ClearRates(Report):
                 [
                     encounter.name,
                     f"{cr.clears} / {cr.eligible_members}",
-                    f"{cr.clear_rate * 100:.2f}%"
+                    f"{cr.clear_rate * 100:.2f}%",
                 ]
             )
             self.data_dict[encounter.name] = {
-                'clears': cr.clears,
-                'total_eligible': cr.eligible_members,
-                'clear_rate': cr.clear_rate
+                "clears": cr.clears,
+                "total_eligible": cr.eligible_members,
+                "clear_rate": cr.clear_rate,
             }
 
-        data_str = tabulate(table,
-                            headers=['Encounter', 'FC clears', 'FC clear rate'])
+        data_str = tabulate(table, headers=["Encounter", "FC clears", "FC clear rate"])
 
         super().__init__(
-            ':white_check_mark:',
-            f'Across Clear Rates: {date.today()}',
+            ":white_check_mark:",
+            f"Across Clear Rates: {date.today()}",
             None,
             data_str,
-            None
+            None,
         )
 
     def to_dict(self):

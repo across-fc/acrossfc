@@ -14,17 +14,16 @@ from .report import Report
 
 
 class ClearedJobsByMember(Report):
-    def __init__(self,
-                 database: Database,
-                 encounters: List[TrackedEncounter],
-                 jobs: List[Job]):
+    def __init__(
+        self, database: Database, encounters: List[TrackedEncounter], jobs: List[Job]
+    ):
         cleared_jobs = database.get_cleared_jobs()
 
         buffer = StringIO()
 
         for i, encounter in enumerate(encounters):
             if i > 0:
-                buffer.write('\n\n')
+                buffer.write("\n\n")
 
             # Manually do a group-by. itertools.groupby seems to be oddly random...
             member_cleared_jobs: Dict[Member, List[Job]] = defaultdict(list)
@@ -33,29 +32,33 @@ class ClearedJobsByMember(Report):
                     continue
                 member_cleared_jobs[member_cleared_job[0]].append(member_cleared_job[1])
 
-            member_cleared_jobs = sorted(member_cleared_jobs.items(), key=lambda i: (-len(i[1]), i[0].name))
+            member_cleared_jobs = sorted(
+                member_cleared_jobs.items(), key=lambda i: (-len(i[1]), i[0].name)
+            )
 
-            buffer.write(f'[{encounter.name}]')
-            buffer.write('\n\n')
+            buffer.write(f"[{encounter.name}]")
+            buffer.write("\n\n")
             table = []
             for i, item in enumerate(member_cleared_jobs):
-                table.append([
-                    item[0].name,
-                    len(item[1]),
-                    ", ".join(job.tla for job in item[1])
-                ])
-            buffer.write(tabulate(table,
-                                  headers=['Member', 'Total', 'Jobs'],
-                                  tablefmt="simple"))
+                table.append(
+                    [item[0].name, len(item[1]), ", ".join(job.tla for job in item[1])]
+                )
+            buffer.write(
+                tabulate(table, headers=["Member", "Total", "Jobs"], tablefmt="simple")
+            )
         if jobs != JOBS:
-            title = 'Members who cleared on ' + ', '.join(j.tla for j in jobs) + f' (as of {date.today()}):'
+            title = (
+                "Members who cleared on "
+                + ", ".join(j.tla for j in jobs)
+                + f" (as of {date.today()}):"
+            )
         else:
-            title = f'Cleared Jobs by Member (as of {date.today()}):'
+            title = f"Cleared Jobs by Member (as of {date.today()}):"
 
         super().__init__(
-            ':white_check_mark:',
+            ":white_check_mark:",
             title,
-            'Names displayed in alphabetical order',
+            "Names displayed in alphabetical order",
             buffer.getvalue(),
-            None
+            None,
         )

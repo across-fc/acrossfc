@@ -14,36 +14,39 @@ class FCConfig:
         DiscordWebhookURL = ...         (optional)
 
     """
+
     def __init__(self):
         self.initialized = False
 
-    def initialize(self,
-                   config_filename: str = '.fcconfig',
-                   production: bool = False):
+    def initialize(self, config_filename: str = ".fcconfig", production: bool = False):
         configs = configparser.ConfigParser()
         configs.read(config_filename)
-        default_configs = configs['DEFAULT']
+        default_configs = configs["DEFAULT"]
         if production:
-            default_configs.update(configs['PROD'])
+            default_configs.update(configs["PROD"])
         self.combined_configs = default_configs
 
         # Assert we have FFLogs client credentials
-        fflogs_client_id = default_configs.get('fflogs_client_id', None)
-        fflogs_client_secret = default_configs.get('fflogs_client_secret', None)
+        fflogs_client_id = default_configs.get("fflogs_client_id", None)
+        fflogs_client_secret = default_configs.get("fflogs_client_secret", None)
         if fflogs_client_id is None or fflogs_client_secret is None:
-            raise RuntimeError(f'"FFLogs API credentials are missing from the [DEFAULT] section in {config_filename}.')
+            raise RuntimeError(
+                f'"FFLogs API credentials are missing from the [DEFAULT] section in {config_filename}.'
+            )
 
         # Parse FFLogs guild ID
-        self.fflogs_guild_id = int(default_configs.get('fflogs_guild_id', -1))
+        self.fflogs_guild_id = int(default_configs.get("fflogs_guild_id", -1))
         if self.fflogs_guild_id == -1:
-            raise RuntimeError(f'"FFLogsGuildID" is missing from the [DEFAULT] section in {config_filename}.')
+            raise RuntimeError(
+                f'"FFLogsGuildID" is missing from the [DEFAULT] section in {config_filename}.'
+            )
 
         # Parse guild ranks to exclude
-        exclude_guild_ranks_str = default_configs.get('exclude_guild_ranks', '')
+        exclude_guild_ranks_str = default_configs.get("exclude_guild_ranks", "")
         self.exclude_guild_ranks = set(
             int(s.strip())
-            for s in exclude_guild_ranks_str.split(',')
-            if s.strip() != ''
+            for s in exclude_guild_ranks_str.split(",")
+            if s.strip() != ""
         )
 
         # Set flag
@@ -51,7 +54,7 @@ class FCConfig:
 
     def __getattr__(self, name):
         if not self.initialized:
-            raise RuntimeError('FCConfig is not initialized yet. Call initialize()')
+            raise RuntimeError("FCConfig is not initialized yet. Call initialize()")
         return self.combined_configs.get(name, None)
 
 

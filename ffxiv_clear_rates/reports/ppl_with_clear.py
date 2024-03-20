@@ -10,32 +10,27 @@ from .report import Report
 
 
 class PeopleWithClear(Report):
-    def __init__(self,
-                 database: Database,
-                 encounters: List[TrackedEncounter]):
+    def __init__(self, database: Database, encounters: List[TrackedEncounter]):
         buffer = StringIO()
 
         for i, encounter in enumerate(encounters):
             if i > 0:
-                buffer.write('\n\n')
+                buffer.write("\n\n")
 
             cleared_members = database.get_cleared_members_by_encounter(encounter)
-            sorted_names = sorted([
-                f"{member.name}"
-                for member in cleared_members
-            ])
+            sorted_names = sorted([f"{member.name}" for member in cleared_members])
 
-            buffer.write(f'{encounter.name} ({len(sorted_names)})')
-            buffer.write('\n-------------------------------------------------\n')
+            buffer.write(f"{encounter.name} ({len(sorted_names)})")
+            buffer.write("\n-------------------------------------------------\n")
             for i, name in enumerate(sorted_names):
                 if i > 0:
-                    buffer.write('\n')
+                    buffer.write("\n")
                 buffer.write(f"{i+1:>2}: {name}")
 
         super().__init__(
-            ':white_check_mark:',
-            f'People who have cleared (as of {date.today()}):',
-            'Names displayed in alphabetical order',
+            ":white_check_mark:",
+            f"People who have cleared (as of {date.today()}):",
+            "Names displayed in alphabetical order",
             buffer.getvalue(),
-            None
+            None,
         )

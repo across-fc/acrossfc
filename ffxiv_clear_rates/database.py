@@ -22,7 +22,6 @@ from ffxiv_clear_rates.model import (
     TRACKED_ENCOUNTERS,
     JOB_CATEGORIES,
     JOBS,
-    RDM, GNB
 )
 
 LOG = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class Database:
         shutil.copy(self.db_filename, filename)
 
     @staticmethod
-    def from_fflogs(members: List[Member], clears: List[Clear]) -> 'Database':
+    def from_fflogs(members: List[Member], clears: List[Clear]) -> "Database":
         db_filename = tempfile.NamedTemporaryFile().name
         db = Database(db_filename)
 
@@ -60,15 +59,15 @@ class Database:
     def get_clear_rates(self) -> Dict[TrackedEncounterName, ClearRate]:
         with self._db.bind_ctx(ALL_MODELS):
             eligible_members = Member.select().count()
-            query = (TrackedEncounter
-                     .select(TrackedEncounter, fn.Count(fn.Distinct(Clear.member)).alias('count'))
-                     .join(Clear)
-                     .group_by(TrackedEncounter))
+            query = (
+                TrackedEncounter.select(
+                    TrackedEncounter, fn.Count(fn.Distinct(Clear.member)).alias("count")
+                )
+                .join(Clear)
+                .group_by(TrackedEncounter)
+            )
 
-        ret = {
-            row.name: ClearRate(row.count, eligible_members)
-            for row in query
-        }
+        ret = {row.name: ClearRate(row.count, eligible_members) for row in query}
 
         # Fill in the rest with zeros
         for encounter in TRACKED_ENCOUNTERS:
@@ -77,34 +76,45 @@ class Database:
 
         return ret
 
-    def get_cleared_members_by_encounter(self, encounter: TrackedEncounter) -> Set[Member]:
+    def get_cleared_members_by_encounter(
+        self, encounter: TrackedEncounter
+    ) -> Set[Member]:
         with self._db.bind_ctx(ALL_MODELS):
-            query = (Member
-                     .select()
-                     .join(Clear)
-                     .where(Clear.encounter == encounter.name)
-                     .distinct())
+            query = (
+                Member.select()
+                .join(Clear)
+                .where(Clear.encounter == encounter.name)
+                .distinct()
+            )
 
         return query
 
-    def get_uncleared_members_by_encounter(self, encounter: TrackedEncounter) -> Set[Member]:
+    def get_uncleared_members_by_encounter(
+        self, encounter: TrackedEncounter
+    ) -> Set[Member]:
         with self._db.bind_ctx(ALL_MODELS):
-            members_with_clear = (Member
-                                  .select()
-                                  .join(Clear)
-                                  .where(Clear.encounter == encounter.name)
-                                  .distinct())
+            members_with_clear = (
+                Member.select()
+                .join(Clear)
+                .where(Clear.encounter == encounter.name)
+                .distinct()
+            )
 
-            members_without_clear = (Member
-                                     .select()
-                                     .join(members_with_clear,
-                                           JOIN.LEFT_OUTER,
-                                           on=(Member.fcid == members_with_clear.c.fcid))
-                                     .where(members_with_clear.c.fcid >> None))
+            members_without_clear = (
+                Member.select()
+                .join(
+                    members_with_clear,
+                    JOIN.LEFT_OUTER,
+                    on=(Member.fcid == members_with_clear.c.fcid),
+                )
+                .where(members_with_clear.c.fcid >> None)
+            )
 
         return set(members_without_clear)
 
-    def get_clear_order(self) -> Dict[TrackedEncounterName, List[Tuple[date, Set[Member]]]]:
+    def get_clear_order(
+        self,
+    ) -> Dict[TrackedEncounterName, List[Tuple[date, Set[Member]]]]:
         # {
         #     <encounter_name>: [
         #         (<date>, <cleared_members_set>),
@@ -116,27 +126,26 @@ class Database:
         with self._db.bind_ctx(ALL_MODELS):
             # Get index of members
             clear_chart = defaultdict(list)
-            query = (Clear
-                     .select(Clear.encounter,
-                             Clear.member,
-                             fn.MIN(fn.DATE(Clear.start_time)).alias('first_clear_date'))
-                     .group_by(Clear.encounter, Clear.member)
-                     .order_by(Clear.encounter, fn.MIN(fn.DATE(Clear.start_time)))
-                     .alias('subquery'))
+            query = (
+                Clear.select(
+                    Clear.encounter,
+                    Clear.member,
+                    fn.MIN(fn.DATE(Clear.start_time)).alias("first_clear_date"),
+                )
+                .group_by(Clear.encounter, Clear.member)
+                .order_by(Clear.encounter, fn.MIN(fn.DATE(Clear.start_time)))
+                .alias("subquery")
+            )
 
             for row in query:
                 clear_date = date.fromisoformat(row.first_clear_date)
                 encounter_clear_chart = clear_chart[row.encounter.name]
                 if len(encounter_clear_chart) == 0:
-                    encounter_clear_chart.append(
-                        (clear_date, {row.member})
-                    )
+                    encounter_clear_chart.append((clear_date, {row.member}))
                 else:
                     last_clear_date = encounter_clear_chart[-1][0]
                     if clear_date > last_clear_date:
-                        encounter_clear_chart.append(
-                            (clear_date, {row.member})
-                        )
+                        encounter_clear_chart.append((clear_date, {row.member}))
                     else:
                         encounter_clear_chart[-1][1].add(row.member)
 
@@ -146,13 +155,16 @@ class Database:
         encounter_cleared_jobs = defaultdict(set)
 
         with self._db.bind_ctx(ALL_MODELS):
-            query = (Clear
-                     .select(Clear.encounter, Clear.member, Clear.job)
-                     .group_by(Clear.encounter, Clear.member, Clear.job)
-                     .order_by(Clear.encounter, Clear.member, Clear.job))
+            query = (
+                Clear.select(Clear.encounter, Clear.member, Clear.job)
+                .group_by(Clear.encounter, Clear.member, Clear.job)
+                .order_by(Clear.encounter, Clear.member, Clear.job)
+            )
 
             for row in query:
                 new_datapoint = (row.member, row.job)
-                encounter_cleared_jobs[row.encounter.name].add(new_datapoint)  # Set will automatically de-dupe
+                encounter_cleared_jobs[row.encounter.name].add(
+                    new_datapoint
+                )  # Set will automatically de-dupe
 
         return encounter_cleared_jobs

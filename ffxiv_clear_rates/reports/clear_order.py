@@ -19,25 +19,31 @@ class ClearOrder(Report):
         buffer = StringIO()
         for i, encounter in enumerate(encounters):
             if i > 0:
-                buffer.write('\n\n')
+                buffer.write("\n\n")
 
-            buffer.write(f'[{encounter.name}]')
-            buffer.write('\n\n')
+            buffer.write(f"[{encounter.name}]")
+            buffer.write("\n\n")
             table = []
             for i, datapoint in enumerate(clear_order[encounter.name]):
-                table.append([
-                    f'{i+1} ',
-                    datapoint[0],
-                    ', '.join(sorted([member.name for member in datapoint[1]]))
-                ])
-            buffer.write(tabulate(table,
-                                  headers=['Order', 'Clear Date', 'Member(s)'],
-                                  tablefmt="simple"))
+                table.append(
+                    [
+                        f"{i+1} ",
+                        datapoint[0],
+                        ", ".join(sorted([member.name for member in datapoint[1]])),
+                    ]
+                )
+            buffer.write(
+                tabulate(
+                    table,
+                    headers=["Order", "Clear Date", "Member(s)"],
+                    tablefmt="simple",
+                )
+            )
 
         super().__init__(
-            ':first_place:',
-            f'Clear Order (as of {date.today()}):',
+            ":first_place:",
+            f"Clear Order (as of {date.today()}):",
             None,
             buffer.getvalue(),
-            None
+            None,
         )
