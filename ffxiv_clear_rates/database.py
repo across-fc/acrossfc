@@ -81,14 +81,15 @@ class Database:
 
     def get_cleared_members_by_encounter(
         self,
-        encounter: TrackedEncounter,
+        encounter_name: str,
         include_echo: bool = False
     ) -> Set[Member]:
         with self._db.bind_ctx(ALL_MODELS):
             query = (
                 Member.select()
                 .join(Clear)
-                .where(Clear.encounter == encounter.name)
+                .join(TrackedEncounter)
+                .where(TrackedEncounter.name == encounter_name)
             )
             if not include_echo:
                 query = query.where(TrackedEncounter.with_echo == False)
@@ -98,14 +99,15 @@ class Database:
 
     def get_uncleared_members_by_encounter(
         self,
-        encounter: TrackedEncounter,
+        encounter_name: str,
         include_echo: bool = False
     ) -> Set[Member]:
         with self._db.bind_ctx(ALL_MODELS):
             members_with_clear = (
                 Member.select()
                 .join(Clear)
-                .where(Clear.encounter == encounter.name)
+                .join(TrackedEncounter)
+                .where(TrackedEncounter.name == encounter_name)
             )
             if not include_echo:
                 members_with_clear = members_with_clear.where(TrackedEncounter.with_echo == False)
