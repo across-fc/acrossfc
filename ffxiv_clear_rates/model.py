@@ -1,11 +1,11 @@
 # stdlib
+from itertools import groupby
 from collections import defaultdict
 from typing import List, Dict, NamedTuple
 
 # 3rd-party
 from peewee import (
     Model,
-    AutoField,
     IntegerField,
     CharField,
     ForeignKeyField,
@@ -77,6 +77,7 @@ class ClearRate(NamedTuple):
 
 
 TrackedEncounterName = str
+TierName = str
 
 # -------------------------
 # Constant data
@@ -141,33 +142,26 @@ ALL_TRACKED_ENCOUNTERS = [
     DSR_EW,
     TOP_EW,
 ]
+ALL_TRACKED_ENCOUNTER_NAMES = list(name for name, _ in groupby(ALL_TRACKED_ENCOUNTERS, key=lambda e: e.name))
 
 # For now, they are they same. In the future we may only track a subset of encounters.
 ACTIVE_TRACKED_ENCOUNTERS = ALL_TRACKED_ENCOUNTERS
+ACTIVE_TRACKED_ENCOUNTER_NAMES = list(name for name, _ in groupby(ACTIVE_TRACKED_ENCOUNTERS, key=lambda e: e.name))
 
-NAME_TO_TRACKED_ENCOUNTERS_MAP: Dict[str, List[TrackedEncounter]] = defaultdict(list)
-for te in ACTIVE_TRACKED_ENCOUNTERS:
-    NAME_TO_TRACKED_ENCOUNTERS_MAP[te.name].append(te)
-
-TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP: Dict[str, List[TrackedEncounter]] = {
+TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[TierName, List[TrackedEncounterName]] = {
     "ANABASEIOS": [
-        P9S, P9S_ECHO,
-        P10S, P10S_ECHO,
-        P11S, P11S_ECHO,
-        P12S_P1, P12S_P1_ECHO,
-        P12S, P12S_ECHO,
+        "P9S",
+        "P10S",
+        "P11S",
+        "P12S_P1",
+        "P12S",
     ],
     "ULTIMATE": [
-        UWU_EW,
-        UWU_SHB,
-        UWU_SB,
-        UCOB_EW,
-        UCOB_SHB,
-        UCOB_SB,
-        TEA_EW,
-        TEA_SHB,
-        DSR_EW,
-        TOP_EW,
+        "UWU"
+        "UCOB",
+        "TEA",
+        "DSR",
+        "TOP",
     ],
 }
 

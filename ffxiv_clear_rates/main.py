@@ -2,7 +2,6 @@
 import argparse
 import logging
 import requests
-import itertools
 from typing import List
 
 # Local
@@ -10,8 +9,9 @@ from .model import (
     Member,
     Clear,
     ACTIVE_TRACKED_ENCOUNTERS,
-    NAME_TO_TRACKED_ENCOUNTERS_MAP,
-    TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP,
+    ALL_TRACKED_ENCOUNTER_NAMES,
+    ACTIVE_TRACKED_ENCOUNTER_NAMES,
+    TIER_NAME_TO_ENCOUNTER_NAMES_MAP,
     TLA_TO_JOB_MAP,
     JOBS,
 )
@@ -73,7 +73,7 @@ def run():
         "--tier",
         "-t",
         action="store",
-        choices=[k.lower() for k in TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP],
+        choices=[k.lower() for k in TIER_NAME_TO_ENCOUNTER_NAMES_MAP],
         default=None,
         type=str,
         help="Encounters to filter results down for.",
@@ -210,10 +210,10 @@ def run():
             database.save(args.save_db_to_filename)
 
     # Sanitize encounter input filter
-    encounter_names = None
+    encounter_names = ACTIVE_TRACKED_ENCOUNTER_NAMES
     if args.encounter is not None:
         for e_str in args.encounter:
-            if e_str not in NAME_TO_TRACKED_ENCOUNTERS_MAP:
+            if e_str not in ALL_TRACKED_ENCOUNTER_NAMES:
                 raise RuntimeError(f"{e_str} is not a tracked encounter.")
 
         encounter_names = args.encounter
@@ -221,10 +221,10 @@ def run():
     # Tier will override encounters
     if args.tier is not None:
         tier_name = args.tier.upper()
-        if tier_name not in TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP:
+        if tier_name not in TIER_NAME_TO_ENCOUNTER_NAMES_MAP:
             raise RuntimeError(f"{args.tier} is not a tracked tier.")
 
-        encounter_names = set(e.name for e in TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP[tier_name])
+        encounter_names = TIER_NAME_TO_ENCOUNTER_NAMES_MAP[tier_name]
 
     # Jobs filter
     jobs = JOBS

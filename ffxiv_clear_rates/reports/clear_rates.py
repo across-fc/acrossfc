@@ -1,5 +1,4 @@
 # stdlib
-from itertools import groupby
 from typing import Dict
 from datetime import date
 
@@ -8,7 +7,7 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TrackedEncounterName, ClearRate, ACTIVE_TRACKED_ENCOUNTERS
+from ffxiv_clear_rates.model import TrackedEncounterName, ClearRate, ACTIVE_TRACKED_ENCOUNTER_NAMES
 from .report import Report
 
 
@@ -18,8 +17,7 @@ class ClearRates(Report):
 
         table = []
         self.data_dict = {}
-        encounter_names = (name for name, _ in groupby(ACTIVE_TRACKED_ENCOUNTERS, key=lambda e: e.name))
-        for encounter_name in encounter_names:
+        for encounter_name in ACTIVE_TRACKED_ENCOUNTER_NAMES:
             cr = clear_rates[encounter_name]
             table.append(
                 [

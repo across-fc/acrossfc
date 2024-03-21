@@ -140,17 +140,18 @@ class Database:
             clear_chart = defaultdict(list)
             query = (
                 Clear.select(
-                    Clear.encounter,
+                    TrackedEncounter.name,
                     Clear.member,
                     fn.MIN(fn.DATE(Clear.start_time)).alias("first_clear_date"),
                 )
+                .join(TrackedEncounter)
             )
             if not include_echo:
-                query = query.join(TrackedEncounter).where(TrackedEncounter)
+                query = query.where(TrackedEncounter.with_echo == False)
             query = (
                 query
-                .group_by(Clear.encounter, Clear.member)
-                .order_by(Clear.encounter, fn.MIN(fn.DATE(Clear.start_time)))
+                .group_by(TrackedEncounter.name, Clear.member)
+                .order_by(TrackedEncounter.name, fn.MIN(fn.DATE(Clear.start_time)))
                 .alias("subquery")
             )
 
