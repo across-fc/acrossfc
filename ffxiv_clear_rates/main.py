@@ -2,14 +2,15 @@
 import argparse
 import logging
 import requests
+import itertools
 from typing import List
 
 # Local
 from .model import (
     Member,
     Clear,
-    TRACKED_ENCOUNTERS,
-    NAME_TO_TRACKED_ENCOUNTER_MAP,
+    ACTIVE_TRACKED_ENCOUNTERS,
+    NAME_TO_TRACKED_ENCOUNTERS_MAP,
     TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP,
     TLA_TO_JOB_MAP,
     JOBS,
@@ -199,7 +200,7 @@ def run():
         fc_clears: List[Clear] = []
         for member in fc_roster:
             fc_clears.extend(
-                fflogs_client.get_clears_for_member(member, TRACKED_ENCOUNTERS)
+                fflogs_client.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
             )
 
         database = Database.from_fflogs(fc_roster, fc_clears)
@@ -209,17 +210,21 @@ def run():
             database.save(args.save_db_to_filename)
 
     # Sanitize encounter input filter
-    encounters = TRACKED_ENCOUNTERS
+    encounter_names = None
     if args.encounter is not None:
         for e_str in args.encounter:
-            if e_str not in NAME_TO_TRACKED_ENCOUNTER_MAP:
+            if e_str not in NAME_TO_TRACKED_ENCOUNTERS_MAP:
                 raise RuntimeError(f"{e_str} is not a tracked encounter.")
 
-        encounters = [NAME_TO_TRACKED_ENCOUNTER_MAP[e_str] for e_str in args.encounter]
+        encounter_names = args.encounter
 
     # Tier will override encounters
     if args.tier is not None:
-        encounters = TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP[args.tier.upper()]
+        tier_name = args.tier.upper()
+        if tier_name not in TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP:
+            raise RuntimeError(f"{args.tier} is not a tracked tier.")
+
+        encounter_names = set(e.name for e in TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP[tier_name])
 
     # Jobs filter
     jobs = JOBS
@@ -240,19 +245,19 @@ def run():
     elif args.command == "fc_roster":
         report = reports.FCRoster(database)
     elif args.command == "clear_chart":
-        report = reports.ClearChart(database, encounters)
+        report = reports.ClearChart(database, encounter_names)
     elif args.command == "cleared_roles":
         report = reports.ClearedRoles(database)
     elif args.command == "clear_order":
-        report = reports.ClearOrder(database, encounters)
+        report = reports.ClearOrder(database, encounter_names)
     elif args.command == "cleared_jobs_by_member":
-        report = reports.ClearedJobsByMember(database, encounters, jobs)
+        report = reports.ClearedJobsByMember(database, encounter_names, jobs)
     elif args.command == "ppl_with_clear":
-        report = reports.PeopleWithClear(database, encounters)
+        report = reports.PeopleWithClear(database, encounter_names)
     elif args.command == "ppl_without_clear":
-        report = reports.PeopleWithoutClear(database, encounters)
+        report = reports.PeopleWithoutClear(database, encounter_names)
     elif args.command == "who_cleared_recently":
-        report = reports.WhoClearedRecently(database, encounters)
+        report = reports.WhoClearedRecently(database, encounter_names)
     else:
         raise RuntimeError(f"Unrecognized command: {args.command}")
 

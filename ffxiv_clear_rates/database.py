@@ -2,7 +2,7 @@
 import tempfile
 import logging
 import shutil
-from typing import List, Dict, Set, Tuple, Optional
+from typing import List, Dict, Set, Tuple
 from datetime import date
 from collections import defaultdict
 
@@ -37,7 +37,10 @@ class Database:
         shutil.copy(self.db_filename, filename)
 
     @staticmethod
-    def from_fflogs(members: List[Member], clears: List[Clear]) -> "Database":
+    def from_fflogs(
+        members: List[Member],
+        clears: List[Clear]
+    ) -> "Database":
         db_filename = tempfile.NamedTemporaryFile().name
         db = Database(db_filename)
 
@@ -56,50 +59,57 @@ class Database:
         with self._db.bind_ctx(ALL_MODELS):
             return Member.select().order_by(Member.rank, Member.name)
 
-    def get_clear_rates(self, include_echo: bool = False) -> Dict[TrackedEncounterName, ClearRate]:
+    def get_clear_rates(
+        self,
+        include_echo: bool = False
+    ) -> Dict[TrackedEncounterName, ClearRate]:
         with self._db.bind_ctx(ALL_MODELS):
             eligible_members = Member.select().count()
             query = (
                 TrackedEncounter.select(
                     TrackedEncounter.name, fn.Count(fn.Distinct(Clear.member)).alias("count")
                 )
-                .join(Clear)
-                .where
-                .group_by(TrackedEncounter.name)
+                .join(Clear, JOIN.LEFT_OUTER)
             )
+            if not include_echo:
+                query = query.where(TrackedEncounter.with_echo == False)
+            query = query.group_by(TrackedEncounter.name)
 
         ret = {row.name: ClearRate(row.count, eligible_members) for row in query}
-
-        # Fill in the rest with zeros
-        for encounter in ALL_TRACKED_ENCOUNTERS:
-            if encounter.name not in ret:
-                ret[encounter.name] = ClearRate(0, eligible_members)
 
         return ret
 
     def get_cleared_members_by_encounter(
-        self, encounter: TrackedEncounter
+        self,
+        encounter: TrackedEncounter,
+        include_echo: bool = False
     ) -> Set[Member]:
         with self._db.bind_ctx(ALL_MODELS):
             query = (
                 Member.select()
                 .join(Clear)
                 .where(Clear.encounter == encounter.name)
-                .distinct()
             )
+            if not include_echo:
+                query = query.where(TrackedEncounter.with_echo == False)
+            query = query.distinct()
 
         return query
 
     def get_uncleared_members_by_encounter(
-        self, encounter: TrackedEncounter
+        self,
+        encounter: TrackedEncounter,
+        include_echo: bool = False
     ) -> Set[Member]:
         with self._db.bind_ctx(ALL_MODELS):
             members_with_clear = (
                 Member.select()
                 .join(Clear)
                 .where(Clear.encounter == encounter.name)
-                .distinct()
             )
+            if not include_echo:
+                members_with_clear = members_with_clear.where(TrackedEncounter.with_echo == False)
+            members_with_clear = members_with_clear.distinct()
 
             members_without_clear = (
                 Member.select()
@@ -115,6 +125,7 @@ class Database:
 
     def get_clear_order(
         self,
+        include_echo: bool = False
     ) -> Dict[TrackedEncounterName, List[Tuple[date, Set[Member]]]]:
         # {
         #     <encounter_name>: [
@@ -133,6 +144,11 @@ class Database:
                     Clear.member,
                     fn.MIN(fn.DATE(Clear.start_time)).alias("first_clear_date"),
                 )
+            )
+            if not include_echo:
+                query = query.join(TrackedEncounter).where(TrackedEncounter)
+            query = (
+                query
                 .group_by(Clear.encounter, Clear.member)
                 .order_by(Clear.encounter, fn.MIN(fn.DATE(Clear.start_time)))
                 .alias("subquery")
@@ -152,12 +168,24 @@ class Database:
 
         return clear_chart
 
-    def get_cleared_jobs(self) -> Dict[TrackedEncounterName, Set[Tuple[Member, Job]]]:
+    def get_cleared_jobs(
+        self,
+        include_echo: bool = False
+    ) -> Dict[TrackedEncounterName, Set[Tuple[Member, Job]]]:
         encounter_cleared_jobs = defaultdict(set)
 
         with self._db.bind_ctx(ALL_MODELS):
             query = (
                 Clear.select(Clear.encounter, Clear.member, Clear.job)
+            )
+            if not include_echo:
+                query = (
+                    query
+                    .join(TrackedEncounter)
+                    .where(TrackedEncounter.with_echo == False)
+                )
+            query = (
+                query
                 .group_by(Clear.encounter, Clear.member, Clear.job)
                 .order_by(Clear.encounter, Clear.member, Clear.job)
             )

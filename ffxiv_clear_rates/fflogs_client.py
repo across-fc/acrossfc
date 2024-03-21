@@ -92,7 +92,7 @@ class FFLogsAPIClient:
         # Add all the tracked encounters to the query
         for encounter in tracked_encounters:
             query_str += f"""
-                {encounter.name}: encounterRankings(
+                {encounter}: encounterRankings(
                     encounterID: {encounter.encounter_id},
                     difficulty: {encounter.difficulty_id or 'null'},
                     partition: {encounter.partition_id or 'null'}
@@ -121,7 +121,7 @@ class FFLogsAPIClient:
                 clears.append(
                     Clear(
                         member=member.fcid,
-                        encounter=encounter.id,
+                        encounter=encounter,
                         start_time=datetime.fromtimestamp(
                             # Python takes in seconds, API returns milliseconds
                             kill["startTime"]

@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TRACKED_ENCOUNTERS, JOB_CATEGORIES
+from ffxiv_clear_rates.model import ACTIVE_TRACKED_ENCOUNTERS, JOB_CATEGORIES
 from .report import Report
 
 
@@ -15,7 +15,7 @@ class ClearedRoles(Report):
         cleared_jobs = database.get_cleared_jobs()
 
         table = []
-        for encounter in TRACKED_ENCOUNTERS:
+        for encounter in ACTIVE_TRACKED_ENCOUNTERS:
             cleared_members_by_role = {cat.name: set() for cat in JOB_CATEGORIES}
             for cleared_job in cleared_jobs[encounter.name]:
                 # TODO: Dedupe by person

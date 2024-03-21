@@ -5,6 +5,7 @@ from typing import List, Dict, NamedTuple
 # 3rd-party
 from peewee import (
     Model,
+    AutoField,
     IntegerField,
     CharField,
     ForeignKeyField,
@@ -21,13 +22,21 @@ class Member(Model):
 
 
 class TrackedEncounter(Model):
+    id = CharField(16, primary_key=True)
     name = CharField(16)
     encounter_id = IntegerField()
     difficulty_id = IntegerField(null=True)
     partition_id = IntegerField(null=True)
+    with_echo = BooleanField(default=False)
 
     class Meta:
         indexes = ((("encounter_id", "difficulty_id", "partition_id"), True),)
+
+    def __str__(self):
+        return f"{self.name}_{self.encounter_id}_{self.difficulty_id}_{self.partition_id}"
+
+    def __repr__(self):
+        return str(self)
 
 
 class JobCategory(Model):
@@ -73,41 +82,47 @@ TrackedEncounterName = str
 # Constant data
 # -------------------------
 
+
+def create(cls, *args):
+    """Shorthand for creating a new model object with the given arguments, assuming they are given in field order."""
+    fields = list(cls._meta.fields.keys())
+    return cls(**{
+        fields[i]: args[i]
+        for i in range(len(args))
+    })
+
+
 ALL_MODELS = [Member, TrackedEncounter, JobCategory, Job, Clear]
 
 # Anabaseios
 
-P9S = TrackedEncounter(name="P9S", encounter_id=88, difficulty_id=101)
-P9S_ECHO = TrackedEncounter(name="P9S", encounter_id=88, difficulty_id=101, partition_id=13)
-
-P10S = TrackedEncounter(name="P10S", encounter_id=89, difficulty_id=101)
-P10S_ECHO = TrackedEncounter(name="P10S", encounter_id=89, difficulty_id=101, partition_id=13)
-
-P11S = TrackedEncounter(name="P11S", encounter_id=90, difficulty_id=101)
-P11S_ECHO = TrackedEncounter(name="P11S", encounter_id=90, difficulty_id=101, partition_id=13)
-
-P12S_P1 = TrackedEncounter(name="P12S_P1", encounter_id=91, difficulty_id=101)
-P12S_P1_ECHO = TrackedEncounter(name="P12S_P1", encounter_id=91, difficulty_id=101, partition_id=13)
-
-P12S = TrackedEncounter(name="P12S", encounter_id=92, difficulty_id=101)
-P12S_ECHO = TrackedEncounter(name="P12S", encounter_id=92, difficulty_id=101, partition_id=13)
+P9S = create(TrackedEncounter, "P9S", "P9S", 88, 101)
+P9S_ECHO = create(TrackedEncounter, "P9S_ECHO", "P9S", 88, 101, 13, True)
+P10S = create(TrackedEncounter, "P10S", "P10S", 89, 101)
+P10S_ECHO = create(TrackedEncounter, "P10S_ECHO", "P10S", 89, 101, 13, True)
+P11S = create(TrackedEncounter, "P11S", "P11S", 90, 101)
+P11S_ECHO = create(TrackedEncounter, "P11S_ECHO", "P11S", 90, 101, 13, True)
+P12S_P1 = create(TrackedEncounter, "P12S_P1", "P12S_P1", 91, 101)
+P12S_P1_ECHO = create(TrackedEncounter, "P12S_P1_ECHO", "P12S_P1", 91, 101, 13, True)
+P12S = create(TrackedEncounter, "P12S", "P12S", 92, 101)
+P12S_ECHO = create(TrackedEncounter, "P12S_ECHO", "P12S", 92, 101, 13, True)
 
 # Ultimates
 
-UWU_EW = TrackedEncounter(name="UWU", encounter_id=1061)
-UWU_SHB = TrackedEncounter(name="UWU", encounter_id=1048)
-UWU_SB = TrackedEncounter(name="UWU", encounter_id=1042)
+UWU_EW = create(TrackedEncounter, "UWU_EW", "UWU", 1061)
+UWU_SHB = create(TrackedEncounter, "UWU_SHB", "UWU", 1048)
+UWU_SB = create(TrackedEncounter, "UWU_SB", "UWU", 1042)
 
-UCOB_EW = TrackedEncounter(name="UCOB", encounter_id=1060)
-UCOB_SHB = TrackedEncounter(name="UCOB", encounter_id=1047)
-UCOB_SB = TrackedEncounter(name="UCOB", encounter_id=1039)
+UCOB_EW = create(TrackedEncounter, "UCOB_EW", "UCOB", 1060)
+UCOB_SHB = create(TrackedEncounter, "UCOB_SHB", "UCOB", 1047)
+UCOB_SB = create(TrackedEncounter, "UCOB_SB", "UCOB", 1039)
 
-TEA_EW = TrackedEncounter(name="TEA", encounter_id=1062)
-TEA_SHB = TrackedEncounter(name="TEA", encounter_id=1050)
+TEA_EW = create(TrackedEncounter, "TEA_EW", "TEA", 1062)
+TEA_SHB = create(TrackedEncounter, "TEA_SHB", "TEA", 1050)
 
-DSR_EW = TrackedEncounter(name="DSR", encounter_id=1065)
+DSR_EW = create(TrackedEncounter, "DSR_EW", "DSR", 1065)
 
-TOP_EW = TrackedEncounter(name="TOP", encounter_id=1068)
+TOP_EW = create(TrackedEncounter, "TOP_EW", "TOP", 1068)
 
 ALL_TRACKED_ENCOUNTERS = [
     P9S, P9S_ECHO,
@@ -127,9 +142,12 @@ ALL_TRACKED_ENCOUNTERS = [
     TOP_EW,
 ]
 
-NAME_TO_TRACKED_ENCOUNTER_LIST_MAP = defaultdict(list)
-for te in ALL_TRACKED_ENCOUNTERS:
-    NAME_TO_TRACKED_ENCOUNTER_LIST_MAP[te.name].append(te)
+# For now, they are they same. In the future we may only track a subset of encounters.
+ACTIVE_TRACKED_ENCOUNTERS = ALL_TRACKED_ENCOUNTERS
+
+NAME_TO_TRACKED_ENCOUNTERS_MAP: Dict[str, List[TrackedEncounter]] = defaultdict(list)
+for te in ACTIVE_TRACKED_ENCOUNTERS:
+    NAME_TO_TRACKED_ENCOUNTERS_MAP[te.name].append(te)
 
 TIER_NAME_TO_TRACKED_ENCOUNTERS_MAP: Dict[str, List[TrackedEncounter]] = {
     "ANABASEIOS": [
