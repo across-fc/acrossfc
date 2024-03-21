@@ -1,6 +1,5 @@
 # stdlib
 from itertools import groupby
-from collections import defaultdict
 from typing import List, Dict, NamedTuple
 
 # 3rd-party
