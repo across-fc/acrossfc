@@ -1,25 +1,23 @@
 # stdlib
 from io import StringIO
 from typing import List
-from datetime import date
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TrackedEncounter
 from .report import Report
 
 
 class WhoClearedRecently(Report):
-    def __init__(self, database: Database, encounters: List[TrackedEncounter]):
+    def __init__(self, database: Database, encounter_names: List[str]):
         buffer = StringIO()
 
-        for i, encounter in enumerate(encounters):
+        for i, encounter_name in enumerate(encounter_names):
             if i > 0:
                 buffer.write("\n\n")
 
-            encounter_clear_chart = database.get_clear_order()[encounter.name]
+            encounter_clear_chart = database.get_clear_order()[encounter_name]
 
-            buffer.write(f"[{encounter.name}]")
+            buffer.write(f"[{encounter_name}]")
             buffer.write("\n\n")
 
             clear_date_str = encounter_clear_chart[-1][0].isoformat()
