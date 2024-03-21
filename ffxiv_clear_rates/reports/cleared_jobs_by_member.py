@@ -9,25 +9,25 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import Member, Job, TrackedEncounter, JOBS
+from ffxiv_clear_rates.model import Member, Job, JOBS
 from .report import Report
 
 
 class ClearedJobsByMember(Report):
     def __init__(
-        self, database: Database, encounters: List[TrackedEncounter], jobs: List[Job]
+        self, database: Database, encounter_names: List[str], jobs: List[Job]
     ):
         cleared_jobs = database.get_cleared_jobs()
 
         buffer = StringIO()
 
-        for i, encounter in enumerate(encounters):
+        for i, encounter_name in enumerate(encounter_names):
             if i > 0:
                 buffer.write("\n\n")
 
             # Manually do a group-by. itertools.groupby seems to be oddly random...
             member_cleared_jobs: Dict[Member, List[Job]] = defaultdict(list)
-            for member_cleared_job in cleared_jobs[encounter.name]:
+            for member_cleared_job in cleared_jobs[encounter_name]:
                 if member_cleared_job[1] not in jobs:
                     continue
                 member_cleared_jobs[member_cleared_job[0]].append(member_cleared_job[1])
@@ -36,7 +36,7 @@ class ClearedJobsByMember(Report):
                 member_cleared_jobs.items(), key=lambda i: (-len(i[1]), i[0].name)
             )
 
-            buffer.write(f"[{encounter.name}]")
+            buffer.write(f"[{encounter_name}]")
             buffer.write("\n\n")
             table = []
             for i, item in enumerate(member_cleared_jobs):
