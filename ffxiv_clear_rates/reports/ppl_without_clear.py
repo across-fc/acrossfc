@@ -10,17 +10,17 @@ from .report import Report
 
 
 class PeopleWithoutClear(Report):
-    def __init__(self, database: Database, encounters: List[TrackedEncounter]):
+    def __init__(self, database: Database, encounter_names: List[str]):
         buffer = StringIO()
 
-        for i, encounter in enumerate(encounters):
+        for i, encounter_name in enumerate(encounter_names):
             if i > 0:
                 buffer.write("\n\n")
 
-            uncleared_members = database.get_uncleared_members_by_encounter(encounter)
+            uncleared_members = database.get_uncleared_members_by_encounter(encounter_name)
             sorted_names = sorted([f"{member.name}" for member in uncleared_members])
 
-            buffer.write(f"{encounter.name} ({len(sorted_names)})")
+            buffer.write(f"{encounter_name} ({len(sorted_names)})")
             buffer.write("\n-------------------------------------------------\n")
             for i, name in enumerate(sorted_names):
                 if i > 0:
