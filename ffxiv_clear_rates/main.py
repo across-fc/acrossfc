@@ -86,6 +86,13 @@ def run():
         help="Jobs to filter results down for.",
     )
     common_parser.add_argument(
+        "--with_echo",
+        "-we",
+        action="store_true",
+        default=False,
+        help="Specify whether to include clears with echo"
+    )
+    common_parser.add_argument(
         "--job_role",
         "-jr",
         action="append",
@@ -241,23 +248,23 @@ def run():
 
     # Handle commands
     if args.command == "clear_rates":
-        report = reports.ClearRates(database)
+        report = reports.ClearRates(database, include_echo=args.with_echo)
     elif args.command == "fc_roster":
         report = reports.FCRoster(database)
     elif args.command == "clear_chart":
-        report = reports.ClearChart(database, encounter_names)
+        report = reports.ClearChart(database, encounter_names, include_echo=args.with_echo)
     elif args.command == "cleared_roles":
-        report = reports.ClearedRoles(database)
+        report = reports.ClearedRoles(database, include_echo=args.with_echo)
     elif args.command == "clear_order":
-        report = reports.ClearOrder(database, encounter_names)
+        report = reports.ClearOrder(database, encounter_names, include_echo=args.with_echo)
     elif args.command == "cleared_jobs_by_member":
-        report = reports.ClearedJobsByMember(database, encounter_names, jobs)
+        report = reports.ClearedJobsByMember(database, encounter_names, jobs, include_echo=args.with_echo)
     elif args.command == "ppl_with_clear":
-        report = reports.PeopleWithClear(database, encounter_names)
+        report = reports.PeopleWithClear(database, encounter_names, include_echo=args.with_echo)
     elif args.command == "ppl_without_clear":
-        report = reports.PeopleWithoutClear(database, encounter_names)
+        report = reports.PeopleWithoutClear(database, encounter_names, include_echo=args.with_echo)
     elif args.command == "who_cleared_recently":
-        report = reports.WhoClearedRecently(database, encounter_names)
+        report = reports.WhoClearedRecently(database, encounter_names, include_echo=args.with_echo)
     else:
         raise RuntimeError(f"Unrecognized command: {args.command}")
 

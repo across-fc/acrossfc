@@ -12,8 +12,12 @@ from .report import Report
 
 
 class ClearRates(Report):
-    def __init__(self, database: Database):
-        clear_rates: Dict[TrackedEncounterName, ClearRate] = database.get_clear_rates()
+    def __init__(
+        self,
+        database: Database,
+        include_echo: bool = False
+    ):
+        clear_rates: Dict[TrackedEncounterName, ClearRate] = database.get_clear_rates(include_echo=include_echo)
 
         table = []
         self.data_dict = {}

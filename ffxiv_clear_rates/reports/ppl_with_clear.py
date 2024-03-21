@@ -5,19 +5,23 @@ from datetime import date
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TrackedEncounter
 from .report import Report
 
 
 class PeopleWithClear(Report):
-    def __init__(self, database: Database, encounter_names: List[str]):
+    def __init__(
+        self,
+        database: Database,
+        encounter_names: List[str],
+        include_echo: bool = False
+    ):
         buffer = StringIO()
 
         for i, encounter_name in enumerate(encounter_names):
             if i > 0:
                 buffer.write("\n\n")
 
-            cleared_members = database.get_cleared_members_by_encounter(encounter_name)
+            cleared_members = database.get_cleared_members_by_encounter(encounter_name, include_echo=include_echo)
             sorted_names = sorted([f"{member.name}" for member in cleared_members])
 
             buffer.write(f"{encounter_name} ({len(sorted_names)})")

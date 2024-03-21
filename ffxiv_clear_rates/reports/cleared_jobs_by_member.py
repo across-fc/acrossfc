@@ -15,9 +15,13 @@ from .report import Report
 
 class ClearedJobsByMember(Report):
     def __init__(
-        self, database: Database, encounter_names: List[str], jobs: List[Job]
+        self,
+        database: Database,
+        encounter_names: List[str],
+        jobs: List[Job],
+        include_echo: bool = False
     ):
-        cleared_jobs = database.get_cleared_jobs()
+        cleared_jobs = database.get_cleared_jobs(include_echo=include_echo)
 
         buffer = StringIO()
 

@@ -12,8 +12,13 @@ from .report import Report
 
 
 class ClearOrder(Report):
-    def __init__(self, database: Database, encounter_names: List[str]):
-        clear_order = database.get_clear_order()
+    def __init__(
+        self,
+        database: Database,
+        encounter_names: List[str],
+        include_echo: bool = False
+    ):
+        clear_order = database.get_clear_order(include_echo=include_echo)
 
         buffer = StringIO()
         for i, encounter_name in enumerate(encounter_names):

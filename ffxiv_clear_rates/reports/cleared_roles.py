@@ -11,8 +11,12 @@ from .report import Report
 
 
 class ClearedRoles(Report):
-    def __init__(self, database: Database):
-        cleared_jobs = database.get_cleared_jobs()
+    def __init__(
+        self,
+        database: Database,
+        include_echo: bool = False
+    ):
+        cleared_jobs = database.get_cleared_jobs(include_echo=include_echo)
 
         table = []
         for encounter_name in ACTIVE_TRACKED_ENCOUNTER_NAMES:

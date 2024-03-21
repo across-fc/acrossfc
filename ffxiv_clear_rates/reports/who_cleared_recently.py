@@ -8,14 +8,19 @@ from .report import Report
 
 
 class WhoClearedRecently(Report):
-    def __init__(self, database: Database, encounter_names: List[str]):
+    def __init__(
+        self,
+        database: Database,
+        encounter_names: List[str],
+        include_echo: bool = False
+    ):
         buffer = StringIO()
 
         for i, encounter_name in enumerate(encounter_names):
             if i > 0:
                 buffer.write("\n\n")
 
-            encounter_clear_chart = database.get_clear_order()[encounter_name]
+            encounter_clear_chart = database.get_clear_order(include_echo=include_echo)[encounter_name]
 
             buffer.write(f"[{encounter_name}]")
             buffer.write("\n\n")

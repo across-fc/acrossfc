@@ -8,15 +8,19 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TrackedEncounterName
 from .report import Report
 
 LOG = logging.getLogger(__name__)
 
 
 class ClearChart(Report):
-    def __init__(self, database: Database, encounter_names: List[TrackedEncounterName]):
-        clear_order = database.get_clear_order()
+    def __init__(
+        self,
+        database: Database,
+        encounter_names: List[str],
+        include_echo: bool = False
+    ):
+        clear_order = database.get_clear_order(include_echo=include_echo)
 
         # Change member list to number of members
         for encounter_name in encounter_names:
