@@ -157,7 +157,7 @@ TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[TierName, List[TrackedEncounterName]] = {
         "P12S",
     ],
     "ULTIMATE": [
-        "UWU"
+        "UWU",
         "UCOB",
         "TEA",
         "DSR",
