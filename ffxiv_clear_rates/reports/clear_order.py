@@ -8,36 +8,46 @@ from tabulate import tabulate
 
 # Local
 from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TrackedEncounter
 from .report import Report
 
 
 class ClearOrder(Report):
-    def __init__(self, database: Database, encounters: List[TrackedEncounter]):
-        clear_order = database.get_clear_order()
+    def __init__(
+        self,
+        database: Database,
+        encounter_names: List[str],
+        include_echo: bool = False
+    ):
+        clear_order = database.get_clear_order(include_echo=include_echo)
 
         buffer = StringIO()
-        for i, encounter in enumerate(encounters):
+        for i, encounter_name in enumerate(encounter_names):
             if i > 0:
-                buffer.write('\n\n')
+                buffer.write("\n\n")
 
-            buffer.write(f'[{encounter.name}]')
-            buffer.write('\n\n')
+            buffer.write(f"[{encounter_name}]")
+            buffer.write("\n\n")
             table = []
-            for i, datapoint in enumerate(clear_order[encounter.name]):
-                table.append([
-                    f'{i+1} ',
-                    datapoint[0],
-                    ', '.join(sorted([member.name for member in datapoint[1]]))
-                ])
-            buffer.write(tabulate(table,
-                                  headers=['Order', 'Clear Date', 'Member(s)'],
-                                  tablefmt="simple"))
+            for i, datapoint in enumerate(clear_order[encounter_name]):
+                table.append(
+                    [
+                        f"{i+1} ",
+                        datapoint[0],
+                        ", ".join(sorted([member.name for member in datapoint[1]])),
+                    ]
+                )
+            buffer.write(
+                tabulate(
+                    table,
+                    headers=["Order", "Clear Date", "Member(s)"],
+                    tablefmt="simple",
+                )
+            )
 
         super().__init__(
-            ':first_place:',
-            f'Clear Order (as of {date.today()}):',
+            ":first_place:",
+            f"Clear Order (as of {date.today()}):",
             None,
             buffer.getvalue(),
-            None
+            None,
         )
