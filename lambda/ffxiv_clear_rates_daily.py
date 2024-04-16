@@ -15,7 +15,9 @@ def lambda_handler(event, context):
         '-pd',
         '--prod'
     ]
-    run()
+    data = run()
+
+    print('Finished processing FFLogs data.')
 
     # Upload database to S3
     s3 = boto3.client('s3')
