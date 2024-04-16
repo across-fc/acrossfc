@@ -1,5 +1,7 @@
 import sys
+import json
 import boto3
+import redis
 from datetime import date
 from ffxiv_clear_rates.main import run
 
@@ -24,6 +26,17 @@ def lambda_handler(event, context):
         print(f"{object_key} uploaded successfully")
     except Exception as e:
         print(f"Error uploading {object_key}: {e}")
+
+    # Update cache
+    redis_client = redis.Redis(
+        host='ffxiv-clear-rates-7rpxnm.serverless.usw2.cache.amazonaws.com',
+        port=6379,
+        db=0,
+        password=None,
+        ssl=True
+    )
+    redis_client.set('latest', json.dumps(data))
+    print("Clear rates stored in Redis successfully.")
 
     return {
         'statusCode': 200,
