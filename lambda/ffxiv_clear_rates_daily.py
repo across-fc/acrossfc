@@ -4,6 +4,7 @@ import boto3
 from datetime import date
 from ffxiv_clear_rates.main import run
 
+
 def lambda_handler(event, context):
     LOCAL_DB_FILENAME = '/tmp/database'
     sys.argv = [
