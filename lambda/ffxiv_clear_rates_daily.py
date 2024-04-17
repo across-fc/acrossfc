@@ -1,10 +1,8 @@
 import sys
 import json
 import boto3
-import redis
 from datetime import date
 from ffxiv_clear_rates.main import run
-
 
 def lambda_handler(event, context):
     LOCAL_DB_FILENAME = '/tmp/database'
@@ -16,9 +14,9 @@ def lambda_handler(event, context):
         '--prod'
     ]
     data = run()
-
+    
     print('Finished processing FFLogs data.')
-
+    
     # Upload database to S3
     s3 = boto3.client('s3')
     bucket_name = 'ffxiv-clear-rates'
@@ -28,19 +26,40 @@ def lambda_handler(event, context):
         print(f"{object_key} uploaded successfully")
     except Exception as e:
         print(f"Error uploading {object_key}: {e}")
-
-    # Update cache
-    redis_client = redis.Redis(
-        host='ffxiv-clear-rates-7rpxnm.serverless.usw2.cache.amazonaws.com',
-        port=6379,
-        db=0,
-        password=None,
-        ssl=True
-    )
-    redis_client.set('latest', json.dumps(data))
-    print("Clear rates stored in Redis successfully.")
-
-    return {
-        'statusCode': 200,
-        'body': 'Success'
+    
+    # Update DB
+    TABLE_NAME = 'ffxiv_clear_rates'
+    item = {
+        'record_date': {'S': 'latest'},
+        'value': {
+            'S': json.dumps(data)
+        },
     }
+    dynamodb = boto3.client('dynamodb')
+    try:
+        # Try to update the item
+        response = dynamodb.put_item(
+            TableName=TABLE_NAME,
+            Item=item,
+            ConditionExpression='attribute_not_exists(record_date)'
+        )
+        print("Item upserted successfully: ", response)
+    except dynamodb.exceptions.ConditionalCheckFailedException:
+        # If the item already exists, perform an update
+        response = dynamodb.update_item(
+            TableName=TABLE_NAME,
+            Key={ 'record_date': {'S': 'latest'} },
+            UpdateExpression='SET #attribute_name = :val1',
+            # Define the attributes and values to update
+            ExpressionAttributeNames={
+                '#attribute_name': 'value',
+            },
+            ExpressionAttributeValues={
+                ':val1': item['value'],
+            }
+        )
+        print("Clear rates updated in DB successfully:", response)
+    except Exception as e:
+        print("Error upserting item:", e)
+    
+    return data
