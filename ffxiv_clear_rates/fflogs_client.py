@@ -114,6 +114,10 @@ class FFLogsAPIClient:
             # This assumes results are returned in the same order as given above
             encounter: TrackedEncounter = tracked_encounters[i]
             boss_kill_data = result["characterData"]["character"][boss_name]
+            if "error" in boss_kill_data:
+                LOG.info(f"Unable to get kill data for {member.name}: {boss_kill_data['error']}")
+                continue
+
             if boss_kill_data["totalKills"] == 0:
                 continue
 
