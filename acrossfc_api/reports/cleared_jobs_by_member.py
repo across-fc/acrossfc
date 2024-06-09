@@ -8,8 +8,8 @@ from collections import defaultdict
 from tabulate import tabulate
 
 # Local
-from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import Member, Job, JOBS
+from acrossfc_api.database import Database
+from acrossfc_api.model import Member, Job, JOBS
 from .report import Report
 
 

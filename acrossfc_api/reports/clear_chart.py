@@ -7,7 +7,7 @@ from typing import List
 from tabulate import tabulate
 
 # Local
-from ffxiv_clear_rates.database import Database
+from acrossfc_api.database import Database
 from .report import Report
 
 LOG = logging.getLogger(__name__)

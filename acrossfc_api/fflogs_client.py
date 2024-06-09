@@ -9,7 +9,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
 # Local
-from ffxiv_clear_rates.model import (
+from acrossfc_api.model import (
     Member,
     TrackedEncounter,
     Clear,

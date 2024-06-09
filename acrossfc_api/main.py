@@ -15,11 +15,11 @@ from .model import (
     TLA_TO_JOB_MAP,
     JOBS,
 )
-from ffxiv_clear_rates.fflogs_client import FFLogsAPIClient
-from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates import reports
-from ffxiv_clear_rates.config import FC_CONFIG
-from ffxiv_clear_rates.reports.gapi import GAPI
+from acrossfc_api.fflogs_client import FFLogsAPIClient
+from acrossfc_api.database import Database
+from acrossfc_api import reports
+from acrossfc_api.config import FC_CONFIG
+from acrossfc_api.reports.gapi import GAPI
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)

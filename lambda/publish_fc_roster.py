@@ -1,5 +1,5 @@
 import sys
-from ffxiv_clear_rates.main import run
+from acrossfc_api.main import run
 
 
 def lambda_handler(event, context):

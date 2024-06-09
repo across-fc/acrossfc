@@ -4,8 +4,8 @@ from io import StringIO
 from datetime import date
 
 # Local
-from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.config import FC_CONFIG
+from acrossfc_api.database import Database
+from acrossfc_api.config import FC_CONFIG
 from .report import Report
 from .gapi import GAPI
 

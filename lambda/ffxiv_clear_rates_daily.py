@@ -2,7 +2,7 @@ import sys
 import json
 import boto3
 from datetime import date
-from ffxiv_clear_rates.main import run
+from acrossfc_api.main import run
 
 
 def lambda_handler(event, context):
@@ -15,9 +15,9 @@ def lambda_handler(event, context):
         '--prod'
     ]
     data = run()
-    
+
     print('Finished processing FFLogs data.')
-    
+
     # Upload database to S3
     s3 = boto3.client('s3')
     bucket_name = 'ffxiv-clear-rates'
@@ -27,7 +27,7 @@ def lambda_handler(event, context):
         print(f"{object_key} uploaded successfully")
     except Exception as e:
         print(f"Error uploading {object_key}: {e}")
-    
+
     # Update DB
     TABLE_NAME = 'ffxiv_clear_rates'
     item = {
@@ -49,7 +49,7 @@ def lambda_handler(event, context):
         # If the item already exists, perform an update
         response = dynamodb.update_item(
             TableName=TABLE_NAME,
-            Key={ 'record_date': {'S': 'latest'} },
+            Key={'record_date': {'S': 'latest'}},
             UpdateExpression='SET #attribute_name = :val1',
             # Define the attributes and values to update
             ExpressionAttributeNames={
@@ -62,5 +62,5 @@ def lambda_handler(event, context):
         print("Clear rates updated in DB successfully:", response)
     except Exception as e:
         print("Error upserting item:", e)
-    
+
     return data

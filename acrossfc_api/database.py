@@ -10,7 +10,7 @@ from collections import defaultdict
 from peewee import SqliteDatabase, fn, JOIN
 
 # Local
-from ffxiv_clear_rates.model import (
+from acrossfc_api.model import (
     Member,
     TrackedEncounter,
     TrackedEncounterName,

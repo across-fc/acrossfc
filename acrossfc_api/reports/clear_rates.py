@@ -6,8 +6,8 @@ from datetime import date
 from tabulate import tabulate
 
 # Local
-from ffxiv_clear_rates.database import Database
-from ffxiv_clear_rates.model import TrackedEncounterName, ClearRate, ACTIVE_TRACKED_ENCOUNTER_NAMES
+from acrossfc_api.database import Database
+from acrossfc_api.model import TrackedEncounterName, ClearRate, ACTIVE_TRACKED_ENCOUNTER_NAMES
 from .report import Report
 
 
