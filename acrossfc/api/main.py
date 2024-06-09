@@ -5,7 +5,7 @@ import requests
 from typing import List
 
 # Local
-from .core.model import (
+from acrossfc.core.model import (
     Member,
     Clear,
     ACTIVE_TRACKED_ENCOUNTERS,
@@ -16,10 +16,10 @@ from .core.model import (
     JOBS,
 )
 from acrossfc.ext.fflogs_client import FFLogsAPIClient
+from acrossfc.ext.google_cloud_client import GCClient
 from acrossfc.core.database import Database
-from acrossfc import reports
 from acrossfc.core.config import FC_CONFIG
-from acrossfc.reports.gapi import GAPI
+from acrossfc import reports
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
@@ -170,7 +170,7 @@ def run():
     args = parser.parse_args()
 
     FC_CONFIG.initialize(config_filename=args.fc_config, production=args.prod)
-    GAPI.initialize(args.gc_creds_file)
+    GCClient.initialize(args.gc_creds_file)
 
     # Verbose logging
     if args.verbose:

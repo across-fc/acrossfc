@@ -30,7 +30,7 @@ dev = [
 ]
 
 [project.scripts]
-etl = "acrossfc_api.main:run"
+etl = "acrossfc.api.main:run"
 
 [tool.setuptools.packages.find]
 exclude = ["lambda*"]
