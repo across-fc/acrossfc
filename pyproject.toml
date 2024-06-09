@@ -3,9 +3,9 @@ requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ffxiv-clear-rates"
-description = "Simple tool to collect FFXIV clear rates and other data for an FC."
-version = "0.3"
+name = "acrossfc-api"
+description = "Across FC Automation and Backend API"
+version = "1.0"
 authors = [
     {name = "Kohen Chia", email = "kohenchia@gmail.com"}
 ]
@@ -21,6 +21,12 @@ dependencies = [
     'google-auth-httplib2',
     'google-auth-oauthlib',
     'urllib3==1.26.17'
+]
+
+[project.optional-dependencies]
+dev = [
+    "awscli",
+    "boto3"
 ]
 
 [project.scripts]

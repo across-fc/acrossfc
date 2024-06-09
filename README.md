@@ -1,8 +1,6 @@
-# ffxiv-clear-rates
+# acrossfc-api
 
-Simple tool for tracking FFXIV clear rates.
-
-This is a prototype for a future tool to be planned by my FC.
+Across FC Automation and Backend API
 
 ## Requirements:
 
@@ -17,16 +15,20 @@ Create a file named `.fcconfig` with the following contents, replacing all `<...
 [DEFAULT]
 fflogs_client_id = <client_id>
 fflogs_client_secret = <client_secret>
-fflogs_guild_id = 627...
-
-# Optional: Comma-separated list of ranks to exclude, e.g. 8,17,6
-exclude_guild_ranks = 7,8,...
+fflogs_guild_id = 75624
+exclude_guild_ranks = 5
 
 # Optional: Discord webhook URL for posting results
-discord_webhook_url = https://...
+discord_webhook_url = <webhook_url>
+
+# Optional: Google Sheets ID for tracking the FC roster.
+# Make sure the Google service account has write access to this document.
+fc_roster_gsheets_id = <gsheets_id>
 ```
 
 Put this file in the repository root.
+
+**Optional:** Create a file named `.gc_creds.json` and put the Google service account credentials in it.
 
 ## Usage:
 
@@ -37,6 +39,12 @@ pip install -e .
 ```
 
 This will install the `fcr` (read: `ffxiv_clear_rates`) command in your environment, which you can use to get clear rates and other types of clear-related data for your FC.
+
+To install development / testing dependencies, use:
+
+```
+pip install -e ".[dev]"
+```
 
 ### Get clear rates:
 
