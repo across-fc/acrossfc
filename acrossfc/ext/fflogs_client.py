@@ -9,7 +9,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
 # Local
-from acrossfc_api.core.model import (
+from acrossfc.core.model import (
     Member,
     TrackedEncounter,
     Clear,

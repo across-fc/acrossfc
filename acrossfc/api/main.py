@@ -15,11 +15,11 @@ from .core.model import (
     TLA_TO_JOB_MAP,
     JOBS,
 )
-from acrossfc_api.ext.fflogs_client import FFLogsAPIClient
-from acrossfc_api.core.database import Database
-from acrossfc_api import reports
-from acrossfc_api.core.config import FC_CONFIG
-from acrossfc_api.reports.gapi import GAPI
+from acrossfc.ext.fflogs_client import FFLogsAPIClient
+from acrossfc.core.database import Database
+from acrossfc import reports
+from acrossfc.core.config import FC_CONFIG
+from acrossfc.reports.gapi import GAPI
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)

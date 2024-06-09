@@ -7,7 +7,7 @@ from datetime import date
 from tabulate import tabulate
 
 # Local
-from acrossfc_api.core.database import Database
+from acrossfc.core.database import Database
 from .report import Report
 
 

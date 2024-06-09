@@ -8,8 +8,8 @@ from collections import defaultdict
 from tabulate import tabulate
 
 # Local
-from acrossfc_api.core.database import Database
-from acrossfc_api.core.model import Member, Job, JOBS
+from acrossfc.core.database import Database
+from acrossfc.core.model import Member, Job, JOBS
 from .report import Report
 
 

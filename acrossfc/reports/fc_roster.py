@@ -4,10 +4,10 @@ from io import StringIO
 from datetime import date
 
 # Local
-from acrossfc_api.core.database import Database
-from acrossfc_api.core.config import FC_CONFIG
+from acrossfc.core.database import Database
+from acrossfc.core.config import FC_CONFIG
+from acrossfc.ext.google_cloud_client import GCClient
 from .report import Report
-from .gapi import GAPI
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
@@ -41,7 +41,7 @@ class FCRoster(Report):
             return False
 
         # Add a new sheet to the spreadsheet
-        request = GAPI.sheets.spreadsheets().batchUpdate(
+        request = GCClient.sheets.spreadsheets().batchUpdate(
             spreadsheetId=gsheet_id,
             body={
                 "requests": [
@@ -59,7 +59,7 @@ class FCRoster(Report):
         resp = request.execute()
         subsheet_id = resp["replies"][0]["addSheet"]["properties"]["sheetId"]
 
-        request = GAPI.sheets.spreadsheets().batchUpdate(
+        request = GCClient.sheets.spreadsheets().batchUpdate(
             spreadsheetId=gsheet_id,
             body={
                 "requests": [
@@ -213,4 +213,4 @@ class FCRoster(Report):
         )
         request.execute()
 
-        return True
+        return Trueapi

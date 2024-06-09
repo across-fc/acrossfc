@@ -10,7 +10,7 @@ from collections import defaultdict
 from peewee import SqliteDatabase, fn, JOIN
 
 # Local
-from acrossfc_api.core.model import (
+from acrossfc.core.model import (
     Member,
     TrackedEncounter,
     TrackedEncounterName,

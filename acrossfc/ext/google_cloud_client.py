@@ -8,7 +8,7 @@ _SCOPES = [
 ]
 
 
-class GoogleAPI:
+class GoogleCloudClient:
     def __init__(self):
         self.initialized = False
         self.GSHEETS = None
@@ -40,4 +40,4 @@ class GoogleAPI:
         self.initialized = True
 
 
-GAPI = GoogleAPI()
+GCClient = GoogleCloudClient()

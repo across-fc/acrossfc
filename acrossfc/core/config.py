@@ -14,7 +14,6 @@ class FCConfig:
         DiscordWebhookURL = ...         (optional)
 
     """
-
     def __init__(self):
         self.initialized = False
 

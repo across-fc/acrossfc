@@ -2,7 +2,7 @@ import sys
 import json
 import boto3
 from datetime import date
-from acrossfc_api.main import run
+from acrossfc.main import run
 
 
 def lambda_handler(event, context):

@@ -1,5 +1,5 @@
 import sys
-from acrossfc_api.main import run
+from acrossfc.main import run
 
 
 def lambda_handler(event, context):

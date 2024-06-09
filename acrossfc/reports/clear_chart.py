@@ -7,7 +7,7 @@ from typing import List
 from tabulate import tabulate
 
 # Local
-from acrossfc_api.core.database import Database
+from acrossfc.core.database import Database
 from .report import Report
 
 LOG = logging.getLogger(__name__)
