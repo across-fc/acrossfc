@@ -12,6 +12,7 @@ authors = [
 requires-python = ">= 3.12"
 readme = "README.md"
 dependencies = [
+    'click',
     'requests',
     'aiohttp',
     'gql',
@@ -30,7 +31,8 @@ dev = [
 ]
 
 [project.scripts]
-etl = "acrossfc.api.main:run"
+axr = "acrossfc.api.analytics:axr"
+axs = "acrossfc.api.submissions:axs"
 
 [tool.setuptools.packages.find]
 exclude = ["lambda*"]
