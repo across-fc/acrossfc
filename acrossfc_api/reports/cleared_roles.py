@@ -5,8 +5,8 @@ from datetime import date
 from tabulate import tabulate
 
 # Local
-from acrossfc_api.database import Database
-from acrossfc_api.model import ACTIVE_TRACKED_ENCOUNTER_NAMES, JOB_CATEGORIES
+from acrossfc_api.core.database import Database
+from acrossfc_api.core.model import ACTIVE_TRACKED_ENCOUNTER_NAMES, JOB_CATEGORIES
 from .report import Report
 
 

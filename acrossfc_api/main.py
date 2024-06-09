@@ -5,7 +5,7 @@ import requests
 from typing import List
 
 # Local
-from .model import (
+from .core.model import (
     Member,
     Clear,
     ACTIVE_TRACKED_ENCOUNTERS,
@@ -15,10 +15,10 @@ from .model import (
     TLA_TO_JOB_MAP,
     JOBS,
 )
-from acrossfc_api.fflogs_client import FFLogsAPIClient
-from acrossfc_api.database import Database
+from acrossfc_api.ext.fflogs_client import FFLogsAPIClient
+from acrossfc_api.core.database import Database
 from acrossfc_api import reports
-from acrossfc_api.config import FC_CONFIG
+from acrossfc_api.core.config import FC_CONFIG
 from acrossfc_api.reports.gapi import GAPI
 
 LOG = logging.getLogger(__name__)

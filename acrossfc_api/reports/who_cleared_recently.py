@@ -3,7 +3,7 @@ from io import StringIO
 from typing import List
 
 # Local
-from acrossfc_api.database import Database
+from acrossfc_api.core.database import Database
 from .report import Report
 
 

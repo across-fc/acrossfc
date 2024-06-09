@@ -4,7 +4,7 @@ from typing import List
 from datetime import date
 
 # Local
-from acrossfc_api.database import Database
+from acrossfc_api.core.database import Database
 from .report import Report
 
 

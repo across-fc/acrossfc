@@ -4,8 +4,8 @@ from io import StringIO
 from datetime import date
 
 # Local
-from acrossfc_api.database import Database
-from acrossfc_api.config import FC_CONFIG
+from acrossfc_api.core.database import Database
+from acrossfc_api.core.config import FC_CONFIG
 from .report import Report
 from .gapi import GAPI
 
