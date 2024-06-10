@@ -1,35 +1,90 @@
 import click
 import logging
+from typing import List
+
+# 3rd party
+import requests
 
 # Local
 from acrossfc import root_logger
+from acrossfc.core.config import FC_CONFIG
+from acrossfc.core.database import Database
+from acrossfc.core.model import (
+    Member,
+    Clear,
+    ACTIVE_TRACKED_ENCOUNTERS,
+    ALL_TRACKED_ENCOUNTER_NAMES,
+    ACTIVE_TRACKED_ENCOUNTER_NAMES,
+    TIER_NAME_TO_ENCOUNTER_NAMES_MAP,
+    TLA_TO_JOB_MAP,
+    JOBS,
+)
+from acrossfc.ext.fflogs_client import FFLogsAPIClient
+from acrossfc.ext.google_cloud_client import GCClient
+
+LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option('-t', '--test', is_flag=True, show_default=True, default=False,
-              help="Run in test mode")
-@click.option('-v', '--verbose', is_flag=True, show_default=True, default=False,
+@click.option('-p', '--prod', is_flag=True, show_default=True,
+              default=False,
+              help="Run in production mode")
+@click.option('-v', '--verbose', is_flag=True, show_default=True,
+              default=False,
               help="Turn on verbose logging")
-@click.option('-c', '--fc-config',
+@click.option('--fc-config', show_default=True,
+              default='.fcconfig',
               help="Path to the FC config file")
-def axr(test, verbose, fc_config):
+@click.option('--gc-creds-file', show_default=True,
+              default='.gc_creds.json',
+              help="File to read Google API credentials for")
+@click.option('-db', '--database',
+              help="Path to the database file to read or write to")
+@click.pass_context
+def axr(ctx, prod, verbose, fc_config, gc_creds_file, database):
     if verbose:
         root_logger.setLevel(logging.DEBUG)
-    # TODO: If test mode... do stuff
-    # TODO: If FC config... do stuff
+    FC_CONFIG.initialize(config_filename=fc_config, production=prod)
+    GCClient.initialize(gc_creds_file)
+    ctx.obj = {
+        'database': database
+    }
 
 
 @axr.command()
 def update_fflogs():
-    click.echo("update_fflogs")
+    resp = requests.get(
+        f"https://www.fflogs.com/guild/update/{FC_CONFIG.fflogs_guild_id}"
+    )
+    if resp.status_code == 200 and "success" in resp.text:
+        click.echo("Successful.")
+        return
+    else:
+        raise RuntimeError(f"Failed: {resp.text}")
 
 
 @axr.command()
-def extract_fflogs_data():
-    # TODO: Download FFLogs data
-    # TODO: Save local file
-    # TODO: Save to S3 if necessary
+@click.pass_context
+def extract_fflogs_data(ctx):
     click.echo("Extract FFLogs data")
+    fflogs_client = FFLogsAPIClient(
+        client_id=FC_CONFIG.fflogs_client_id,
+        client_secret=FC_CONFIG.fflogs_client_secret,
+    )
+
+    fc_roster: List[Member] = fflogs_client.get_fc_roster(
+        guild_id=FC_CONFIG.fflogs_guild_id,
+        guild_rank_filter=lambda rank: rank not in FC_CONFIG.exclude_guild_ranks,
+    )
+    fc_clears: List[Clear] = []
+    for member in fc_roster:
+        fc_clears.extend(
+            fflogs_client.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
+        )
+
+    database = Database.from_fflogs(fc_roster, fc_clears)
+    database.save(ctx.obj['database'])
+    # TODO: Save to S3 if necessary
 
 
 @axr.command()
