@@ -30,14 +30,14 @@ class FCConfig:
         fflogs_client_secret = default_configs.get("fflogs_client_secret", None)
         if fflogs_client_id is None or fflogs_client_secret is None:
             raise RuntimeError(
-                f'"FFLogs API credentials are missing from the [DEFAULT] section in {config_filename}.'
+                f'fflogs_client_id or fflogs_client_secret are missing from {config_filename}.'
             )
 
         # Parse FFLogs guild ID
         self.fflogs_guild_id = int(default_configs.get("fflogs_guild_id", -1))
         if self.fflogs_guild_id == -1:
             raise RuntimeError(
-                f'"FFLogsGuildID" is missing from the [DEFAULT] section in {config_filename}.'
+                f'fflogs_guild_id is missing from {config_filename}.'
             )
 
         # Parse guild ranks to exclude
@@ -47,6 +47,13 @@ class FCConfig:
             for s in exclude_guild_ranks_str.split(",")
             if s.strip() != ""
         )
+
+        # Get S3 database file backup name
+        self.s3_db_backup_bucket_name = default_configs.get("s3_db_backup_bucket_name", None)
+        if self.s3_db_backup_bucket_name is None:
+            raise RuntimeError(
+                f's3_db_backup_bucket_name is missing from the configs {config_filename}'
+            )
 
         # Set flag
         self.initialized = True

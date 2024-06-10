@@ -19,6 +19,7 @@ from acrossfc.core.model import (
     TLA_TO_JOB_MAP,
     JOBS,
 )
+import acrossfc.ext.s3_client as S3Client
 from acrossfc.ext.fflogs_client import FFLogsAPIClient
 from acrossfc.ext.google_cloud_client import GCClient
 
@@ -82,9 +83,10 @@ def extract_fflogs_data(ctx):
             fflogs_client.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
         )
 
+    local_db_filename = ctx.obj['database']
     database = Database.from_fflogs(fc_roster, fc_clears)
-    database.save(ctx.obj['database'])
-    # TODO: Save to S3 if necessary
+    database.save(local_db_filename)
+    S3Client.upload_clear_database(local_db_filename)
 
 
 @axr.command()
@@ -115,6 +117,7 @@ def cleared_roles():
 @axr.command()
 def cleared_jobs_by_member():
     click.echo("cleared_jobs_by_member")
+
 
 @axr.command()
 def who_cleared_recently():
