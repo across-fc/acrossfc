@@ -6,7 +6,7 @@ from datetime import date
 from tabulate import tabulate
 
 # Local
-from acrossfc.core.database import Database
+from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import TrackedEncounterName, ClearRate, ACTIVE_TRACKED_ENCOUNTER_NAMES
 from .report import Report
 
@@ -14,7 +14,7 @@ from .report import Report
 class ClearRates(Report):
     def __init__(
         self,
-        database: Database,
+        database: ClearDatabase,
         include_echo: bool = False
     ):
         clear_rates: Dict[TrackedEncounterName, ClearRate] = database.get_clear_rates(include_echo=include_echo)

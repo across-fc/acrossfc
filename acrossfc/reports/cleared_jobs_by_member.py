@@ -8,7 +8,7 @@ from collections import defaultdict
 from tabulate import tabulate
 
 # Local
-from acrossfc.core.database import Database
+from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import Member, Job, JOBS
 from .report import Report
 
@@ -16,7 +16,7 @@ from .report import Report
 class ClearedJobsByMember(Report):
     def __init__(
         self,
-        database: Database,
+        database: ClearDatabase,
         encounter_names: List[str],
         jobs: List[Job],
         include_echo: bool = False

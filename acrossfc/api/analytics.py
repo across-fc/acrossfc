@@ -5,10 +5,15 @@ from typing import List
 # 3rd party
 import requests
 
+
+import sys
+for path in sys.path:
+    print(path)
+
 # Local
 from acrossfc import root_logger
 from acrossfc.core.config import FC_CONFIG
-from acrossfc.core.database import Database
+from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import (
     Member,
     Clear,
@@ -84,7 +89,7 @@ def extract_fflogs_data(ctx):
         )
 
     local_db_filename = ctx.obj['database']
-    database = Database.from_fflogs(fc_roster, fc_clears)
+    database = ClearDatabase.from_fflogs(fc_roster, fc_clears)
     database.save(local_db_filename)
     S3Client.upload_clear_database(local_db_filename)
 

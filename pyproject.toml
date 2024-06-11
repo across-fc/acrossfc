@@ -35,4 +35,4 @@ axr = "acrossfc.api.analytics:axr"
 axs = "acrossfc.api.submissions:axs"
 
 [tool.setuptools.packages.find]
-exclude = ["lambda*"]
+include = ["acrossfc"]

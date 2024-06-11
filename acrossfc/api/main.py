@@ -17,7 +17,7 @@ from acrossfc.core.model import (
 )
 from acrossfc.ext.fflogs_client import FFLogsAPIClient
 from acrossfc.ext.google_cloud_client import GCClient
-from acrossfc.core.database import Database
+from acrossfc.core.database import ClearDatabase
 from acrossfc.core.config import FC_CONFIG
 from acrossfc import reports
 
@@ -193,7 +193,7 @@ def run():
     # Load the database from a file or from FFLogs
     if args.load_db_from_filename is not None:
         LOG.info(f"Loading database from {args.load_db_from_filename}...")
-        database = Database(db_filename=args.load_db_from_filename)
+        database = ClearDatabase(db_filename=args.load_db_from_filename)
     else:
         fflogs_client = FFLogsAPIClient(
             client_id=FC_CONFIG.fflogs_client_id,
@@ -210,7 +210,7 @@ def run():
                 fflogs_client.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
             )
 
-        database = Database.from_fflogs(fc_roster, fc_clears)
+        database = ClearDatabase.from_fflogs(fc_roster, fc_clears)
 
         if args.save_db_to_filename is not None:
             LOG.info(f"Saving database to {args.save_db_to_filename}...")

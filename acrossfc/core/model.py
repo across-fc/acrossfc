@@ -124,6 +124,20 @@ DSR_EW = create(TrackedEncounter, "DSR_EW", "DSR", 1065)
 
 TOP_EW = create(TrackedEncounter, "TOP_EW", "TOP", 1068)
 
+ULTIMATES = [
+    UWU_EW,
+    UWU_SHB,
+    UWU_SB,
+    UCOB_EW,
+    UCOB_SHB,
+    UCOB_SB,
+    TEA_EW,
+    TEA_SHB,
+    DSR_EW,
+    TOP_EW,
+]
+ULTIMATE_NAMES = list(name for name, _ in groupby(ULTIMATES, key=lambda e: e.name))
+
 ALL_TRACKED_ENCOUNTERS = [
     P9S, P9S_ECHO,
     P10S, P10S_ECHO,

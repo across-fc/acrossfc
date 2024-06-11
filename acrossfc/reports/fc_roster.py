@@ -4,7 +4,7 @@ from io import StringIO
 from datetime import date
 
 # Local
-from acrossfc.core.database import Database
+from acrossfc.core.database import ClearDatabase
 from acrossfc.core.config import FC_CONFIG
 from acrossfc.ext.google_cloud_client import GCClient
 from .report import Report
@@ -14,7 +14,7 @@ LOG.setLevel(logging.INFO)
 
 
 class FCRoster(Report):
-    def __init__(self, database: Database):
+    def __init__(self, database: ClearDatabase):
         self.members = sorted(database.get_fc_roster(), key=lambda m: (m.rank, m.name))
 
         buffer = StringIO()

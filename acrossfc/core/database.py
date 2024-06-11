@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 LOG.setLevel(logging.INFO)
 
 
-class Database:
+class ClearDatabase:
     def __init__(self, db_filename: str):
         self.db_filename = db_filename
         self._db = SqliteDatabase(self.db_filename)
@@ -40,9 +40,9 @@ class Database:
     def from_fflogs(
         members: List[Member],
         clears: List[Clear]
-    ) -> "Database":
+    ) -> "ClearDatabase":
         db_filename = tempfile.NamedTemporaryFile().name
-        db = Database(db_filename)
+        db = ClearDatabase(db_filename)
 
         # Setup database
         with db._db.bind_ctx(ALL_MODELS):

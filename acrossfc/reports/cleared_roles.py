@@ -5,7 +5,7 @@ from datetime import date
 from tabulate import tabulate
 
 # Local
-from acrossfc.core.database import Database
+from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import ACTIVE_TRACKED_ENCOUNTER_NAMES, JOB_CATEGORIES
 from .report import Report
 
@@ -13,7 +13,7 @@ from .report import Report
 class ClearedRoles(Report):
     def __init__(
         self,
-        database: Database,
+        database: ClearDatabase,
         include_echo: bool = False
     ):
         cleared_jobs = database.get_cleared_jobs(include_echo=include_echo)

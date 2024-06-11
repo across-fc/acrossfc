@@ -7,7 +7,7 @@ from typing import List
 from tabulate import tabulate
 
 # Local
-from acrossfc.core.database import Database
+from acrossfc.core.database import ClearDatabase
 from .report import Report
 
 LOG = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 class ClearChart(Report):
     def __init__(
         self,
-        database: Database,
+        database: ClearDatabase,
         encounter_names: List[str],
         include_echo: bool = False
     ):
