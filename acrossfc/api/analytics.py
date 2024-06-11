@@ -6,7 +6,7 @@ from typing import List
 import requests
 
 # Local
-from acrossfc import root_logger
+from acrossfc import root_logger, reports
 from acrossfc.core.config import FC_CONFIG
 from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import (
@@ -16,6 +16,7 @@ from acrossfc.core.model import (
     ALL_TRACKED_ENCOUNTER_NAMES,
     ACTIVE_TRACKED_ENCOUNTER_NAMES,
     TIER_NAME_TO_ENCOUNTER_NAMES_MAP,
+    ALL_TIER_NAMES,
     TLA_TO_JOB_MAP,
     JOBS,
 )
@@ -27,29 +28,19 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option('-p', '--prod', is_flag=True, show_default=True,
-              default=False,
+@click.option('-p', '--prod', is_flag=True, show_default=True, default=False,
               help="Run in production mode")
-@click.option('-v', '--verbose', is_flag=True, show_default=True,
-              default=False,
+@click.option('-v', '--verbose', is_flag=True, show_default=True, default=False,
               help="Turn on verbose logging")
-@click.option('--fc-config', show_default=True,
-              default='.fcconfig',
+@click.option('--fc-config', show_default=True, default='.fcconfig',
               help="Path to the FC config file")
-@click.option('--gc-creds-file', show_default=True,
-              default='.gc_creds.json',
+@click.option('--gc-creds-file', show_default=True, default='.gc_creds.json',
               help="File to read Google API credentials for")
-@click.option('-db', '--cleardb-file',
-              help="File to read or write the clear database to")
-@click.pass_context
-def axr(ctx, prod, verbose, fc_config, gc_creds_file, cleardb_file):
+def axr(prod, verbose, fc_config, gc_creds_file):
     if verbose:
         root_logger.setLevel(logging.DEBUG)
     FC_CONFIG.initialize(config_filename=fc_config, production=prod)
     GCClient.initialize(gc_creds_file)
-    ctx.obj = {
-        'cleardb_file': cleardb_file
-    }
 
 
 @axr.command()
@@ -65,8 +56,9 @@ def update_fflogs():
 
 
 @axr.command()
-@click.pass_context
-def extract_fflogs_data(ctx):
+@click.option('-db', '--cleardb-file', required=True,
+              help="File to read or write the clear database to")
+def extract_fflogs_data(cleardb_file):
     click.echo("Extract FFLogs data")
     fflogs_client = FFLogsAPIClient(
         client_id=FC_CONFIG.fflogs_client_id,
@@ -83,52 +75,52 @@ def extract_fflogs_data(ctx):
             fflogs_client.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
         )
 
-    cleardb_filename = ctx.obj['cleardb_file']
     database = ClearDatabase.from_fflogs(fc_roster, fc_clears)
-    database.save(cleardb_filename)
-    S3Client.upload_clear_database(cleardb_filename)
+    database.save(cleardb_file)
+    S3Client.upload_clear_database(cleardb_file)
 
 
 @axr.command()
-def fc_roster():
-    click.echo("fc_roster")
+@click.argument('report')
+@click.option('-db', '--cleardb-file', required=True,
+              help="File to read or write the clear database to")
+@click.option('-e', '--encounter', multiple=True,
+              type=click.Choice(ALL_TRACKED_ENCOUNTER_NAMES, case_sensitive=False),
+              help="Filter results by encounter")
+@click.option('-t', '--tier', multiple=True,
+              type=click.Choice(ALL_TIER_NAMES, case_sensitive=False),
+              help="Filter results by tier")
+@click.option('--include-echo', is_flag=True, show_default=True, default=False,
+              help="Include echo clears")
+def run(report, cleardb_file, encounter, tier, include_echo):
+    database = ClearDatabase(db_filename=cleardb_file)
+    # TODO: Allow filtering by encounter / jobs
+    click.echo(f"encounter {len(encounter)}")
+    click.echo(f"tier: {len(tier)}")
+    encounter_names = ALL_TRACKED_ENCOUNTER_NAMES
+    jobs = JOBS
+    if report == "clear_rates":
+        report = reports.ClearRates(database, include_echo=include_echo)
+    elif report == "fc_roster":
+        report = reports.FCRoster(database)
+    elif report == "legends":
+        report = reports.Legends(database)
+    elif report == "clear_chart":
+        report = reports.ClearChart(database, encounter_names, include_echo=include_echo)
+    elif report == "cleared_roles":
+        report = reports.ClearedRoles(database, include_echo=include_echo)
+    elif report == "clear_order":
+        report = reports.ClearOrder(database, encounter_names, include_echo=include_echo)
+    elif report == "cleared_jobs_by_member":
+        report = reports.ClearedJobsByMember(database, encounter_names, jobs, include_echo=include_echo)
+    elif report == "ppl_with_clear":
+        report = reports.PeopleWithClear(database, encounter_names, include_echo=include_echo)
+    elif report == "ppl_without_clear":
+        report = reports.PeopleWithoutClear(database, encounter_names, include_echo=include_echo)
+    elif report == "who_cleared_recently":
+        report = reports.WhoClearedRecently(database, encounter_names, include_echo=include_echo)
+    else:
+        raise RuntimeError(f"Unrecognized report: {report}")
+    pass
 
-
-@axr.command()
-def clear_rates():
-    click.echo("clear_rates")
-
-
-@axr.command()
-def clear_chart():
-    click.echo("clear_chart")
-
-
-@axr.command()
-def clear_order():
-    click.echo("clear_order")
-
-
-@axr.command()
-def cleared_roles():
-    click.echo("cleared_roles")
-
-
-@axr.command()
-def cleared_jobs_by_member():
-    click.echo("cleared_jobs_by_member")
-
-
-@axr.command()
-def who_cleared_recently():
-    click.echo("who_cleared_recently")
-
-
-@axr.command()
-def ppl_with_clear():
-    click.echo("ppl_with_clear")
-
-
-@axr.command()
-def ppl_without_clear():
-    click.echo("ppl_without_clear")
+    click.echo(report.to_cli_str())

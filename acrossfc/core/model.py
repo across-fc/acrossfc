@@ -177,6 +177,7 @@ TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[TierName, List[TrackedEncounterName]] = {
         "TOP",
     ],
 }
+ALL_TIER_NAMES = list(TIER_NAME_TO_ENCOUNTER_NAMES_MAP.keys())
 
 TANK = JobCategory(name="TANK", long_name="Tank")
 HEALER = JobCategory(name="HEALER", long_name="Healer")

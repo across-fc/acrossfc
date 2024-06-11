@@ -38,12 +38,14 @@ class Legends(Report):
 
             num_legends = len(table)
             fc_percentage = float(num_legends) / num_members
+
+            if i > 0:
+                buffer.write('\n\n')
             buffer.write(f"{i+1}x Legends: {len(table)} ({fc_percentage * 100:.2f}%)")
             buffer.write("\n-------------------------------------------------\n")
             buffer.write(
                 tabulate(table, tablefmt="plain")
             )
-            buffer.write("\n\n")
 
         super().__init__(
             ":white_check_mark:",

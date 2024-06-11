@@ -9,3 +9,4 @@ from .cleared_jobs_by_member import ClearedJobsByMember
 from .who_cleared_recently import WhoClearedRecently
 from .ppl_with_clear import PeopleWithClear
 from .ppl_without_clear import PeopleWithoutClear
+from .legends import Legends
