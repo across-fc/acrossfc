@@ -5,11 +5,6 @@ from typing import List
 # 3rd party
 import requests
 
-
-import sys
-for path in sys.path:
-    print(path)
-
 # Local
 from acrossfc import root_logger
 from acrossfc.core.config import FC_CONFIG
