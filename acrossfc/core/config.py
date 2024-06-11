@@ -49,10 +49,10 @@ class FCConfig:
         )
 
         # Get S3 database file backup name
-        self.s3_db_backup_bucket_name = default_configs.get("s3_db_backup_bucket_name", None)
-        if self.s3_db_backup_bucket_name is None:
+        self.s3_cleardb_bucket_name = default_configs.get("s3_cleardb_bucket_name", None)
+        if self.s3_cleardb_bucket_name is None:
             raise RuntimeError(
-                f's3_db_backup_bucket_name is missing from the configs {config_filename}'
+                f's3_cleardb_bucket_name is missing from the configs {config_filename}'
             )
 
         # Set flag

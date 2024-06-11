@@ -39,16 +39,16 @@ LOG = logging.getLogger(__name__)
 @click.option('--gc-creds-file', show_default=True,
               default='.gc_creds.json',
               help="File to read Google API credentials for")
-@click.option('-db', '--database',
-              help="Path to the database file to read or write to")
+@click.option('-db', '--cleardb-file',
+              help="File to read or write the clear database to")
 @click.pass_context
-def axr(ctx, prod, verbose, fc_config, gc_creds_file, database):
+def axr(ctx, prod, verbose, fc_config, gc_creds_file, cleardb_file):
     if verbose:
         root_logger.setLevel(logging.DEBUG)
     FC_CONFIG.initialize(config_filename=fc_config, production=prod)
     GCClient.initialize(gc_creds_file)
     ctx.obj = {
-        'database': database
+        'cleardb_file': cleardb_file
     }
 
 
@@ -83,10 +83,10 @@ def extract_fflogs_data(ctx):
             fflogs_client.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
         )
 
-    local_db_filename = ctx.obj['database']
+    cleardb_filename = ctx.obj['cleardb_file']
     database = ClearDatabase.from_fflogs(fc_roster, fc_clears)
-    database.save(local_db_filename)
-    S3Client.upload_clear_database(local_db_filename)
+    database.save(cleardb_filename)
+    S3Client.upload_clear_database(cleardb_filename)
 
 
 @axr.command()
