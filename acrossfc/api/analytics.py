@@ -14,9 +14,8 @@ from acrossfc.core.model import (
     Clear,
     ACTIVE_TRACKED_ENCOUNTERS,
     ALL_TRACKED_ENCOUNTER_NAMES,
-    ACTIVE_TRACKED_ENCOUNTER_NAMES,
     TIER_NAME_TO_ENCOUNTER_NAMES_MAP,
-    ALL_TIER_NAMES,
+    NAME_TO_JOB_CATEGORIES_MAP,
     TLA_TO_JOB_MAP,
     JOBS,
 )
@@ -88,26 +87,33 @@ def extract_fflogs_data(cleardb_file):
               type=click.Choice(ALL_TRACKED_ENCOUNTER_NAMES, case_sensitive=False),
               help="Filter results by encounter")
 @click.option('-t', '--tier',
-              type=click.Choice(ALL_TIER_NAMES, case_sensitive=False),
-              help="Filter results by tier")
+              type=click.Choice(TIER_NAME_TO_ENCOUNTER_NAMES_MAP.keys(), case_sensitive=False),
+              help="Filter results by tier. Overrides --encounter")
+@click.option('-j', '--job', multiple=True,
+              type=click.Choice(TLA_TO_JOB_MAP.keys(), case_sensitive=False),
+              help="Filter results by job")
+@click.option('-jr', '--job-role', multiple=True,
+              type=click.Choice(NAME_TO_JOB_CATEGORIES_MAP.keys(), case_sensitive=False),
+              help="Filter results by role. Overrides --job")
 @click.option('--include-echo', is_flag=True, show_default=True, default=False,
               help="Include echo clears")
-def run(report, cleardb_file, encounter, tier, include_echo):
+def run(report, cleardb_file, encounter, tier, job, job_role, include_echo):
     database = ClearDatabase(db_filename=cleardb_file)
 
     encounter_names = ALL_TRACKED_ENCOUNTER_NAMES
-    if len(encounter) > 0:
-        for e in encounter:
-            if e not in ALL_TRACKED_ENCOUNTER_NAMES:
-                raise RuntimeError(f"{e} is not a tracked encounter.")
+    if tier is not None:
+        encounter_names = TIER_NAME_TO_ENCOUNTER_NAMES_MAP[tier]
+    elif len(encounter) > 0:
         encounter_names = encounter
 
-    if tier is not None:
-        if tier not in ALL_TIER_NAMES:
-            raise RuntimeError(f"{t} is not a tracked tier")
-        encounter_names = TIER_NAME_TO_ENCOUNTER_NAMES_MAP[tier]
-
     jobs = JOBS
+    if len(job_role) > 0:
+        jobs = [
+            j for j in JOBS
+            if j.main_category_id in job_role or j.sub_category_id in job_role
+        ]
+    elif len(job) > 0:
+        jobs = [TLA_TO_JOB_MAP[j] for j in job]
 
     if report == "clear_rates":
         report = reports.ClearRates(database, include_echo=include_echo)
