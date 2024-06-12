@@ -213,4 +213,4 @@ class FCRoster(Report):
         )
         request.execute()
 
-        return Trueapi
+        return True

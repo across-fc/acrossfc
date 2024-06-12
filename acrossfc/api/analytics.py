@@ -134,3 +134,5 @@ def run(report, cleardb_file, encounter, tier, include_echo):
     pass
 
     click.echo(report.to_cli_str())
+
+    return report.data

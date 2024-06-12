@@ -20,3 +20,4 @@ build/
 
 # Test files
 *.ipynb
+custom_reports/
