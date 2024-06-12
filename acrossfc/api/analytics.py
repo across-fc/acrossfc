@@ -87,18 +87,28 @@ def extract_fflogs_data(cleardb_file):
 @click.option('-e', '--encounter', multiple=True,
               type=click.Choice(ALL_TRACKED_ENCOUNTER_NAMES, case_sensitive=False),
               help="Filter results by encounter")
-@click.option('-t', '--tier', multiple=True,
+@click.option('-t', '--tier',
               type=click.Choice(ALL_TIER_NAMES, case_sensitive=False),
               help="Filter results by tier")
 @click.option('--include-echo', is_flag=True, show_default=True, default=False,
               help="Include echo clears")
 def run(report, cleardb_file, encounter, tier, include_echo):
     database = ClearDatabase(db_filename=cleardb_file)
-    # TODO: Allow filtering by encounter / jobs
-    click.echo(f"encounter {len(encounter)}")
-    click.echo(f"tier: {len(tier)}")
+
     encounter_names = ALL_TRACKED_ENCOUNTER_NAMES
+    if len(encounter) > 0:
+        for e in encounter:
+            if e not in ALL_TRACKED_ENCOUNTER_NAMES:
+                raise RuntimeError(f"{e} is not a tracked encounter.")
+        encounter_names = encounter
+
+    if tier is not None:
+        if tier not in ALL_TIER_NAMES:
+            raise RuntimeError(f"{t} is not a tracked tier")
+        encounter_names = TIER_NAME_TO_ENCOUNTER_NAMES_MAP[tier]
+
     jobs = JOBS
+
     if report == "clear_rates":
         report = reports.ClearRates(database, include_echo=include_echo)
     elif report == "fc_roster":
