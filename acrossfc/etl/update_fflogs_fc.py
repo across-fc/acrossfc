@@ -11,7 +11,6 @@ LOG = logging.getLogger(__name__)
 
 class UpdateFFLogsFC(ETLJob):
     def run(self):
-        LOG.debug("********** RUNNING UPDATE FFLOGS FC")
         resp = requests.get(
             f"https://www.fflogs.com/guild/update/{FC_CONFIG.fflogs_guild_id}"
         )

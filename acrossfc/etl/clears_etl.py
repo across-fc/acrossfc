@@ -26,7 +26,6 @@ LOG = logging.getLogger(__name__)
 
 class ClearsETL(ETLJob):
     def run(self):
-        LOG.debug('********** RUNNING CLEARS ETL')
         fc_roster: List[Member] = FFLOGS_CLIENT.get_fc_roster(
             guild_id=FC_CONFIG.fflogs_guild_id,
             guild_rank_filter=lambda rank: rank not in FC_CONFIG.exclude_guild_ranks,
