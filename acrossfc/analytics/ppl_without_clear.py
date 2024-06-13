@@ -5,7 +5,7 @@ from datetime import date
 
 # Local
 from acrossfc.core.database import ClearDatabase
-from .report import Report
+from .report_base import Report
 
 
 class PeopleWithoutClear(Report):

@@ -8,7 +8,7 @@ from tabulate import tabulate
 # Local
 from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import TrackedEncounterName, ClearRate, ACTIVE_TRACKED_ENCOUNTER_NAMES
-from .report import Report
+from .report_base import Report
 
 
 class ClearRates(Report):

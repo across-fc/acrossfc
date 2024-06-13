@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 # Local
 from acrossfc.core.database import ClearDatabase
-from .report import Report
+from .report_base import Report
 
 
 class ClearOrder(Report):

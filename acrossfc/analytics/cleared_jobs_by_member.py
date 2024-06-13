@@ -10,7 +10,7 @@ from tabulate import tabulate
 # Local
 from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import Member, Job, JOBS
-from .report import Report
+from .report_base import Report
 
 
 class ClearedJobsByMember(Report):

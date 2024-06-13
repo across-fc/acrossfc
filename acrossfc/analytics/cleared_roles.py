@@ -7,7 +7,7 @@ from tabulate import tabulate
 # Local
 from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import ACTIVE_TRACKED_ENCOUNTER_NAMES, JOB_CATEGORIES
-from .report import Report
+from .report_base import Report
 
 
 class ClearedRoles(Report):

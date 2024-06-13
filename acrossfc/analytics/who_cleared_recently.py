@@ -4,7 +4,7 @@ from typing import List
 
 # Local
 from acrossfc.core.database import ClearDatabase
-from .report import Report
+from .report_base import Report
 
 
 class WhoClearedRecently(Report):
