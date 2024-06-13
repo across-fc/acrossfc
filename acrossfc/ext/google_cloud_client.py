@@ -14,20 +14,17 @@ class GoogleCloudClient:
         self.GSHEETS = None
         self.GDRIVE = None
 
+    def assert_initialized(self):
+        assert self.initialized, "Google API is not initialized yet. Please call initialize()."
+
     @property
     def sheets(self):
-        if not self.initialized:
-            raise RuntimeError(
-                "Google API is not initialized yet. Please call initialize()."
-            )
+        self.assert_initialized()
         return self.GSHEETS
 
     @property
     def drive(self):
-        if not self.initialized:
-            raise RuntimeError(
-                "Google API is not initialized yet. Please call initialize()."
-            )
+        self.assert_initialized()
         return self.GDRIVE
 
     def initialize(self, creds_file: str):
@@ -40,4 +37,4 @@ class GoogleCloudClient:
         self.initialized = True
 
 
-GCClient = GoogleCloudClient()
+GC_CLIENT = GoogleCloudClient()

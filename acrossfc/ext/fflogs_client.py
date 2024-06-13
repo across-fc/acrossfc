@@ -22,8 +22,13 @@ LOG.setLevel(logging.INFO)
 
 
 class FFLogsAPIClient:
+    def __init__(self):
+        self.initialized = False
 
-    def __init__(self, client_id: str, client_secret: str):
+    def assert_initialized(self):
+        assert self.initialized, "FFLogsAPIClient is not initialized yet."
+
+    def initialize(self, client_id: str, client_secret: str):
         resp = requests.post(
             "https://www.fflogs.com/oauth/token",
             auth=(client_id, client_secret),
@@ -47,9 +52,12 @@ class FFLogsAPIClient:
             transport=gql_transport, fetch_schema_from_transport=True
         )
 
+        self.initialized = True
+
     def get_fc_roster(
         self, guild_id: int, guild_rank_filter: Callable[[int], bool]
     ) -> List[Member]:
+        self.assert_initialized()
         query = gql(
             """
             query getGuildData($id: Int!) {
@@ -81,7 +89,9 @@ class FFLogsAPIClient:
         member: Member,
         tracked_encounters: List[TrackedEncounter] = ALL_TRACKED_ENCOUNTERS,
     ) -> List[Clear]:
+        self.assert_initialized()
         LOG.info(f"Getting clear data for {member.name}...")
+
         # Query header
         query_str = """
             query getCharacterData($id: Int!) {
@@ -140,3 +150,6 @@ class FFLogsAPIClient:
                 )
 
         return clears
+
+
+FFLOGS_CLIENT = FFLogsAPIClient()

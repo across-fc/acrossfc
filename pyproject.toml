@@ -31,7 +31,8 @@ dev = [
 ]
 
 [project.scripts]
-axr = "acrossfc.api.analytics:axr"
+etl = "acrossfc.etl:etl"
+axr = "acrossfc.analytics:axr"
 axs = "acrossfc.api.submissions:axs"
 
 [tool.setuptools.packages.find]
