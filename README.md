@@ -1,4 +1,4 @@
-# acrossfc-api
+# acrossfc
 
 Across FC Automation and Backend API
 
