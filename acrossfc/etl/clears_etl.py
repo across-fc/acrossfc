@@ -36,7 +36,8 @@ class ClearsETL(ETLJob):
                 FFLOGS_CLIENT.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
             )
 
-        cleardb_filename = str(date.today())
+        # Needs to be in /tmp for it to work in Lambda
+        cleardb_filename = f"/tmp/{str(date.today())}"
         database = ClearDatabase.from_fflogs(fc_roster, fc_clears)
         database.save(cleardb_filename)
         S3_CLIENT.upload_clear_database(cleardb_filename)
