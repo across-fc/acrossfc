@@ -36,4 +36,4 @@ axr = "acrossfc.analytics:axr"
 axs = "acrossfc.api.submissions:axs"
 
 [tool.setuptools.packages.find]
-include = ["acrossfc"]
+include = ["acrossfc*"]

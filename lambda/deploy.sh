@@ -1,9 +1,9 @@
 #!/usr/bin/env zsh
 
-# TODO: Change this into a makefile
-
 # Create new virtualenv
-BUILD_ENV=lambda_build_env
+# The venv has to be named `python` for Lambda to recognize it. 
+# Ref: https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html#packaging-layers-paths
+BUILD_ENV=python
 python -m venv $BUILD_ENV
 source $BUILD_ENV/bin/activate
 pip install .
