@@ -27,6 +27,8 @@ log_config = {
     },
 }
 
-logging.config.dictConfig(log_config)
-
-root_logger = logging.getLogger(ROOT_LOGGER_NAME)
+if len(logging.getLogger().handlers) == 0:
+    logging.config.dictConfig(log_config)
+    root_logger = logging.getLogger(ROOT_LOGGER_NAME)
+else:
+    root_logger = logging.getLogger()
