@@ -24,7 +24,7 @@ from .etl_job_base import ETLJob
 LOG = logging.getLogger(__name__)
 
 
-class ClearsETL(ETLJob):
+class FCClearsETL(ETLJob):
     def run(self):
         fc_roster: List[Member] = FFLOGS_CLIENT.get_fc_roster(
             guild_id=FC_CONFIG.fflogs_guild_id,

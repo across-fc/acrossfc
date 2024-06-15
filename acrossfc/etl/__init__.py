@@ -4,8 +4,8 @@ from typing import NamedTuple, Type
 
 # Local
 from acrossfc import root_logger
-from .clears_etl import ClearsETL
 from .update_fflogs_fc import UpdateFFLogsFC
+from .fc_clears_etl import FCClearsETL
 from .fc_roster_etl import FCRosterETL
 
 
@@ -46,7 +46,7 @@ CMD_TO_JOB_CONFIG_MAP = {
         'Runs the FC roster ETL job'
     ),
     'clears-etl': JobConfig(
-        ClearsETL,
+        FCClearsETL,
         'Runs the FFLogs clear data ETL job'
     ),
 }
