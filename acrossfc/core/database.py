@@ -18,8 +18,10 @@ from acrossfc.core.model import (
     Job,
     Clear,
     ClearRate,
+)
+from acrossfc.core.constants import (
     ALL_MODELS,
-    ALL_TRACKED_ENCOUNTERS,
+    ALL_ENCOUNTERS,
     JOB_CATEGORIES,
     JOBS,
 )
@@ -47,7 +49,7 @@ class ClearDatabase:
         # Setup database
         with db._db.bind_ctx(ALL_MODELS):
             db._db.create_tables(ALL_MODELS)
-            TrackedEncounter.bulk_create(ALL_TRACKED_ENCOUNTERS)
+            TrackedEncounter.bulk_create(ALL_ENCOUNTERS)
             JobCategory.bulk_create(JOB_CATEGORIES)
             Job.bulk_create(JOBS)
             Member.bulk_create(members)

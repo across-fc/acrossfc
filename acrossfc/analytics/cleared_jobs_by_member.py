@@ -9,7 +9,8 @@ from tabulate import tabulate
 
 # Local
 from acrossfc.core.database import ClearDatabase
-from acrossfc.core.model import Member, Job, JOBS
+from acrossfc.core.model import Member, Job
+from acrossfc.core.constants import JOBS
 from .report_base import Report
 
 
