@@ -25,7 +25,7 @@ class ClearOrder(Report):
             if i > 0:
                 buffer.write("\n\n")
 
-            buffer.write(f"[{encounter_name}]")
+            buffer.write(f"{encounter_name} ({len(clear_order[encounter_name])})")
             buffer.write("\n\n")
             table = []
             for i, datapoint in enumerate(clear_order[encounter_name]):

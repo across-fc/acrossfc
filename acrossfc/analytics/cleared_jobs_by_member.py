@@ -41,7 +41,7 @@ class ClearedJobsByMember(Report):
                 member_cleared_jobs.items(), key=lambda i: (-len(i[1]), i[0].name)
             )
 
-            buffer.write(f"[{encounter_name}]")
+            buffer.write(f"{encounter_name} ({len(member_cleared_jobs)})")
             buffer.write("\n\n")
             table = []
             for i, item in enumerate(member_cleared_jobs):
