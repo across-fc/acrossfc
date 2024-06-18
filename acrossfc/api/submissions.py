@@ -30,13 +30,13 @@ def axs(verbose):
 @click.option('-u', '--fflogs-url')
 def submit_fc_pf(fc_pf_id: str, fflogs_url: Optional[str] = None):
     timestamp = int(time.time())
-    submission_uuid = uuid.uuid4()
+    submission_uuid = str(uuid.uuid4())
 
     # Get all point events
     point_events = PointsEvaluator(fflogs_url, fc_pf_id).point_events
     point_events_json = [
         {
-            'uuid': str(uuid.uui4()),
+            'uuid': str(uuid.uuid4()),
             'submission_uuid': submission_uuid,
             'member_id': point_event.member_id,
             'points': point_event.points,
@@ -61,6 +61,13 @@ def submit_fc_pf(fc_pf_id: str, fflogs_url: Optional[str] = None):
             'point_events': point_events_json,
             'last_update_ts': None,
             'last_update_by': None,
+        }
+    )
+    submissions_queue_table = ddb.Table(FC_CONFIG.ddb_submissions_queue_table)
+    submissions_queue_table.put_item(
+        Item={
+            'uuid': submission_uuid,
+            'ts': timestamp
         }
     )
     LOG.info(f"Inserted submission {submission_uuid} into DynamoDB.")
