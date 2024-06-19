@@ -1,7 +1,9 @@
 # stdlib
+import re
 import logging
+from typing import List
 from datetime import datetime
-from typing import List, Callable
+from urllib.parse import urlparse
 
 # 3rd-party
 import requests
@@ -9,11 +11,15 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
 # Local
+from acrossfc.core.config import FC_CONFIG
 from acrossfc.core.model import (
     Member,
     TrackedEncounter,
     Clear,
-    ALL_TRACKED_ENCOUNTERS,
+    FFLogsFightData,
+)
+from acrossfc.core.constants import (
+    ALL_ENCOUNTERS,
     NAME_TO_JOB_MAP,
 )
 
@@ -22,13 +28,10 @@ LOG.setLevel(logging.INFO)
 
 
 class FFLogsAPIClient:
-    def __init__(self):
-        self.initialized = False
+    def __init__(self, client_id: str, client_secret: str):
+        self.client_id = client_id
+        self.client_secret = client_secret
 
-    def assert_initialized(self):
-        assert self.initialized, "FFLogsAPIClient is not initialized yet."
-
-    def initialize(self, client_id: str, client_secret: str):
         resp = requests.post(
             "https://www.fflogs.com/oauth/token",
             auth=(client_id, client_secret),
@@ -52,12 +55,7 @@ class FFLogsAPIClient:
             transport=gql_transport, fetch_schema_from_transport=True
         )
 
-        self.initialized = True
-
-    def get_fc_roster(
-        self, guild_id: int, guild_rank_filter: Callable[[int], bool]
-    ) -> List[Member]:
-        self.assert_initialized()
+    def get_fc_roster(self) -> List[Member]:
         query = gql(
             """
             query getGuildData($id: Int!) {
@@ -75,11 +73,11 @@ class FFLogsAPIClient:
             }
             """
         )
-        result = self.gql_client.execute(query, variable_values={"id": guild_id})
+        result = self.gql_client.execute(query, variable_values={"id": FC_CONFIG.fflogs_guild_id})
         ret = [
             Member(fcid=d["id"], name=d["name"], rank=d["guildRank"])
             for d in result["guildData"]["guild"]["members"]["data"]
-            if guild_rank_filter(d["guildRank"])
+            if d["guildRank"] not in FC_CONFIG.exclude_guild_ranks
         ]
 
         return ret
@@ -87,9 +85,8 @@ class FFLogsAPIClient:
     def get_clears_for_member(
         self,
         member: Member,
-        tracked_encounters: List[TrackedEncounter] = ALL_TRACKED_ENCOUNTERS,
+        tracked_encounters: List[TrackedEncounter] = ALL_ENCOUNTERS,
     ) -> List[Clear]:
-        self.assert_initialized()
         LOG.info(f"Getting clear data for {member.name}...")
 
         # Query header
@@ -151,5 +148,48 @@ class FFLogsAPIClient:
 
         return clears
 
+    def get_fight_data(self, fflogs_url: str) -> FFLogsFightData:
+        parts = urlparse(fflogs_url)
+        report_id_match = re.match(r'/reports/(.*)$', parts.path)
+        if not report_id_match:
+            raise ValueError(f"FFLogs URL path does not match r'/reports/(.*)$'. Received: {fflogs_url}")
 
-FFLOGS_CLIENT = FFLogsAPIClient()
+        report_id = report_id_match.groups()[0]
+
+        fight_id_match = re.match(r'fight=(\d+)', parts.fragment)
+        if not fight_id_match:
+            raise ValueError(f"FFLogs URL fragment does not match r'fight=(\d+)'. Received: {fflogs_url}")
+
+        fight_id = int(fight_id_match.groups()[0])
+
+        LOG.info(f"Getting fight data for report {report_id}, fight {fight_id}...")
+
+        # Query header
+        query_str = """
+            query getReportData($report_id: String!, $fight_id: Int!) {
+                reportData {
+                    report(code: $report_id) {
+                        fights(fightIDs: [$fight_id]) {
+                            encounterID,
+                            difficulty
+                        }
+                        playerDetails(fightIDs: [$fight_id])
+                    }
+                }
+            }
+            """
+        query = gql(query_str)
+        result = self.gql_client.execute(query, variable_values={"report_id": report_id, "fight_id": fight_id})
+        fight_data = result["reportData"]["report"]["fights"][0]
+        encounter_id = fight_data["encounterID"]
+        difficulty_id = fight_data["difficulty"]
+        player_details = result["reportData"]["report"]["playerDetails"]["data"]["playerDetails"]
+        player_names = [player["name"] for role in player_details for player in player_details[role]]
+
+        return FFLogsFightData(encounter_id, difficulty_id, player_names)
+
+
+FFLOGS_CLIENT = FFLogsAPIClient(
+    client_id=FC_CONFIG.fflogs_client_id,
+    client_secret=FC_CONFIG.fflogs_client_secret,
+)

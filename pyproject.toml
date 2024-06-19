@@ -27,7 +27,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "awscli",
-    "boto3"
+    "boto3",
+    "pytest"
 ]
 
 [project.scripts]

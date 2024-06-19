@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 # Local
 from acrossfc.core.database import ClearDatabase
-from acrossfc.core.model import ULTIMATE_NAMES
+from acrossfc.core.constants import ULTIMATE_NAMES
 from .report_base import Report
 
 

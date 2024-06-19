@@ -1,4 +1,5 @@
 # stdlib
+import os
 import configparser
 
 
@@ -14,15 +15,16 @@ class FCConfig:
         DiscordWebhookURL = ...         (optional)
 
     """
-    def __init__(self):
-        self.initialized = False
+    def __init__(self, fc_config_filename: str, env: str):
+        self.fc_config_filename = fc_config_filename
+        self.env = env
 
-    def initialize(self, config_filename: str = ".fcconfig", production: bool = False):
         configs = configparser.ConfigParser()
-        configs.read(config_filename)
+        configs.read(fc_config_filename)
         default_configs = configs["DEFAULT"]
-        if production:
-            default_configs.update(configs["PROD"])
+        if env not in configs:
+            raise ValueError(f"Environment {env} not found in FC config file ({self.fc_config_filename}).")
+        default_configs.update(configs[env])
         self.combined_configs = default_configs
 
         # Assert we have FFLogs client credentials
@@ -30,14 +32,14 @@ class FCConfig:
         fflogs_client_secret = default_configs.get("fflogs_client_secret", None)
         if fflogs_client_id is None or fflogs_client_secret is None:
             raise RuntimeError(
-                f'fflogs_client_id or fflogs_client_secret are missing from {config_filename}.'
+                f'fflogs_client_id or fflogs_client_secret are missing from {fc_config_filename}.'
             )
 
         # Parse FFLogs guild ID
         self.fflogs_guild_id = int(default_configs.get("fflogs_guild_id", -1))
         if self.fflogs_guild_id == -1:
             raise RuntimeError(
-                f'fflogs_guild_id is missing from {config_filename}.'
+                f'fflogs_guild_id is missing from {fc_config_filename}.'
             )
 
         # Parse guild ranks to exclude
@@ -52,16 +54,18 @@ class FCConfig:
         self.s3_cleardb_bucket_name = default_configs.get("s3_cleardb_bucket_name", None)
         if self.s3_cleardb_bucket_name is None:
             raise RuntimeError(
-                f's3_cleardb_bucket_name is missing from the configs {config_filename}'
+                f's3_cleardb_bucket_name is missing from the configs {fc_config_filename}'
             )
 
         # Set flag
         self.initialized = True
 
     def __getattr__(self, name):
-        if not self.initialized:
-            raise RuntimeError("FCConfig is not initialized yet. Call initialize()")
+        if name not in self.combined_configs:
+            raise ValueError(f"{name} not found in FC config file ")
         return self.combined_configs.get(name, None)
 
 
-FC_CONFIG = FCConfig()
+fc_config_filename = os.environ.get('AX_FC_CONFIG', '.fcconfig')
+env = os.environ.get('AX_ENV', 'TEST')
+FC_CONFIG = FCConfig(fc_config_filename, env)

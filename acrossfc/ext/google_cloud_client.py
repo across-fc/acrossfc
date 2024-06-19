@@ -1,3 +1,7 @@
+# stdlib
+import os
+
+# 3rd-party
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -9,32 +13,22 @@ _SCOPES = [
 
 
 class GoogleCloudClient:
-    def __init__(self):
-        self.initialized = False
-        self.GSHEETS = None
-        self.GDRIVE = None
-
-    def assert_initialized(self):
-        assert self.initialized, "Google API is not initialized yet. Please call initialize()."
+    def __init__(self, gc_creds_filename: str):
+        # Authenticate with Google Sheets and Drive APIs
+        creds = service_account.Credentials.from_service_account_file(
+            gc_creds_filename, scopes=_SCOPES
+        )
+        self.GSHEETS = build("sheets", "v4", credentials=creds)
+        self.GDRIVE = build("drive", "v3", credentials=creds)
 
     @property
     def sheets(self):
-        self.assert_initialized()
         return self.GSHEETS
 
     @property
     def drive(self):
-        self.assert_initialized()
         return self.GDRIVE
 
-    def initialize(self, creds_file: str):
-        # Authenticate with Google Sheets and Drive APIs
-        creds = service_account.Credentials.from_service_account_file(
-            creds_file, scopes=_SCOPES
-        )
-        self.GSHEETS = build("sheets", "v4", credentials=creds)
-        self.GDRIVE = build("drive", "v3", credentials=creds)
-        self.initialized = True
 
-
-GC_CLIENT = GoogleCloudClient()
+gc_creds_filename = os.environ.get('AX_GC_CREDS', '.gc_creds.json')
+GC_CLIENT = GoogleCloudClient(gc_creds_filename=gc_creds_filename)
