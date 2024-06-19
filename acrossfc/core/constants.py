@@ -109,12 +109,12 @@ DSR_EW = create(TrackedEncounter, "DSR_EW", "DSR", 1065)
 TOP_EW = create(TrackedEncounter, "TOP_EW", "TOP", 1068)
 
 ULTIMATES = [
-    UWU_EW,
-    UWU_SHB,
-    UWU_SB,
     UCOB_EW,
     UCOB_SHB,
     UCOB_SB,
+    UWU_EW,
+    UWU_SHB,
+    UWU_SB,
     TEA_EW,
     TEA_SHB,
     DSR_EW,
