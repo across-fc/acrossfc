@@ -28,7 +28,8 @@ dependencies = [
 dev = [
     "awscli",
     "boto3",
-    "pytest"
+    "pytest",
+    "fastapi"
 ]
 
 [project.scripts]
