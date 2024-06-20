@@ -40,4 +40,4 @@ def get_submissions_queue():
 
 @app.get("/current_submissions_tier")
 def get_current_submissions_tier():
-    return submissions.get_current_submissions_tier
+    return submissions.get_current_submissions_tier()
