@@ -1,5 +1,5 @@
 # stdlib
-from typing import NamedTuple, List
+from typing import NamedTuple, Callable, List
 from dataclasses import dataclass
 from enum import Enum
 
@@ -41,6 +41,9 @@ class TrackedEncounter(Model):
 
     def __repr__(self):
         return str(self)
+
+
+TrackedEncounterName = str
 
 
 class JobCategory(Model):
@@ -127,5 +130,14 @@ class FFLogsFightData(NamedTuple):
     player_names: List[str]
 
 
-TrackedEncounterName = str
-TierName = str
+class CommandConfig(NamedTuple):
+    func: Callable
+    help: str
+    decorators: List[Callable] = []
+    # e.g.
+    # [
+    #     click.option(...),
+    #     click.option(...),
+    #     click.pass_context,
+    #     ...
+    # ]

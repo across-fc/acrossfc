@@ -158,7 +158,7 @@ class FFLogsAPIClient:
 
         fight_id_match = re.match(r'fight=(\d+)', parts.fragment)
         if not fight_id_match:
-            raise ValueError(f"FFLogs URL fragment does not match r'fight=(\d+)'. Received: {fflogs_url}")
+            raise ValueError(f"FFLogs URL fragment does not match r'fight=(\\d+)'. Received: {fflogs_url}")
 
         fight_id = int(fight_id_match.groups()[0])
 

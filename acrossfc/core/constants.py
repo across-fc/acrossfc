@@ -10,7 +10,6 @@ from .model import (
     Job,
     JobCategory,
     PointsCategory,
-    TierName,
     TrackedEncounterName
 )
 
@@ -129,7 +128,7 @@ ALL_ENCOUNTER_NAMES = list(name for name, _ in groupby(ALL_ENCOUNTERS, key=lambd
 TRACKED_ENCOUNTERS = CURRENT_SAVAGES + ULTIMATES
 TRACKED_ENCOUNTER_NAMES = list(name for name, _ in groupby(TRACKED_ENCOUNTERS, key=lambda e: e.name))
 
-TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[TierName, List[TrackedEncounterName]] = {
+TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[str, List[TrackedEncounterName]] = {
     "ANABASEIOS": [
         "P9S",
         "P10S",
