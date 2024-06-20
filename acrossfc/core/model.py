@@ -1,5 +1,5 @@
 # stdlib
-from typing import NamedTuple, Callable, List
+from typing import Optional, NamedTuple, Callable, List
 from dataclasses import dataclass
 from enum import Enum
 
@@ -84,31 +84,31 @@ class PointsCategory(Enum):
     FC_CRITERION = 203
     FC_CRITERION_SAVAGE = 204
     FC_ULTIMATE = 205
-    SAVAGE_1 = 301
-    SAVAGE_2 = 302
-    SAVAGE_3 = 303
-    SAVAGE_4_1 = 304
-    SAVAGE_4_2 = 305
+    SAVAGE_1 = 310
+    SAVAGE_2 = 320
+    SAVAGE_3 = 330
+    SAVAGE_4_1 = 340
+    SAVAGE_4_2 = 341
     VET = 400
     CRAFTING_GATHERING = 401
     MENTOR = 402
 
 
 @dataclass
-class PointEvent:
+class PointsEvent:
+    uuid: str
     member_id: int
+    points: int
     category: PointsCategory
     description: str
-    points: int
+    ts: int
+    submission_uuid: Optional[str]
+    fc_pf_id: Optional[str]
+    approved: Optional[bool]
+    reviewed_by: Optional[int]
 
     def __repr__(self):
         return f"{self.member_id}: {self.category.name} ({self.points})"
-
-
-class PointsEventStatus(Enum):
-    UNAPPROVED = 0
-    APPROVED = 1
-    REJECTED = 2
 
 
 # -----------------------------------------------

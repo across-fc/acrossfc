@@ -1,16 +1,15 @@
 # stdlib
-from typing import Optional
+from typing import Optional, List
 
 # 3rd-party
 import boto3
 
 # Local
 from acrossfc.core.config import FC_CONFIG
-from acrossfc.core.model import PointsCategory
+from acrossfc.core.model import PointsCategory, PointsEvent
 
 
-# TODO: Add point event for member
-def add_points(member_id: int, point):
+def add_points(points_events: List[PointsEvent]):
     # PointsCategory.MENTOR_TICKET: 10,
     # PointsCategory.FC_STATIC: 20,
     # PointsCategory.CRAFTING_GATHERING: 50,

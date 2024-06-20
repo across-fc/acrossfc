@@ -1,9 +1,11 @@
 # stdlib
+import uuid
+import time
 import logging
 from typing import Optional, List
 
 # Local
-from acrossfc.core.model import PointEvent, Member, FFLogsFightData, PointsCategory, TrackedEncounter
+from acrossfc.core.model import PointsEvent, Member, FFLogsFightData, PointsCategory, TrackedEncounter
 from acrossfc.core.constants import (
     POINTS,
     CURRENT_EXTREMES,
@@ -48,11 +50,13 @@ class PointsEvaluator:
             for user_id in self.fc_member_ids:
                 category = PointsCategory.FC_PF
                 self.point_events.append(
-                    PointEvent(
+                    PointsEvent(
+                        uuid=str(uuid.uuid4()),
                         member_id=user_id,
                         points=POINTS[category],
                         category=category,
-                        description=f"FC PF: {self.fc_pf_id}"
+                        description=f"FC PF: {self.fc_pf_id}",
+                        ts=int(time.time())
                     )
                 )
 
@@ -103,11 +107,13 @@ class PointsEvaluator:
 
         for member_id in self.fc_member_ids:
             self.point_events.append(
-                PointEvent(
+                PointsEvent(
+                    uuid=str(uuid.uuid4()),
                     member_id=member_id,
                     points=POINTS[category],
                     category=category,
                     description=description,
+                    ts=int(time.time())
                 )
             )
 

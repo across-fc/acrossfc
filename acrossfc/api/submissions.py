@@ -2,7 +2,7 @@
 import uuid
 import time
 import logging
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 
 # 3rd-party
 import boto3
@@ -10,8 +10,8 @@ from boto3.dynamodb.conditions import Key
 
 # Local
 from acrossfc.core.config import FC_CONFIG
-from acrossfc.core.model import PointsEventStatus
-from acrossfc.core.points import PointsEvaluator
+from acrossfc.core.model import PointsEvent, PointsCategory
+from acrossfc.core.points_evaluator import PointsEvaluator
 from .participation_points import add_points
 
 LOG = logging.getLogger(__name__)
@@ -77,12 +77,13 @@ def submit_fc_pf(fc_pf_id: str, fflogs_url: Optional[str] = None):
     points_events = PointsEvaluator(fflogs_url, fc_pf_id).points_events
     points_events_json = [
         {
-            'uuid': str(uuid.uuid4()),
+            'uuid': points_event.uuid,
             'member_id': points_event.member_id,
             'points': points_event.points,
             'category': points_event.category.value,
             'description': points_event.description,
-            'status': PointsEventStatus.UNAPPROVED.value,
+            'ts': points_event.ts,
+            'approved': None
         }
         for points_event in points_events
     ]
@@ -95,7 +96,8 @@ def submit_fc_pf(fc_pf_id: str, fflogs_url: Optional[str] = None):
         Item={
             'uuid': submission_uuid,
             'ts': timestamp,
-            'submitted_by': 'bot',   # TODO: FIGURE OUT HOW TO GET USER
+            # TODO: FIGURE OUT HOW TO GET USER
+            'submitted_by': 'bot',
             'fc_pf_id': fc_pf_id,
             'fflogs_url': fflogs_url,
             'tier': FC_CONFIG.current_submissions_tier,
@@ -116,20 +118,35 @@ def submit_fc_pf(fc_pf_id: str, fflogs_url: Optional[str] = None):
 
 def review_submission(
     submission_uuid: str,
-    points_event_to_approval_status: Dict[str, PointsEventStatus],
-    reviewer_id: int
+    points_event_to_approved: Dict[str, bool],
+    reviewer_id: int,
+    notes: Optional[str] = None
 ):
     submission = get_submissions_by_uuid(submission_uuid)
 
     # Add all approved points to user
-    for points_event in submission['points_events']:
-        points_event['status'] = points_event_to_approval_status[points_event['uuid']].value
-        if points_event['status'] == PointsEventStatus.APPROVED:
-            # TODO: Implement
-            add_points()
+    points_events_to_add: List[PointsEvent] = []
+    for pe in submission['points_events']:
+        pe['approved'] = points_event_to_approved[pe['uuid']]
+        if pe['approved']:
+            points_events_to_add.append(PointsEvent(
+                uuid=pe['uuid'],
+                member_id=pe['member_id'],
+                points=pe['points'],
+                category=PointsCategory(pe['category']),
+                description=pe['description'],
+                ts=pe['ts'],
+                submission_uuid=submission['uuid'],
+                fc_pf_id=submission.get('fc_pf_id', None),
+                approved=True,
+                reviewed_by=reviewer_id,
+            ))
+
+    add_points(points_events_to_add)
 
     submission['last_update_ts'] = int(time.time())
     submission['last_update_by'] = reviewer_id
+    submission['notes'] = notes
 
     # Update submission entry
     ddb = boto3.resource('dynamodb')

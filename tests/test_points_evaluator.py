@@ -1,4 +1,4 @@
-from acrossfc.core.points import PointsEvaluator
+from acrossfc.core.points_evaluator import PointsEvaluator
 from acrossfc.core.constants import CURRENT_EXTREMES
 
 
