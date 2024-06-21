@@ -1,6 +1,6 @@
 # stdlib
 from typing import Optional, NamedTuple, Callable, List
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from enum import Enum
 
 # 3rd-party
@@ -102,13 +102,18 @@ class PointsEvent:
     category: PointsCategory
     description: str
     ts: int
-    submission_uuid: Optional[str]
-    fc_pf_id: Optional[str]
-    approved: Optional[bool]
-    reviewed_by: Optional[int]
+    submission_uuid: Optional[str] = None
+    fc_pf_id: Optional[str] = None
+    approved: Optional[bool] = None
+    reviewed_by: Optional[int] = None
 
     def __repr__(self):
         return f"{self.member_id}: {self.category.name} ({self.points})"
+
+    def to_json(self):
+        ret = asdict(self)
+        ret['category'] = self.category.value
+        return ret
 
 
 # -----------------------------------------------
@@ -125,8 +130,8 @@ class ClearRate(NamedTuple):
 
 
 class FFLogsFightData(NamedTuple):
-    encounter_id: int
-    difficulty_id: int
+    report_id: str
+    encounter: TrackedEncounter
     player_names: List[str]
 
 

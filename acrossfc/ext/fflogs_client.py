@@ -186,7 +186,18 @@ class FFLogsAPIClient:
         player_details = result["reportData"]["report"]["playerDetails"]["data"]["playerDetails"]
         player_names = [player["name"] for role in player_details for player in player_details[role]]
 
-        return FFLogsFightData(encounter_id, difficulty_id, player_names)
+        # Match encounter
+        for e in ALL_ENCOUNTERS:
+            if (
+                encounter_id == e.encounter_id and
+                (
+                    e.difficulty_id is None or
+                    difficulty_id == e.difficulty_id
+                )
+            ):
+                return FFLogsFightData(report_id, e, player_names)
+
+        return None
 
 
 FFLOGS_CLIENT = FFLogsAPIClient(

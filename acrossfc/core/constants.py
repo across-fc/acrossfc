@@ -62,23 +62,26 @@ CURRENT_UNREAL = EW_UNREAL_5
 # Savage: Anabaseios
 
 P9S = create(TrackedEncounter, "P9S", "P9S", 88, 101)
-P9S_ECHO = create(TrackedEncounter, "P9S_ECHO", "P9S", 88, 101, 13, True)
 P10S = create(TrackedEncounter, "P10S", "P10S", 89, 101)
-P10S_ECHO = create(TrackedEncounter, "P10S_ECHO", "P10S", 89, 101, 13, True)
 P11S = create(TrackedEncounter, "P11S", "P11S", 90, 101)
-P11S_ECHO = create(TrackedEncounter, "P11S_ECHO", "P11S", 90, 101, 13, True)
 P12S_P1 = create(TrackedEncounter, "P12S_P1", "P12S_P1", 91, 101)
-P12S_P1_ECHO = create(TrackedEncounter, "P12S_P1_ECHO", "P12S_P1", 91, 101, 13, True)
 P12S = create(TrackedEncounter, "P12S", "P12S", 92, 101)
-P12S_ECHO = create(TrackedEncounter, "P12S_ECHO", "P12S", 92, 101, 13, True)
 
 CURRENT_SAVAGES = [
-    P9S, P9S_ECHO,
-    P10S, P10S_ECHO,
-    P11S, P11S_ECHO,
-    P12S_P1, P12S_P1_ECHO,
-    P12S, P12S_ECHO
+    P9S,
+    P10S,
+    P11S,
+    P12S_P1,
+    P12S,
 ]
+
+CURRENT_SAVAGE_TO_POINTS_CATEGORY = {
+    P9S: PointsCategory.SAVAGE_1,
+    P10S: PointsCategory.SAVAGE_2,
+    P11S: PointsCategory.SAVAGE_3,
+    P12S_P1: PointsCategory.SAVAGE_4_1,
+    P12S: PointsCategory.SAVAGE_4_2,
+}
 
 # Criterion
 
@@ -251,3 +254,13 @@ POINTS = {
     PointsCategory.CRAFTING_GATHERING: 50,
     PointsCategory.MENTOR: 25
 }
+
+ONE_TIME_POINTS = [
+    PointsCategory.SAVAGE_1,
+    PointsCategory.SAVAGE_2,
+    PointsCategory.SAVAGE_3,
+    PointsCategory.SAVAGE_4_1,
+    PointsCategory.SAVAGE_4_2,
+    PointsCategory.CRAFTING_GATHERING,
+    PointsCategory.MENTOR
+]
