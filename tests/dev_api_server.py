@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 # Local
 from acrossfc.api import submissions
+from acrossfc.api import participation_points
 
 LOG_FORMAT = (
     "<TEST API> %(asctime)s.%(msecs)03d [%(levelname)s] %(filename)s:%(lineno)d: %(message)s"
@@ -41,3 +42,8 @@ def get_submissions_queue():
 @app.get("/current_submissions_tier")
 def get_current_submissions_tier():
     return submissions.get_current_submissions_tier()
+
+
+@app.get("/participation_points/{member_id}")
+def get_participation_points(member_id: int, tier: str):
+    return participation_points.get_points_for_member(member_id, tier)

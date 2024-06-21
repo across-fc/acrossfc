@@ -4,7 +4,7 @@ import logging
 
 # Local
 from acrossfc import root_logger
-from .submissions import submit_fc_pf
+from .submissions import submit_fflogs
 
 
 @click.group()
@@ -15,10 +15,10 @@ def axs(verbose):
         root_logger.setLevel(logging.DEBUG)
 
 
-cmd = submit_fc_pf
-cmd = click.option('-u', '--fflogs-url')(cmd)
-cmd = click.option('-i', '--fc-pf-id', required=True)(cmd)
+cmd = submit_fflogs
+cmd = click.option('-u', '--fflogs-url', required=True)(cmd)
+cmd = click.option('-i', '--fc-pf-id')(cmd)
 axs.command(
-    name='submit-fc-pf',
-    help='Make a submission for an FC PF event'
+    name='submit-fflogs',
+    help='Make a submission with FFLogs'
 )(cmd)

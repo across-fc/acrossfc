@@ -70,7 +70,7 @@ def get_current_submissions_tier():
     return FC_CONFIG.current_submissions_tier
 
 
-def submit_fc_pf(fc_pf_id: str, fflogs_url: Optional[str] = None):
+def submit_fflogs(fflogs_url: str, fc_pf_id: Optional[str] = None):
     timestamp = int(time.time())
 
     # Get all point events
