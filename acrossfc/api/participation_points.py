@@ -29,7 +29,7 @@ def add_points(points_events: List[PointsEvent], tier: Optional[str] = FC_CONFIG
             else:
                 member_points['points_events'].append(pe.to_json())
 
-    _update_member_points(member_points)
+        _update_member_points(member_points)
 
 
 def remove_one_time_points(member_id: int, tier: str, category: PointsCategory):

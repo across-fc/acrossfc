@@ -42,7 +42,7 @@ def get_submissions_for_tier(
 
 def get_submissions_by_uuid(_uuid: str):
     ddb = boto3.resource('dynamodb')
-    submissions_table = ddb.Table(FC_CONFIG.ddb_submissions_queue_table)
+    submissions_table = ddb.Table(FC_CONFIG.ddb_submissions_table)
     return submissions_table.get_item(
         Key={
             'uuid': _uuid
@@ -160,3 +160,5 @@ def review_submission(
             'uuid': submission_uuid
         }
     )
+
+    return None

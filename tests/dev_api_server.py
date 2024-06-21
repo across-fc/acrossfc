@@ -1,8 +1,10 @@
 # stdlib
 import logging
+from typing import Optional, Dict
 
 # 3rd-party
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 # Local
 from acrossfc.api import submissions
@@ -47,3 +49,21 @@ def get_current_submissions_tier():
 @app.get("/participation_points/{member_id}")
 def get_participation_points(member_id: int, tier: str):
     return participation_points.get_points_for_member(member_id, tier)
+
+
+class ReviewSubmissionsBody(BaseModel):
+    submission_uuid: str
+    points_event_to_approved: Dict[str, bool]
+    reviewer_id: int
+    notes: Optional[str] = None
+
+
+@app.post("/review_submission")
+def review_submission(body: ReviewSubmissionsBody):
+    LOG.info(body)
+    return submissions.review_submission(
+        body.submission_uuid,
+        body.points_event_to_approved,
+        body.reviewer_id,
+        notes=body.notes
+    )

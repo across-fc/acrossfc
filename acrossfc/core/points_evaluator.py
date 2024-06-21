@@ -128,14 +128,12 @@ class PointsEvaluator:
         for member in self.fc_members_in_fight:
             clears: List[Clear] = FFLOGS_CLIENT.get_clears_for_member(member, [self.fight_data.encounter])
 
-            if len(clears) > 1:
-                veteran_members.append(member)
-
             current_clear: Clear = next(filter(lambda c: c.report_code == self.fight_data.report_id, clears))
-            if (
-                len(clears) == 1 or
-                len([c for c in clears if c.start_time < current_clear.start_time]) == 0
-            ):
+            prior_clears: List[Clear] = [c for c in clears if c.start_time < current_clear.start_time]
+
+            if len(prior_clears) > 0:
+                veteran_members.append(member)
+            else:
                 first_clear_members.append(member)
 
         # First clear savage points
