@@ -75,6 +75,10 @@ def submit_fflogs(fflogs_url: str, fc_pf_id: Optional[str] = None):
 
     # Get all point events
     points_events = PointsEvaluator(fflogs_url, fc_pf_id).points_events
+
+    if len(points_events) == 0:
+        LOG.info("No points were awarded for this fight.")
+
     points_events_json = [
         {
             'uuid': points_event.uuid,

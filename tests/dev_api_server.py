@@ -1,6 +1,6 @@
 # stdlib
 import logging
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 # 3rd-party
 from fastapi import FastAPI
@@ -8,8 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # Local
-from acrossfc.api import submissions
-from acrossfc.api import participation_points
+from acrossfc.api import submissions, participation_points
+from acrossfc.core.model import Member, PointsCategory
+from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
 
 LOG_FORMAT = (
     "<TEST API> %(asctime)s.%(msecs)03d [%(levelname)s] %(filename)s:%(lineno)d: %(message)s"
@@ -59,9 +60,28 @@ def get_current_submissions_tier():
     return submissions.get_current_submissions_tier()
 
 
-@app.get("/participation_points/{member_id}")
+@app.get("/ppts/{member_id}")
 def get_participation_points(member_id: int, tier: str):
     return participation_points.get_points_for_member(member_id, tier)
+
+
+@app.get("/ppts_leaderboard")
+def get_participation_points_leaderboard(tier: str):
+    return participation_points.get_points_leaderboard(tier)
+
+
+@app.get("/ppts_table")
+def get_participation_points_table():
+    return [
+        {
+            'category_id': category.value,
+            'name': category.name,
+            'description': category.description,
+            'constraints': category.constraints,
+            'points': category.points
+        }
+        for category in PointsCategory
+    ]
 
 
 class ReviewSubmissionsBody(BaseModel):
@@ -80,3 +100,16 @@ def review_submission(body: ReviewSubmissionsBody):
         body.reviewer_id,
         notes=body.notes
     )
+
+
+@app.get("/fc_roster")
+def fc_roster():
+    roster: List[Member] = FFLOGS_CLIENT.get_fc_roster()
+    return [
+        {
+            'member_id': m.fcid,
+            'name': m.name,
+            'rank': m.rank
+        }
+        for m in roster
+    ]

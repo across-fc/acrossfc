@@ -32,3 +32,11 @@ if len(logging.getLogger().handlers) == 0:
     root_logger = logging.getLogger(ROOT_LOGGER_NAME)
 else:
     root_logger = logging.getLogger()
+
+# Silence the aiohttp logger
+aiohttp_logger = logging.getLogger('aiohttp.py')
+aiohttp_logger.setLevel(logging.WARNING)
+for h in aiohttp_logger.handlers:
+    h.setLevel(logging.WARNING)
+
+logging.getLogger('asyncio').setLevel(logging.WARNING)

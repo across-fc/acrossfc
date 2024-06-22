@@ -229,38 +229,3 @@ JOBS = [
 
 NAME_TO_JOB_MAP = {job.name: job for job in JOBS}
 TLA_TO_JOB_MAP = {job.tla: job for job in JOBS}
-
-# -----------------------------------------
-# FC Participation points
-# -----------------------------------------
-
-POINTS = {
-    PointsCategory.FC_PF: 10,
-    PointsCategory.FC_EVENT: 20,
-    PointsCategory.MENTOR_TICKET: 10,
-    PointsCategory.FC_STATIC: 20,
-    PointsCategory.FC_EXTREME: 10,
-    PointsCategory.FC_UNREAL: 10,
-    PointsCategory.FC_SAVAGE: 10,
-    PointsCategory.FC_CRITERION: 10,
-    PointsCategory.FC_CRITERION_SAVAGE: 10,
-    PointsCategory.FC_ULTIMATE: 10,
-    PointsCategory.SAVAGE_1: 10,
-    PointsCategory.SAVAGE_2: 10,
-    PointsCategory.SAVAGE_3: 10,
-    PointsCategory.SAVAGE_4_1: 10,
-    PointsCategory.SAVAGE_4_2: 10,
-    PointsCategory.VET: 10,
-    PointsCategory.CRAFTING_GATHERING: 50,
-    PointsCategory.MENTOR: 25
-}
-
-ONE_TIME_POINTS = [
-    PointsCategory.SAVAGE_1,
-    PointsCategory.SAVAGE_2,
-    PointsCategory.SAVAGE_3,
-    PointsCategory.SAVAGE_4_1,
-    PointsCategory.SAVAGE_4_2,
-    PointsCategory.CRAFTING_GATHERING,
-    PointsCategory.MENTOR
-]

@@ -14,7 +14,6 @@ from acrossfc.core.model import (
     Clear
 )
 from acrossfc.core.constants import (
-    POINTS,
     CURRENT_EXTREMES,
     CURRENT_UNREAL,
     CURRENT_SAVAGES,
@@ -40,13 +39,6 @@ class PointsEvaluator:
         self.eval_fc_high_end_content()
         self.eval_vet_and_first_clears()
 
-        member_id_to_name_map = {
-            m.fcid: m.name
-            for m in self.fc_roster
-        }
-        for pe in self.points_events:
-            LOG.debug(f"{member_id_to_name_map[pe.member_id]}: {pe.category.name} ({pe.points})")
-
     def load_fc_member_ids(self):
         player_names_set = set(self.fight_data.player_names)
         for member in self.fc_roster:
@@ -68,7 +60,7 @@ class PointsEvaluator:
                     PointsEvent(
                         uuid=str(uuid.uuid4()),
                         member_id=member.fcid,
-                        points=POINTS[category],
+                        points=category.points,
                         category=category,
                         description=f"FC PF: {self.fc_pf_id}",
                         ts=int(time.time()),
@@ -115,7 +107,7 @@ class PointsEvaluator:
                 PointsEvent(
                     uuid=str(uuid.uuid4()),
                     member_id=member.fcid,
-                    points=POINTS[category],
+                    points=category.points,
                     category=category,
                     description=description,
                     ts=int(time.time())
@@ -148,7 +140,7 @@ class PointsEvaluator:
                     PointsEvent(
                         uuid=str(uuid.uuid4()),
                         member_id=member.fcid,
-                        points=POINTS[category],
+                        points=category.points,
                         category=category,
                         description=f"First clear: {self.fight_data.encounter.name}",
                         ts=int(time.time()),
