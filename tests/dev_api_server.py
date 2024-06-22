@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from acrossfc.api import submissions, participation_points
 from acrossfc.core.model import Member, PointsCategory
 from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
+from acrossfc.ext.ddb_client import DDB_CLIENT
 
 LOG_FORMAT = (
     "<TEST API> %(asctime)s.%(msecs)03d [%(levelname)s] %(filename)s:%(lineno)d: %(message)s"
@@ -22,7 +23,11 @@ if len(logging.getLogger().handlers) == 0:
 else:
     LOG = logging.getLogger()
 
-app = FastAPI()
+
+logging.getLogger('uvicorn').setLevel(logging.DEBUG)
+
+app = FastAPI(debug=True)
+
 
 origins = [
     "http://localhost:3000",
@@ -45,7 +50,7 @@ def get_submissions(tier: str):
 
 @app.get("/submissions/{uuid}")
 def get_submission_by_id(uuid: str):
-    sub = submissions.get_submissions_by_uuid(uuid)
+    sub = DDB_CLIENT.get_submission_by_uuid(uuid)
     return sub
 
 
@@ -62,7 +67,7 @@ def get_current_submissions_tier():
 
 @app.get("/ppts/{member_id}")
 def get_participation_points(member_id: int, tier: str):
-    return participation_points.get_points_for_member(member_id, tier)
+    return DDB_CLIENT.get_member_points(member_id, tier)
 
 
 @app.get("/ppts_leaderboard")

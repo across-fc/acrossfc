@@ -200,7 +200,7 @@ def review_submission(
         pe_approved = points_event_to_approved[pe['uuid']]
         pe_status = PointsEventStatus.APPROVED if pe_approved else PointsEventStatus.DENIED
         pe['status'] = pe_status.value
-        if pe['approved']:
+        if pe_approved:
             user_points_events_to_commit.append(PointsEvent(
                 uuid=pe['uuid'],
                 member_id=pe['member_id'],
