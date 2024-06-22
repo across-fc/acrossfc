@@ -208,7 +208,8 @@ def review_submission(
                 category=PointsCategory.to_enum(pe['category']),
                 description=pe['description'],
                 ts=pe['ts'],
-                submission_uuid=submission['uuid']
+                submission_uuid=submission['uuid'],
+                status=PointsEventStatus.APPROVED
             ))
 
     commit_member_points_events(user_points_events_to_commit)
