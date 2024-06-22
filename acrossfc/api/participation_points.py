@@ -10,7 +10,7 @@ from acrossfc.core.config import FC_CONFIG
 from acrossfc.core.model import PointsCategory, PointsEvent
 
 
-def add_points(points_events: List[PointsEvent], tier: Optional[str] = FC_CONFIG.current_submissions_tier):
+def commit_points_events(points_events: List[PointsEvent], tier: Optional[str] = FC_CONFIG.current_submissions_tier):
     grouped = groupby(points_events, key=lambda pe: pe.member_id)
 
     for member_id, group in grouped:

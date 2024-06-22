@@ -192,6 +192,15 @@ class PointsEvent:
         return ret
 
 
+class SubmissionsChannel(Enum):
+    FC_PF = 1
+    FC_BOT_FFLOGS = 2
+    FC_BOT_SCREENSHOT = 3
+    FC_BOT_ADMIN = 4
+    ADMIN_PORTAL = 5
+    DEV = 777
+
+
 # -----------------------------------------------
 # Convenience structs and aliases
 # -----------------------------------------------

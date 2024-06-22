@@ -1,6 +1,11 @@
+# stdlib
 import logging
 import logging.config
 
+# Local
+from .utils import setup_utils
+
+# Configure root logger
 ROOT_LOGGER_NAME = 'acrossfc'
 LOG_FORMAT = (
     "%(asctime)s.%(msecs)03d [%(levelname)s] %(filename)s:%(lineno)d: %(message)s"
@@ -33,10 +38,6 @@ if len(logging.getLogger().handlers) == 0:
 else:
     root_logger = logging.getLogger()
 
-# Silence the aiohttp logger
-aiohttp_logger = logging.getLogger('aiohttp.py')
-aiohttp_logger.setLevel(logging.WARNING)
-for h in aiohttp_logger.handlers:
-    h.setLevel(logging.WARNING)
 
-logging.getLogger('asyncio').setLevel(logging.WARNING)
+# Setup util functions and such
+setup_utils()

@@ -10,9 +10,9 @@ from boto3.dynamodb.conditions import Key
 
 # Local
 from acrossfc.core.config import FC_CONFIG
-from acrossfc.core.model import PointsEvent, PointsCategory
+from acrossfc.core.model import PointsEvent, PointsCategory, SubmissionsChannel
 from acrossfc.core.points_evaluator import PointsEvaluator
-from .participation_points import add_points
+from .participation_points import commit_points_events
 
 LOG = logging.getLogger(__name__)
 
@@ -70,7 +70,28 @@ def get_current_submissions_tier():
     return FC_CONFIG.current_submissions_tier
 
 
-def submit_fflogs(fflogs_url: str, fc_pf_id: Optional[str] = None):
+def analyze_fflogs(fflogs_url: str, fc_pf_id: Optional[str] = None):
+    # Get all point events
+    points_events = PointsEvaluator(fflogs_url, fc_pf_id).points_events
+    return [
+        pe.to_json()
+        for pe in points_events
+    ]
+
+
+def submit_manual(category: PointsCategory | int | str, member_ids: List[int]):
+    category = PointsCategory.to_enum(category)
+    # TODO: Implement
+    pass
+
+
+def submit_fflogs(
+    fflogs_url: str,
+    submitted_by_name: str,
+    submission_channel: SubmissionsChannel | int | str,
+    fc_pf_id: Optional[str] = None,
+):
+    submission_channel = SubmissionsChannel.to_enum(submission_channel)
     timestamp = int(time.time())
 
     # Get all point events
@@ -100,8 +121,8 @@ def submit_fflogs(fflogs_url: str, fc_pf_id: Optional[str] = None):
         Item={
             'uuid': submission_uuid,
             'ts': timestamp,
-            # TODO: FIGURE OUT HOW TO GET USER
-            'submitted_by': 'bot',
+            'submitted_by': submitted_by_name,
+            'submission_channel': submission_channel.value,
             'fc_pf_id': fc_pf_id,
             'fflogs_url': fflogs_url,
             'tier': FC_CONFIG.current_submissions_tier,
@@ -146,7 +167,7 @@ def review_submission(
                 reviewed_by=reviewer_id,
             ))
 
-    add_points(points_events_to_add)
+    commit_points_events(points_events_to_add)
 
     submission['last_update_ts'] = int(time.time())
     submission['last_update_by'] = reviewer_id
