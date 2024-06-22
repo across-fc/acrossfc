@@ -1,4 +1,5 @@
 # stdlib
+from datetime import datetime
 from typing import Optional, NamedTuple, Callable, List
 from dataclasses import dataclass, asdict
 from enum import Enum
@@ -132,6 +133,7 @@ class ClearRate(NamedTuple):
 class FFLogsFightData(NamedTuple):
     report_id: str
     encounter: TrackedEncounter
+    start_time: datetime
     player_names: List[str]
 
 

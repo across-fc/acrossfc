@@ -169,9 +169,11 @@ class FFLogsAPIClient:
             query getReportData($report_id: String!, $fight_id: Int!) {
                 reportData {
                     report(code: $report_id) {
+                        startTime,
                         fights(fightIDs: [$fight_id]) {
                             encounterID,
-                            difficulty
+                            difficulty,
+                            startTime
                         }
                         playerDetails(fightIDs: [$fight_id])
                     }
@@ -180,9 +182,16 @@ class FFLogsAPIClient:
             """
         query = gql(query_str)
         result = self.gql_client.execute(query, variable_values={"report_id": report_id, "fight_id": fight_id})
+        report_start_time_ms = result["reportData"]["report"]["startTime"]
         fight_data = result["reportData"]["report"]["fights"][0]
         encounter_id = fight_data["encounterID"]
         difficulty_id = fight_data["difficulty"]
+        fight_start_time_relative_ms = fight_data["startTime"]
+        start_time = datetime.fromtimestamp(
+            # Python takes in seconds, API returns milliseconds
+            (report_start_time_ms + fight_start_time_relative_ms)
+            / 1000
+        )
         player_details = result["reportData"]["report"]["playerDetails"]["data"]["playerDetails"]
         player_names = [player["name"] for role in player_details for player in player_details[role]]
 
@@ -195,7 +204,7 @@ class FFLogsAPIClient:
                     difficulty_id == e.difficulty_id
                 )
             ):
-                return FFLogsFightData(report_id, e, player_names)
+                return FFLogsFightData(report_id, e, start_time, player_names)
 
         return None
 

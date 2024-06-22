@@ -3,6 +3,7 @@ import uuid
 import time
 import logging
 from typing import Optional, List
+from datetime import timedelta
 
 # Local
 from acrossfc.core.model import (
@@ -128,8 +129,11 @@ class PointsEvaluator:
         for member in self.fc_members_in_fight:
             clears: List[Clear] = FFLOGS_CLIENT.get_clears_for_member(member, [self.fight_data.encounter])
 
-            current_clear: Clear = next(filter(lambda c: c.report_code == self.fight_data.report_id, clears))
-            prior_clears: List[Clear] = [c for c in clears if c.start_time < current_clear.start_time]
+            prior_clears: List[Clear] = [
+                c for c in clears
+                # Only count clears older than 1 minute ago from this clear - buffer added for safety
+                if c.start_time < (self.fight_data.start_time - timedelta(seconds=60))
+            ]
 
             if len(prior_clears) > 0:
                 veteran_members.append(member)
