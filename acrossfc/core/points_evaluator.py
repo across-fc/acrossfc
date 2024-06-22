@@ -6,6 +6,7 @@ from typing import Optional, List
 from datetime import timedelta
 
 # Local
+from acrossfc.core.config import FC_CONFIG
 from acrossfc.core.model import (
     PointsEvent,
     Member,
@@ -22,6 +23,7 @@ from acrossfc.core.constants import (
     ULTIMATES
 )
 from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
+from acrossfc.ext.ddb_client import DDB_CLIENT
 
 LOG = logging.getLogger(__name__)
 
@@ -64,7 +66,6 @@ class PointsEvaluator:
                         category=category,
                         description=f"FC PF: {self.fc_pf_id}",
                         ts=int(time.time()),
-                        fc_pf_id=self.fc_pf_id
                     )
                 )
 
@@ -136,6 +137,13 @@ class PointsEvaluator:
         if self.fight_data.encounter in CURRENT_SAVAGE_TO_POINTS_CATEGORY:
             category = CURRENT_SAVAGE_TO_POINTS_CATEGORY[self.fight_data.encounter]
             for member in first_clear_members:
+                # Extra check: If member has already been awarded one-time points, skip this one.
+                member_points = DDB_CLIENT.get_member_points(member.fcid, tier=FC_CONFIG.current_submissions_tier)
+                one_time_points_exist = member_points is not None and category in member_points['one_time']
+                if one_time_points_exist:
+                    LOG.info(f"{member.fcid} has already been awarded points for {category.name}. Skipping.")
+                    continue
+
                 self.points_events.append(
                     PointsEvent(
                         uuid=str(uuid.uuid4()),
@@ -144,7 +152,6 @@ class PointsEvaluator:
                         category=category,
                         description=f"First clear: {self.fight_data.encounter.name}",
                         ts=int(time.time()),
-                        fc_pf_id=self.fc_pf_id
                     )
                 )
 
@@ -158,6 +165,5 @@ class PointsEvaluator:
                         category=PointsCategory.VET,
                         description=f"Veteran support: {self.fight_data.encounter.name}",
                         ts=int(time.time()),
-                        fc_pf_id=self.fc_pf_id
                     )
                 )

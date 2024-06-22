@@ -170,6 +170,13 @@ class PointsCategory(Enum):
         return self in one_time_points
 
 
+class PointsEventStatus(Enum):
+    PENDING = 0
+    APPROVED = 1
+    DENIED = 2
+    ONE_TIME_POINTS_ALREADY_AWARDED = 3
+
+
 @dataclass
 class PointsEvent:
     uuid: str
@@ -179,16 +186,24 @@ class PointsEvent:
     description: str
     ts: int
     submission_uuid: Optional[str] = None
-    fc_pf_id: Optional[str] = None
-    approved: Optional[bool] = None
-    reviewed_by: Optional[int] = None
+    status: PointsEventStatus = PointsEventStatus.PENDING
 
     def __repr__(self):
         return f"{self.member_id}: {self.category.name} ({self.points})"
 
-    def to_json(self):
+    def to_user_json(self):
         ret = asdict(self)
         ret['category'] = self.category.value
+        # Keep submission ID but remove status
+        del ret['status']
+        return ret
+
+    def to_submission_json(self):
+        ret = asdict(self)
+        ret['category'] = self.category.value
+        # Keep status but remove submissions ID
+        ret['status'] = self.status.value
+        del ret['submission_uuid']
         return ret
 
 
