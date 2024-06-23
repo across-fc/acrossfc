@@ -1,6 +1,9 @@
 # stdlib
 import os
+import logging
 import configparser
+
+LOG = logging.getLogger(__name__)
 
 
 class FCConfig:
@@ -56,6 +59,17 @@ class FCConfig:
             raise RuntimeError(
                 f's3_cleardb_bucket_name is missing from the configs {fc_config_filename}'
             )
+
+        # Parse admin discord IDs
+        fc_admin_ids = default_configs.get("fc_admin_ids", None)
+        if fc_admin_ids is not None:
+            self.fc_admin_ids = [
+                int(i.strip())
+                for i in fc_admin_ids.split(',')
+            ]
+        else:
+            LOG.info("No admin IDs configured. Auto-approve will be disabled.")
+            self.fc_admin_ids = []
 
         # Set flag
         self.initialized = True

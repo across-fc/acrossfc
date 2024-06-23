@@ -18,4 +18,3 @@ build/
 # Test files
 *.ipynb
 .test_files
-tests/

@@ -1,9 +1,9 @@
 import click
 import logging
-from typing import NamedTuple, Callable
 
 # Local
 from acrossfc import root_logger
+from acrossfc.core.model import CommandConfig
 from .update_fflogs_fc import update_fflogs_fc
 from .fc_clears_etl import fc_clears_etl
 from .fc_roster_etl import fc_roster_etl
@@ -17,26 +17,21 @@ def etl(verbose):
         root_logger.setLevel(logging.DEBUG)
 
 
-class JobConfig(NamedTuple):
-    func: Callable
-    help: str
-
-
-CMD_TO_JOB_CONFIG_MAP = {
-    'update-fflogs-fc': JobConfig(
+NAME_TO_CMD_CONFIG_MAP = {
+    'update-fflogs-fc': CommandConfig(
         update_fflogs_fc,
         'Triggers an update on the FC roster on FFLogs'
     ),
-    'fc-roster-etl': JobConfig(
+    'fc-roster-etl': CommandConfig(
         fc_roster_etl,
         'Runs the FC roster ETL job'
     ),
-    'clears-etl': JobConfig(
+    'clears-etl': CommandConfig(
         fc_clears_etl,
         'Runs the FFLogs clear data ETL job'
     ),
 }
 
-for cmd_name, job_cfg in CMD_TO_JOB_CONFIG_MAP.items():
-    job_func = job_cfg.func
-    etl.command(name=cmd_name, help=job_cfg.help)(job_func)
+for cmd_name, cmd_cfg in NAME_TO_CMD_CONFIG_MAP.items():
+    func = cmd_cfg.func
+    etl.command(name=cmd_name, help=cmd_cfg.help)(func)

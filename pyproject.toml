@@ -28,13 +28,14 @@ dependencies = [
 dev = [
     "awscli",
     "boto3",
-    "pytest"
+    "pytest",
+    "fastapi"
 ]
 
 [project.scripts]
 etl = "acrossfc.etl:etl"
 axr = "acrossfc.analytics:axr"
-axs = "acrossfc.api.submissions:axs"
+axs = "acrossfc.api:axs"
 
 [tool.setuptools.packages.find]
 include = ["acrossfc*"]

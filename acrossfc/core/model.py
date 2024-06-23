@@ -1,6 +1,7 @@
 # stdlib
-from typing import NamedTuple, List
-from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional, NamedTuple, Callable, List
+from dataclasses import dataclass, asdict
 from enum import Enum
 
 # 3rd-party
@@ -43,6 +44,9 @@ class TrackedEncounter(Model):
         return str(self)
 
 
+TrackedEncounterName = str
+
+
 class JobCategory(Model):
     name = CharField(32, primary_key=True)
     long_name = CharField(64)
@@ -72,7 +76,6 @@ class Clear(Model):
 
 class PointsCategory(Enum):
     FC_PF = 100
-    FC_EVENT = 101
     MENTOR_TICKET = 102
     FC_STATIC = 103
     FC_EXTREME = 200
@@ -81,31 +84,136 @@ class PointsCategory(Enum):
     FC_CRITERION = 203
     FC_CRITERION_SAVAGE = 204
     FC_ULTIMATE = 205
-    SAVAGE_1 = 301
-    SAVAGE_2 = 302
-    SAVAGE_3 = 303
-    SAVAGE_4_1 = 304
-    SAVAGE_4_2 = 305
+    SAVAGE_1 = 310
+    SAVAGE_2 = 320
+    SAVAGE_3 = 330
+    SAVAGE_4_1 = 340
+    SAVAGE_4_2 = 341
     VET = 400
     CRAFTING_GATHERING = 401
     MENTOR = 402
 
+    @property
+    def description(self):
+        descriptions = {
+            self.FC_PF: "FC PF Listing",
+            self.MENTOR_TICKET: "Put in and finish a mentor ticket",
+            self.FC_STATIC: "Be a part of a full / partial FC Savage / Ultimate static",
+            self.FC_EXTREME: "FC EX party",
+            self.FC_UNREAL: "FC Unreal party",
+            self.FC_SAVAGE: "FC Savage party",
+            self.FC_CRITERION: "FC Criterion party",
+            self.FC_CRITERION_SAVAGE: "FC Criterion Savage party",
+            self.FC_ULTIMATE: "FC Ultimate party",
+            self.SAVAGE_1: "Clear the first floor of Savage",
+            self.SAVAGE_2: "Clear the second floor of Savage",
+            self.SAVAGE_3: "Clear the third floor of Savage",
+            self.SAVAGE_4_1: "Clear the door boos on the fourth floor of Savage",
+            self.SAVAGE_4_2: "Clear the fourth floor of Savage",
+            self.VET: "Veteran award: Helping with a first-clear",
+            self.CRAFTING_GATHERING: "Crafting / Gathering team member",
+            self.MENTOR: "Mentor"
+        }
+        return descriptions[self]
+
+    @property
+    def constraints(self):
+        constraints = {
+            self.FC_EXTREME: "4+ FC, non-static",
+            self.FC_UNREAL: "4+ FC, non-static",
+            self.FC_SAVAGE: "4+ FC, non-static",
+            self.FC_CRITERION: "4+ FC, non-static",
+            self.FC_CRITERION_SAVAGE: "4+ FC, non-static",
+            self.FC_ULTIMATE: "4+ FC, non-static",
+            self.SAVAGE_1: "One-time only",
+            self.SAVAGE_2: "One-time only",
+            self.SAVAGE_3: "One-time only",
+            self.SAVAGE_4_1: "One-time only",
+            self.SAVAGE_4_2: "One-time only",
+        }
+        return constraints.get(self, None)
+
+    @property
+    def points(self):
+        points = {
+            self.FC_PF: 10,
+            self.MENTOR_TICKET: 10,
+            self.FC_STATIC: 20,
+            self.FC_EXTREME: 10,
+            self.FC_UNREAL: 10,
+            self.FC_SAVAGE: 10,
+            self.FC_CRITERION: 10,
+            self.FC_CRITERION_SAVAGE: 10,
+            self.FC_ULTIMATE: 10,
+            self.SAVAGE_1: 10,
+            self.SAVAGE_2: 10,
+            self.SAVAGE_3: 10,
+            self.SAVAGE_4_1: 10,
+            self.SAVAGE_4_2: 10,
+            self.VET: 10,
+            self.CRAFTING_GATHERING: 50,
+            self.MENTOR: 25
+        }
+        return points[self]
+
+    @property
+    def is_one_time(self):
+        one_time_points = [
+            self.SAVAGE_1,
+            self.SAVAGE_2,
+            self.SAVAGE_3,
+            self.SAVAGE_4_1,
+            self.SAVAGE_4_2,
+            self.CRAFTING_GATHERING,
+            self.MENTOR
+        ]
+        return self in one_time_points
+
+
+class PointsEventStatus(Enum):
+    PENDING = 0
+    APPROVED = 1
+    DENIED = 2
+    ONE_TIME_POINTS_ALREADY_AWARDED = 3
+
 
 @dataclass
-class PointEvent:
+class PointsEvent:
+    uuid: str
     member_id: int
+    points: int
     category: PointsCategory
     description: str
-    points: int
+    ts: int
+    submission_uuid: Optional[str] = None
+    status: PointsEventStatus = PointsEventStatus.PENDING
 
     def __repr__(self):
         return f"{self.member_id}: {self.category.name} ({self.points})"
 
+    def to_user_json(self):
+        ret = asdict(self)
+        ret['category'] = self.category.value
+        # Keep submission ID but remove status
+        del ret['status']
+        return ret
 
-class PointsEventStatus(Enum):
-    UNAPPROVED = 0
-    APPROVED = 1
-    REJECTED = 2
+    def to_submission_json(self):
+        ret = asdict(self)
+        ret['category'] = self.category.value
+        # Keep status but remove submissions ID
+        ret['status'] = self.status.value
+        del ret['submission_uuid']
+        return ret
+
+
+class SubmissionsChannel(Enum):
+    FC_PF = 1
+    FC_BOT_FFLOGS = 2
+    FC_BOT_SCREENSHOT = 3
+    FC_BOT_ADMIN = 4
+    ADMIN_PORTAL = 5
+    DEV = 777
 
 
 # -----------------------------------------------
@@ -122,10 +230,20 @@ class ClearRate(NamedTuple):
 
 
 class FFLogsFightData(NamedTuple):
-    encounter_id: int
-    difficulty_id: int
+    report_id: str
+    encounter: TrackedEncounter
+    start_time: datetime
     player_names: List[str]
 
 
-TrackedEncounterName = str
-TierName = str
+class CommandConfig(NamedTuple):
+    func: Callable
+    help: str
+    decorators: List[Callable] = []
+    # e.g.
+    # [
+    #     click.option(...),
+    #     click.option(...),
+    #     click.pass_context,
+    #     ...
+    # ]
