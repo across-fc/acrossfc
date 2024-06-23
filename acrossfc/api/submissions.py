@@ -109,6 +109,7 @@ def submit_manual(
         raise ValueError(f"{auto_approve_admin_id} is not a recognized admin ID.")
 
     submission_uuid = str(uuid.uuid4())
+    submission_channel = SubmissionsChannel.to_enum(submission_channel)
 
     points_events = []
     for pc in point_categories_to_member_ids_map:
@@ -129,10 +130,15 @@ def submit_manual(
 
     # Note: The order of operations is important here.
     # First try to commit member points and catch any dedupes, then add the submission, then add to queue if necessary.
+    timestamp = int(time.time())
+    last_update_ts = None
+    last_update_by = None
+
     if auto_approve:
         commit_member_points_events(points_events)
+        last_update_ts = timestamp
+        last_update_by = auto_approve_admin_id
 
-    timestamp = int(time.time())
     DDB_CLIENT.upsert_submission({
         'uuid': submission_uuid,
         'ts': timestamp,
@@ -144,8 +150,8 @@ def submit_manual(
         'fflogs_url': fflogs_url,
         'tier': FC_CONFIG.current_submissions_tier,
         'points_events': [pe.to_submission_json() for pe in points_events],
-        'last_update_ts': None,
-        'last_update_by': None,
+        'last_update_ts': last_update_ts,
+        'last_update_by': last_update_by,
         'notes': notes
     })
 

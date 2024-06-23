@@ -1,6 +1,6 @@
 # stdlib
 import logging
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 
 # 3rd-party
 from fastapi import FastAPI
@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 # Local
 from acrossfc.api import submissions, participation_points
-from acrossfc.core.model import Member, PointsCategory
+from acrossfc.core.model import Member, PointsCategory, SubmissionsChannel
 from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
 from acrossfc.ext.ddb_client import DDB_CLIENT
 
@@ -74,6 +74,41 @@ class EvaluateFFLogsBody(BaseModel):
 @app.post("/submissions/evaluate")
 def evaluate_fflogs(body: EvaluateFFLogsBody):
     return submissions.evaluate_fflogs(body.fflogs_url, body.is_fc_pf, body.is_static)
+
+
+class SubmitManualBody(BaseModel):
+    point_categories_to_member_ids_map: Dict[Union[int, str], List[int]]
+    submitted_by_name: str
+    submission_channel: Union[int, str]
+    is_static: bool
+    is_fc_pf: bool
+    fflogs_url: Optional[str] = None
+    fc_pf_id: Optional[str] = None
+    auto_approve_admin_id: Optional[int] = None
+    notes: Optional[str] = None
+
+
+@app.post("/submissions/manual")
+def submit_manual(body: SubmitManualBody):
+    return submissions.submit_manual(
+        point_categories_to_member_ids_map={
+            PointsCategory.to_enum(pc): body.point_categories_to_member_ids_map[pc]
+            for pc in body.point_categories_to_member_ids_map
+        },
+        submitted_by_name=body.submitted_by_name,
+        submission_channel=SubmissionsChannel.to_enum(body.submission_channel),
+        is_static=body.is_static,
+        is_fc_pf=body.is_fc_pf,
+        fflogs_url=body.fflogs_url,
+        fc_pf_id=body.fc_pf_id,
+        auto_approve_admin_id=body.auto_approve_admin_id,
+        notes=body.notes
+    )
+
+
+@app.post("/submissions/fflogs")
+def submit_fflogs():
+    pass
 
 
 @app.get("/ppts")
