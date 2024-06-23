@@ -82,8 +82,7 @@ def lambda_handler(event, context):
                 eval_results = submissions.evaluate_fflogs(**data)
                 resp_data = eval_results
             elif PATH[1] == "fflogs":
-                # TODO:
-                logging.info("Not implemented yet.")
+                submissions.submit_fflogs(**data)
                 resp_data = RESP_200_JSON
             elif PATH[1] == "manual":
                 submissions.submit_manual(**data)
