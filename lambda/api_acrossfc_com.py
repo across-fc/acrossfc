@@ -7,7 +7,7 @@ from decimal import Decimal
 from collections.abc import MutableMapping, MutableSequence
 
 # Local
-from acrossfc.api import submissions, participation_points
+from acrossfc.api import submissions, participation_points, fc_roster
 from acrossfc.core.model import Member, PointsCategory
 from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
 from acrossfc.ext.ddb_client import DDB_CLIENT
@@ -47,15 +47,7 @@ def lambda_handler(event, context):
     # TODO: Auth
 
     if PATH[0] == "fc_roster":
-        roster: List[Member] = FFLOGS_CLIENT.get_fc_roster()
-        resp_data = [
-            {
-                'member_id': m.fcid,
-                'name': m.name,
-                'rank': m.rank
-            }
-            for m in roster
-        ]
+        resp_data = fc_roster.get_fc_roster()
 
     if PATH[0] == "current_tier":
         resp_data = submissions.get_current_submissions_tier()
@@ -91,7 +83,12 @@ def lambda_handler(event, context):
     if PATH[0] == "ppts":
         if http_method == 'GET':
             if len(PATH) == 1:
-                resp_data = DDB_CLIENT.get_member_points(**qs_params)
+                if 'member_id' in qs_params:
+                    # TODO: Figure out a cleaner solution
+                    qs_params['member_id'] = int(qs_params['member_id'])
+                    resp_data = participation_points.get_points_for_member(**qs_params)
+                elif 'member_name' in qs_params:
+                    resp_data = participation_points.get_points_for_member_by_name(**qs_params)
             elif PATH[1] == "leaderboard":
                 resp_data = participation_points.get_points_leaderboard(**qs_params)
             elif PATH[1] == "table":

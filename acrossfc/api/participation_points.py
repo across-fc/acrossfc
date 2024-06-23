@@ -6,6 +6,7 @@ from typing import Optional, List
 # Local
 from acrossfc.core.config import FC_CONFIG
 from acrossfc.core.model import PointsCategory, PointsEvent, PointsEventStatus
+from acrossfc.api.fc_roster import get_member_id_by_name
 from acrossfc.ext.ddb_client import DDB_CLIENT
 
 LOG = logging.getLogger(__name__)
@@ -39,6 +40,17 @@ def commit_member_points_events(
                 member_points['total_points'] += pe.points
 
         DDB_CLIENT.update_member_points(member_points)
+
+
+def get_points_for_member(member_id: int, tier: str):
+    return DDB_CLIENT.get_member_points(member_id, tier)
+
+
+def get_points_for_member_by_name(member_name: str, tier: str):
+    member_id = get_member_id_by_name(member_name)
+    if member_id is None:
+        return None
+    return DDB_CLIENT.get_member_points(member_id, tier)
 
 
 def remove_one_time_points(member_id: int, tier: str, category: PointsCategory):
