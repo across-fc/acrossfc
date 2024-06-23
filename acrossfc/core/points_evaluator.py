@@ -29,9 +29,17 @@ LOG = logging.getLogger(__name__)
 
 
 class PointsEvaluator:
-    def __init__(self, fflogs_url: str, fc_pf_id: Optional[str]):
+    def __init__(
+        self,
+        fflogs_url: str,
+        is_fc_pf: bool,
+        is_static: bool,
+        fc_pf_id: Optional[str]
+    ):
         self.fight_data: FFLogsFightData = FFLOGS_CLIENT.get_fight_data(fflogs_url)
         self.fc_roster: List[Member] = FFLOGS_CLIENT.get_fc_roster()
+        self.is_fc_pf = is_fc_pf
+        self.is_static = is_static
         self.fc_pf_id = fc_pf_id
         self.fc_members_in_fight: List[Member] = []
         self.points_events = []
@@ -55,7 +63,7 @@ class PointsEvaluator:
         """
         Participate in ANY FC PF listing (10)
         """
-        if self.fc_pf_id is not None:
+        if self.is_fc_pf:
             for member in self.fc_members_in_fight:
                 category = PointsCategory.FC_PF
                 self.points_events.append(
@@ -64,7 +72,7 @@ class PointsEvaluator:
                         member_id=member.fcid,
                         points=category.points,
                         category=category,
-                        description=f"FC PF: {self.fc_pf_id}",
+                        description=f"FC PF: {self.fc_pf_id or 'Unknown'}",
                         ts=int(time.time()),
                     )
                 )
@@ -75,6 +83,10 @@ class PointsEvaluator:
         Full or partial FC party (full-lockout or clear)
         STATICS DO NOT COUNT (10)
         """
+        if self.is_static:
+            LOG.info("Statics do not qualify for FC high-end content points. Skipping.")
+            return
+
         full_or_partial_fc = (len(self.fc_members_in_fight) >= 4)
 
         # TODO: How to scan for statics? By frequency?

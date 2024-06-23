@@ -16,9 +16,11 @@ def axs(verbose):
 
 
 cmd = submit_fflogs
-cmd = click.option('-u', '--fflogs-url', required=True)(cmd)
-cmd = click.option('-s', '--submitted-by-name', required=True)(cmd)
+cmd = click.option('-l', '--fflogs-url', required=True)(cmd)
+cmd = click.option('-u', '--submitted-by-name', required=True)(cmd)
 cmd = click.option('-c', '--submission-channel', required=True)(cmd)
+cmd = click.option('--is-static', is_flag=True, default=False)(cmd)
+cmd = click.option('--is-fc-pf', is_flag=True, default=False)(cmd)
 cmd = click.option('-i', '--fc-pf-id')(cmd)
 axs.command(
     name='submit-fflogs',

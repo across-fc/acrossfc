@@ -65,17 +65,28 @@ def get_current_submissions_tier():
     return submissions.get_current_submissions_tier()
 
 
-@app.get("/ppts/{member_id}")
+class EvaluateFFLogsBody(BaseModel):
+    fflogs_url: str
+    is_fc_pf: bool
+    is_static: bool
+
+
+@app.post("/submissions/evaluate")
+def evaluate_fflogs(body: EvaluateFFLogsBody):
+    return submissions.evaluate_fflogs(body.fflogs_url, body.is_fc_pf, body.is_static)
+
+
+@app.get("/ppts")
 def get_participation_points(member_id: int, tier: str):
     return DDB_CLIENT.get_member_points(member_id, tier)
 
 
-@app.get("/ppts_leaderboard")
+@app.get("/ppts/leaderboard")
 def get_participation_points_leaderboard(tier: str):
     return participation_points.get_points_leaderboard(tier)
 
 
-@app.get("/ppts_table")
+@app.get("/ppts/table")
 def get_participation_points_table():
     return [
         {

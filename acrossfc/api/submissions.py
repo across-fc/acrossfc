@@ -71,11 +71,16 @@ def get_current_submissions_tier():
     return FC_CONFIG.current_submissions_tier
 
 
-def analyze_fflogs(fflogs_url: str, fc_pf_id: Optional[str] = None):
+def evaluate_fflogs(
+    fflogs_url: str,
+    is_fc_pf: bool,
+    is_static: bool,
+    fc_pf_id: Optional[str] = None
+):
     # Get all point events
-    points_events = PointsEvaluator(fflogs_url, fc_pf_id).points_events
+    points_events = PointsEvaluator(fflogs_url, is_fc_pf, is_static, fc_pf_id).points_events
     return [
-        pe.to_json()
+        pe.to_submission_json()
         for pe in points_events
     ]
 
@@ -84,6 +89,8 @@ def submit_manual(
     point_categories_to_member_ids_map: Dict[PointsCategoryLike, List[int]],
     submitted_by_name: str,
     submission_channel: SubmissionsChannelLike,
+    is_static: bool,
+    is_fc_pf: bool,
     fflogs_url: Optional[str] = None,
     fc_pf_id: Optional[str] = None,
     auto_approve_admin_id: Optional[int] = None,
@@ -131,6 +138,8 @@ def submit_manual(
         'ts': timestamp,
         'submitted_by': submitted_by_name,
         'submission_channel': submission_channel.value,
+        'is_ic_pf': is_fc_pf,
+        'is_static': is_static,
         'fc_pf_id': fc_pf_id,
         'fflogs_url': fflogs_url,
         'tier': FC_CONFIG.current_submissions_tier,
@@ -151,13 +160,15 @@ def submit_fflogs(
     fflogs_url: str,
     submitted_by_name: str,
     submission_channel: SubmissionsChannelLike,
+    is_static: bool,
+    is_fc_pf: bool,
     fc_pf_id: Optional[str] = None,
 ):
     submission_channel = SubmissionsChannel.to_enum(submission_channel)
     timestamp = int(time.time())
 
     # Get all point events
-    points_events: List[PointsEvent] = PointsEvaluator(fflogs_url, fc_pf_id).points_events
+    points_events: List[PointsEvent] = PointsEvaluator(fflogs_url, is_fc_pf, is_static, fc_pf_id).points_events
 
     if len(points_events) == 0:
         LOG.info("No points were awarded for this fight.")
@@ -171,6 +182,8 @@ def submit_fflogs(
         'ts': timestamp,
         'submitted_by': submitted_by_name,
         'submission_channel': submission_channel.value,
+        'is_ic_pf': is_fc_pf,
+        'is_static': is_static,
         'fc_pf_id': fc_pf_id,
         'fflogs_url': fflogs_url,
         'tier': FC_CONFIG.current_submissions_tier,
