@@ -12,7 +12,7 @@ pip install .
 TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
 LAYER_FILENAME=acrossfc-${TIMESTAMP}.zip
 zip -r $LAYER_FILENAME $BUILD_ENV
-aws --profile acrossfc s3 cp $LAYER_FILENAME s3://acrossfc-lambda/$LAYER_FILENAME
+aws --profile acrossfc s3 cp $LAYER_FILENAME s3://ax-engineering/$LAYER_FILENAME
 
 # Cleanup
 rm -fr $BUILD_ENV
