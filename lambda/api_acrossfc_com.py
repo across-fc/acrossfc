@@ -73,8 +73,10 @@ def lambda_handler(event, context):
         LOG.error(f"Error while trying to authorize with Discord. {d_resp.text}")
         return response(401)
 
-    if d_resp['id'] not in FC_CONFIG.allowed_discord_id_list:
-        LOG.warn(f"Discord user {d_resp['name']} ({d_resp['id']}) tried to access the API.")
+    discord_id = d_resp.json()['id']
+    discord_name = d_resp.json()['username']
+    if discord_id not in FC_CONFIG.allowed_discord_id_list:
+        LOG.warn(f"Discord user {discord_name} ({discord_id}) tried to access the API.")
         return response(403)
     # END Auth ------------------------
 
