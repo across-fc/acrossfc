@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # Local
-from acrossfc.api import submissions, participation_points
+from acrossfc.api import submissions, participation_points, fc_roster
 from acrossfc.core.model import Member, PointsCategory, SubmissionsChannel
 from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
 from acrossfc.ext.ddb_client import DDB_CLIENT
@@ -54,15 +54,33 @@ def get_submission_by_id(uuid: str):
     return sub
 
 
-@app.get("/submissions_queue")
+@app.get("/submissions/queue")
 def get_submissions_queue():
     queue = submissions.get_submissions_queue()
     return queue
 
 
-@app.get("/current_submissions_tier")
+@app.get("/current_tier")
 def get_current_submissions_tier():
     return submissions.get_current_submissions_tier()
+
+
+class ReviewSubmissionsBody(BaseModel):
+    submission_uuid: str
+    points_event_to_approved: Dict[str, bool]
+    reviewer_id: int
+    notes: Optional[str] = None
+
+
+@app.post("/submissions/review")
+def review_submission(body: ReviewSubmissionsBody):
+    LOG.info(body)
+    return submissions.review_submission(
+        body.submission_uuid,
+        body.points_event_to_approved,
+        body.reviewer_id,
+        notes=body.notes
+    )
 
 
 class EvaluateFFLogsBody(BaseModel):
@@ -74,6 +92,27 @@ class EvaluateFFLogsBody(BaseModel):
 @app.post("/submissions/evaluate")
 def evaluate_fflogs(body: EvaluateFFLogsBody):
     return submissions.evaluate_fflogs(body.fflogs_url, body.is_fc_pf, body.is_static)
+
+
+class SubmitFFLogsBody(BaseModel):
+    fflogs_url: str
+    submitted_by_name: str
+    submission_channel: Union[int, str]
+    is_static: bool
+    is_fc_pf: bool
+    fc_pf_id: Optional[str] = None,
+
+
+@app.post("/submissions/fflogs")
+def submit_fflogs(body: SubmitFFLogsBody):
+    return submissions.submit_fflogs(
+        fflogs_url=body.fflogs_url,
+        submitted_by_name=body.submitted_by_name,
+        submission_channel=SubmissionsChannel.to_enum(body.submission_channel),
+        is_fc_pf=body.is_fc_pf,
+        is_static=body.is_static,
+        fc_pf_id=body.fc_pf_id
+    )
 
 
 class SubmitManualBody(BaseModel):
@@ -106,11 +145,6 @@ def submit_manual(body: SubmitManualBody):
     )
 
 
-@app.post("/submissions/fflogs")
-def submit_fflogs():
-    pass
-
-
 @app.get("/ppts")
 def get_participation_points(member_id: int, tier: str):
     return DDB_CLIENT.get_member_points(member_id, tier)
@@ -135,32 +169,6 @@ def get_participation_points_table():
     ]
 
 
-class ReviewSubmissionsBody(BaseModel):
-    submission_uuid: str
-    points_event_to_approved: Dict[str, bool]
-    reviewer_id: int
-    notes: Optional[str] = None
-
-
-@app.post("/review_submission")
-def review_submission(body: ReviewSubmissionsBody):
-    LOG.info(body)
-    return submissions.review_submission(
-        body.submission_uuid,
-        body.points_event_to_approved,
-        body.reviewer_id,
-        notes=body.notes
-    )
-
-
 @app.get("/fc_roster")
-def fc_roster():
-    roster: List[Member] = FFLOGS_CLIENT.get_fc_roster()
-    return [
-        {
-            'member_id': m.fcid,
-            'name': m.name,
-            'rank': m.rank
-        }
-        for m in roster
-    ]
+def get_fc_roster():
+    return fc_roster.get_fc_roster()
