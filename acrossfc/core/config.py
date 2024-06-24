@@ -3,6 +3,9 @@ import os
 import logging
 import configparser
 
+# Local
+from acrossfc import ENV
+
 LOG = logging.getLogger(__name__)
 
 
@@ -81,5 +84,4 @@ class FCConfig:
 
 
 fc_config_filename = os.environ.get('AX_FC_CONFIG', '.fcconfig')
-env = os.environ.get('AX_ENV', 'TEST')
-FC_CONFIG = FCConfig(fc_config_filename, env)
+FC_CONFIG = FCConfig(fc_config_filename, ENV)

@@ -1,26 +1,15 @@
 # stdlib
+import os
 import re
 import json
-import logging
-from typing import List
 from decimal import Decimal
 from collections.abc import MutableMapping, MutableSequence
 
 # Local
+from acrossfc import root_logger as LOG
 from acrossfc.api import submissions, participation_points, fc_roster
-from acrossfc.core.model import Member, PointsCategory
-from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
+from acrossfc.core.model import PointsCategory
 from acrossfc.ext.ddb_client import DDB_CLIENT
-
-
-RESP_200_JSON = {
-    'statusCode': 200,
-    'body': 'OK'
-}
-RESP_404_JSON = {
-    'statusCode': 404,
-    'body': 'Not found'
-}
 
 
 def convert_decimals_to_int(obj):
@@ -42,9 +31,10 @@ def lambda_handler(event, context):
     PATH = raw_path.split('/')[1:]
     http_method = event['requestContext']['http']['method']
     qs_params = event.get('queryStringParameters', {})
-    resp_data = event
+    resp_data = None
 
     # TODO: Auth
+
 
     if PATH[0] == "fc_roster":
         resp_data = fc_roster.get_fc_roster()
@@ -75,10 +65,10 @@ def lambda_handler(event, context):
                 resp_data = eval_results
             elif PATH[1] == "fflogs":
                 submissions.submit_fflogs(**data)
-                resp_data = RESP_200_JSON
+                resp_data = {}
             elif PATH[1] == "manual":
                 submissions.submit_manual(**data)
-                resp_data = RESP_200_JSON
+                resp_data = {}
 
     if PATH[0] == "ppts":
         if http_method == 'GET':
@@ -103,8 +93,15 @@ def lambda_handler(event, context):
                     for category in PointsCategory
                 ]
 
+    if resp_data is None:
+        statusCode = 404
+        if os.environ.get('AX_ENV') == "TEST":
+            resp_data = event
+    else:
+        statusCode = 200
+
     resp = {
-        'statusCode': 200,
+        'statusCode': statusCode,
         'headers': {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Headers': 'Content-Type',

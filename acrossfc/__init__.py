@@ -1,4 +1,5 @@
 # stdlib
+import os
 import logging
 import logging.config
 
@@ -38,6 +39,7 @@ if len(logging.getLogger().handlers) == 0:
 else:
     root_logger = logging.getLogger()
 
+ENV = os.environ.get('AX_ENV', 'TEST')
 
 # Setup util functions and such
 setup_utils()
