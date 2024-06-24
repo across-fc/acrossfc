@@ -3,7 +3,6 @@ import os
 import re
 import json
 import requests
-import logging
 from typing import Optional, Dict
 from decimal import Decimal
 from collections.abc import MutableMapping, MutableSequence
@@ -18,7 +17,7 @@ from acrossfc.ext.ddb_client import DDB_CLIENT
 
 def response(status_code: int, msg: Optional[str] = None, data: Optional[Dict] = None):
     headers = {
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type,X-AX-DACCESS-TOKEN,X-AX-DBOT-TOKEN',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
     }
@@ -51,10 +50,12 @@ def convert_decimals_to_int(obj):
 
 
 def lambda_handler(event, context):
-    LOG.setLevel(logging.INFO)
+    http_method = event['requestContext']['http']['method']
+    if http_method == 'OPTIONS':
+        return response(204)
+
     raw_path = event['rawPath']
     PATH = raw_path.split('/')[1:]
-    http_method = event['requestContext']['http']['method']
     qs_params = event.get('queryStringParameters', {})
 
     # BEGIN Auth ------------------------
