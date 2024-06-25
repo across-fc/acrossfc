@@ -14,19 +14,28 @@ from acrossfc.core.model import PointsCategory
 from acrossfc.core.config import FC_CONFIG
 from acrossfc.ext.ddb_client import DDB_CLIENT
 
+ALLOWED_HEADER_NAMES = [
+    'Content-Type',
+    'X-Amz-Date',
+    'Authorization',
+    'X-Api-Key',
+    'X-Amz-Security-Token',
+    'X-AX-DACCESS-TOKEN',
+    'X-AX-DBOT-TOKEN'
+]
+COMMON_HEADERS = {
+    'Access-Control-Allow-Headers': ','.join(ALLOWED_HEADER_NAMES),
+    'Access-Control-Allow-Origin': FC_CONFIG.cors_allow_origin,
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+}
+
 
 def response(status_code: int, msg: Optional[str] = None, data: Optional[Dict] = None):
-    headers = {
-        'Access-Control-Allow-Headers': 'Content-Type,X-AX-DACCESS-TOKEN,X-AX-DBOT-TOKEN',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-    }
-
     body = msg
-
+    headers = COMMON_HEADERS
     if data is not None:
         body = json.dumps(convert_decimals_to_int(data))
-        headers['Content-Type'] = 'application/json'
+        headers = COMMON_HEADERS | {'Content-Type': 'application/json'}
 
     return {
         'statusCode': status_code,
