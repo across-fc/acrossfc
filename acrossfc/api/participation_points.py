@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 def commit_member_points_events(
     points_events: List[PointsEvent],
-    tier: Optional[str] = FC_CONFIG.current_submissions_tier
+    tier: str
 ):
     grouped = groupby(points_events, key=lambda pe: pe.member_id)
 

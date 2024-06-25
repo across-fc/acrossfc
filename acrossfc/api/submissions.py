@@ -135,7 +135,7 @@ def submit_manual(
     last_update_by = None
 
     if auto_approve:
-        commit_member_points_events(points_events)
+        commit_member_points_events(points_events, tier=FC_CONFIG.current_submissions_tier)
         last_update_ts = timestamp
         last_update_by = auto_approve_admin_id
 
@@ -231,7 +231,7 @@ def review_submission(
                 status=PointsEventStatus.APPROVED
             ))
 
-    commit_member_points_events(user_points_events_to_commit)
+    commit_member_points_events(user_points_events_to_commit, tier=submission['tier'])
 
     # Update points event statuses based on the commit result
     updated_points_event_status: Dict[str, PointsEventStatus] = {
