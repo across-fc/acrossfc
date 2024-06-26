@@ -25,7 +25,7 @@ def register_guild_commands():
     DISCORD_API.post(
         f"channels/{FC_CONFIG.discord_fc_action_channel_id}/messages",
         {
-            "content": "(Points submissions will begin after <t:1719565200:f>)",
+            "content": "Points for the current tier are now closed. The next tier will begin on <t:1719565200:f>.",
             "components": [
                 {
                     "type": 1,
