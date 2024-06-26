@@ -1,9 +1,7 @@
 import json
-import requests
 
 # Local
-from acrossfc.core.config import FC_CONFIG
-from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
+from acrossfc.ext import discord_client as DISCORD_API
 
 DISCORD_CHANNEL_ID = '1242662415670317128'
 
@@ -60,25 +58,19 @@ def lambda_handler(event, context):
             'body': json.dumps({'type': 1})
         }
     elif body['type'] == 2:
+        # Application commands
         command_name = body['data']['name']
         if command_name == "fc_points":
             interaction_id = body['id']
             interaction_token = body['token']
-            url = f'https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback'
-            headers = {
-                'Authorization': f'Bot {FC_CONFIG.discord_bot_token}',
-                'Content-Type': 'application/json'
-            }
-            json_data = {
+            DISCORD_API.post(f"interactions/{interaction_id}/{interaction_token}/callback", {
                 'type': 4,
                 'data': {
                     'content': 'Points for the current tier are now closed. The next tier will begin on <t:1719565200:f>.',
                     'flags': 1 << 6
                 }
-            }
-            response = requests.post(url, headers=headers, json=json_data)
-            return response.json()
-
+            })
+        # TODO: Implement button callbacks too
     return {
         'statusCode': 200,
         'body': json.dumps({'type': 1})
