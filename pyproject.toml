@@ -16,6 +16,7 @@ dependencies = [
     'requests',
     'aiohttp',
     'gql',
+    "pynacl",
     'tabulate',
     'peewee',
     'google-api-python-client',
@@ -29,7 +30,7 @@ dev = [
     "awscli",
     "boto3",
     "pytest",
-    "fastapi"
+    "fastapi",
 ]
 
 [project.scripts]
