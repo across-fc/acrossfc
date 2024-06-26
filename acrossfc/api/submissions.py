@@ -61,11 +61,12 @@ def get_submissions_queue(exclusive_start_key: Optional[Any] = None):
     else:
         response = submissions_table.scan()
 
-    return {
+    data = {
         'items': response['Items'],
         'count': response['Count'],
         'lastEvalutedKey': response.get('LastEvaluatedKey', None)
     }
+    return data
 
 
 def get_current_submissions_tier():

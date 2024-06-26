@@ -2,6 +2,8 @@
 import os
 import re
 import json
+import hmac
+import hashlib
 import requests
 from typing import Optional, Dict
 from decimal import Decimal
@@ -58,6 +60,15 @@ def convert_decimals_to_int(obj):
         return obj
 
 
+def verify_bot_signature(data, signature) -> bool:
+    expected_signature = hmac.new(
+        FC_CONFIG.il_palazzo_key.encode('utf-8'),
+        data.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+    return signature == expected_signature
+
+
 def lambda_handler(event, context):
     http_method = event['requestContext']['http']['method']
     if http_method == 'OPTIONS':
@@ -70,24 +81,25 @@ def lambda_handler(event, context):
     # BEGIN Auth ------------------------
     if 'x-ax-daccess-token' in event['headers']:
         token = f"Bearer {event['headers']['x-ax-daccess-token']}"
-    elif 'x-ax-dbot-token' in event['headers']:
-        token = f"Bot {event['headers']['x-ax-dbot-token']}"
+        d_resp = requests.get("https://discord.com/api/v10/users/@me", headers={
+            'Authorization': token
+        })
+        if d_resp.status_code != 200:
+            LOG.error(f"Error while trying to authorize with Discord. {d_resp.text}")
+            return response(401)
+
+        discord_id = d_resp.json()['id']
+        discord_name = d_resp.json()['username']
+        if discord_id not in FC_CONFIG.allowed_discord_id_list:
+            LOG.warn(f"Discord user {discord_name} ({discord_id}) tried to access the API.")
+            return response(403)
+    elif 'x-ax-bot-signature' in event['headers']:
+        if not verify_bot_signature(event['body'], event['headers']['x-ax-bot-signature']):
+            LOG.warn(f"Failed to verify bot signature. Request rejected. {event}")
+            return response(403)
     else:
         return response(401)
 
-    d_resp = requests.get("https://discord.com/api/v10/users/@me", headers={
-        'Authorization': token
-    })
-
-    if d_resp.status_code != 200:
-        LOG.error(f"Error while trying to authorize with Discord. {d_resp.text}")
-        return response(401)
-
-    discord_id = d_resp.json()['id']
-    discord_name = d_resp.json()['username']
-    if discord_id not in FC_CONFIG.allowed_discord_id_list:
-        LOG.warn(f"Discord user {discord_name} ({discord_id}) tried to access the API.")
-        return response(403)
     # END Auth ------------------------
 
     if PATH[0] == "fc_roster":

@@ -25,13 +25,11 @@ else:
 
 logging.getLogger('uvicorn').setLevel(logging.DEBUG)
 
-app = FastAPI(debug=True)
-
-
 origins = [
     "http://localhost:3000",
 ]
 
+app = FastAPI(debug=True)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -41,16 +39,15 @@ app.add_middleware(
 )
 
 
+@app.get("/current_tier")
+def get_current_submissions_tier():
+    return submissions.get_current_submissions_tier()
+
+
 @app.get("/submissions")
 def get_submissions(tier: str):
     subs = submissions.get_submissions_for_tier(tier)
     return subs
-
-
-@app.get("/submissions/{uuid}")
-def get_submission_by_id(uuid: str):
-    sub = DDB_CLIENT.get_submission_by_uuid(uuid)
-    return sub
 
 
 @app.get("/submissions/queue")
@@ -59,9 +56,10 @@ def get_submissions_queue():
     return queue
 
 
-@app.get("/current_tier")
-def get_current_submissions_tier():
-    return submissions.get_current_submissions_tier()
+@app.get("/submissions/{uuid}")
+def get_submission_by_id(uuid: str):
+    sub = DDB_CLIENT.get_submission_by_uuid(uuid)
+    return sub
 
 
 class ReviewSubmissionsBody(BaseModel):
