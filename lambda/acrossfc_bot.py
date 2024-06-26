@@ -60,23 +60,24 @@ def lambda_handler(event, context):
             'body': json.dumps({'type': 1})
         }
     elif body['type'] == 2:
-        roster = FFLOGS_CLIENT.get_fc_roster()
-
-        interaction_id = body['id']
-        interaction_token = body['token']
-        url = f'https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback'
-        headers = {
-            'Authorization': f'Bot {FC_CONFIG.discord_bot_token}',
-            'Content-Type': 'application/json'
-        }
-        json_data = {
-            'type': 4,
-            'data': {
-                'content': f"We have {len(roster)} members!"
+        command_name = body['data']['name']
+        if command_name == "fc_points":
+            interaction_id = body['id']
+            interaction_token = body['token']
+            url = f'https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback'
+            headers = {
+                'Authorization': f'Bot {FC_CONFIG.discord_bot_token}',
+                'Content-Type': 'application/json'
             }
-        }
-        response = requests.post(url, headers=headers, json=json_data)
-        return response.json()
+            json_data = {
+                'type': 4,
+                'data': {
+                    'content': 'Points for the current tier are now closed. The next tier will begin on <t:1719565200:f>.',
+                    'flags': 1 << 6
+                }
+            }
+            response = requests.post(url, headers=headers, json=json_data)
+            return response.json()
 
     return {
         'statusCode': 200,

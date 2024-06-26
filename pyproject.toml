@@ -9,7 +9,7 @@ version = "1.0"
 authors = [
     {name = "Kohen Chia", email = "kohenchia@gmail.com"}
 ]
-requires-python = ">= 3.12"
+requires-python = ">= 3.11"
 readme = "README.md"
 dependencies = [
     'click',
@@ -37,6 +37,7 @@ dev = [
 etl = "acrossfc.etl:etl"
 axr = "acrossfc.analytics:axr"
 axs = "acrossfc.api:axs"
+axd = "acrossfc.admin.discord:axd"
 
 [tool.setuptools.packages.find]
 include = ["acrossfc*"]
