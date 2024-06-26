@@ -24,6 +24,7 @@ LOG = logging.getLogger(__name__)
 
 PointsCategoryLike = Union[PointsCategory, int, str]
 SubmissionsChannelLike = Union[SubmissionsChannel, int, str]
+ComboUserID = Dict[str, Union[int, str]]
 
 
 def get_submissions_for_tier(
@@ -77,6 +78,7 @@ def evaluate_fflogs(
     is_static: bool,
     fc_pf_id: Optional[str] = None
 ):
+    # TODO: Change this to return a submissions object
     # Get all point events
     points_events = PointsEvaluator(fflogs_url, is_fc_pf, is_static, fc_pf_id).points_events
     return [
@@ -87,7 +89,7 @@ def evaluate_fflogs(
 
 def submit_manual(
     point_categories_to_member_ids_map: Dict[PointsCategoryLike, List[int]],
-    submitted_by_name: str,
+    submitted_by: ComboUserID,
     submission_channel: SubmissionsChannelLike,
     is_static: bool,
     is_fc_pf: bool,
@@ -142,7 +144,7 @@ def submit_manual(
     DDB_CLIENT.upsert_submission({
         'uuid': submission_uuid,
         'ts': timestamp,
-        'submitted_by': submitted_by_name,
+        'submitted_by': submitted_by,
         'submission_channel': submission_channel.value,
         'is_ic_pf': is_fc_pf,
         'is_static': is_static,
@@ -164,7 +166,7 @@ def submit_manual(
 
 def submit_fflogs(
     fflogs_url: str,
-    submitted_by_name: str,
+    submitted_by: ComboUserID,
     submission_channel: SubmissionsChannelLike,
     is_static: bool,
     is_fc_pf: bool,
@@ -186,7 +188,7 @@ def submit_fflogs(
     DDB_CLIENT.upsert_submission({
         'uuid': submission_uuid,
         'ts': timestamp,
-        'submitted_by': submitted_by_name,
+        'submitted_by': submitted_by,
         'submission_channel': submission_channel.value,
         'is_ic_pf': is_fc_pf,
         'is_static': is_static,

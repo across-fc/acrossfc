@@ -9,8 +9,7 @@ from pydantic import BaseModel
 
 # Local
 from acrossfc.api import submissions, participation_points, fc_roster
-from acrossfc.core.model import Member, PointsCategory, SubmissionsChannel
-from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
+from acrossfc.core.model import PointsCategory, SubmissionsChannel
 from acrossfc.ext.ddb_client import DDB_CLIENT
 
 LOG_FORMAT = (
@@ -96,7 +95,7 @@ def evaluate_fflogs(body: EvaluateFFLogsBody):
 
 class SubmitFFLogsBody(BaseModel):
     fflogs_url: str
-    submitted_by_name: str
+    submitted_by: submissions.ComboUserID
     submission_channel: Union[int, str]
     is_static: bool
     is_fc_pf: bool
@@ -107,7 +106,7 @@ class SubmitFFLogsBody(BaseModel):
 def submit_fflogs(body: SubmitFFLogsBody):
     return submissions.submit_fflogs(
         fflogs_url=body.fflogs_url,
-        submitted_by_name=body.submitted_by_name,
+        submitted_by=body.submitted_by,
         submission_channel=SubmissionsChannel.to_enum(body.submission_channel),
         is_fc_pf=body.is_fc_pf,
         is_static=body.is_static,
@@ -117,7 +116,7 @@ def submit_fflogs(body: SubmitFFLogsBody):
 
 class SubmitManualBody(BaseModel):
     point_categories_to_member_ids_map: Dict[Union[int, str], List[int]]
-    submitted_by_name: str
+    submitted_by: submissions.ComboUserID
     submission_channel: Union[int, str]
     is_static: bool
     is_fc_pf: bool
@@ -134,7 +133,7 @@ def submit_manual(body: SubmitManualBody):
             PointsCategory.to_enum(pc): body.point_categories_to_member_ids_map[pc]
             for pc in body.point_categories_to_member_ids_map
         },
-        submitted_by_name=body.submitted_by_name,
+        submitted_by=body.submitted_by,
         submission_channel=SubmissionsChannel.to_enum(body.submission_channel),
         is_static=body.is_static,
         is_fc_pf=body.is_fc_pf,
