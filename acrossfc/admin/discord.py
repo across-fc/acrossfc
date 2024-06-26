@@ -60,3 +60,10 @@ def delete_guild_command(command_id):
         f"applications/{FC_CONFIG.discord_app_id}/guilds/{FC_CONFIG.discord_guild_id}/commands/{command_id}",
     )
     
+
+@axd.command()
+def get_guild_members():
+    discord_members = DISCORD_API.get(
+        f"guilds/{FC_CONFIG.discord_guild_id}/members?limit=1000"
+    )
+    print(json.dumps(discord_members, indent=4))
