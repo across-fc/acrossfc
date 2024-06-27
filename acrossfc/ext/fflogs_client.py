@@ -1,7 +1,7 @@
 # stdlib
 import re
 import logging
-from typing import List
+from typing import Optional, List
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -31,6 +31,7 @@ class FFLogsAPIClient:
     def __init__(self, client_id: str, client_secret: str):
         self.client_id = client_id
         self.client_secret = client_secret
+        self._cached_roster: Optional[List[Member]] = None
 
         resp = requests.post(
             "https://www.fflogs.com/oauth/token",
@@ -56,6 +57,10 @@ class FFLogsAPIClient:
         )
 
     def get_fc_roster(self) -> List[Member]:
+        # Use cached value if possible
+        if self._cached_roster is not None:
+            return self._cached_roster
+
         query = gql(
             """
             query getGuildData($id: Int!) {
@@ -74,13 +79,13 @@ class FFLogsAPIClient:
             """
         )
         result = self.gql_client.execute(query, variable_values={"id": FC_CONFIG.fflogs_guild_id})
-        ret = [
+        self._cached_roster = [
             Member(fcid=d["id"], name=d["name"], rank=d["guildRank"])
             for d in result["guildData"]["guild"]["members"]["data"]
             if d["guildRank"] not in FC_CONFIG.exclude_guild_ranks
         ]
 
-        return ret
+        return self._cached_roster
 
     def get_clears_for_member(
         self,
