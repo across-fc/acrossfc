@@ -2,7 +2,7 @@ import click
 import logging
 
 # Local
-from acrossfc import root_logger
+from acrossfc import ROOT_LOG
 from acrossfc.core.database import ClearDatabase
 from acrossfc.core.constants import (
     ALL_ENCOUNTER_NAMES,
@@ -48,7 +48,7 @@ LOG = logging.getLogger(__name__)
               help="Include echo clears")
 def axr(report, verbose, cleardb_file, encounter, tier, job, job_role, include_echo):
     if verbose:
-        root_logger.setLevel(logging.DEBUG)
+        ROOT_LOG.setLevel(logging.DEBUG)
 
     database = ClearDatabase(db_filename=cleardb_file)
 

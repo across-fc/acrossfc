@@ -2,7 +2,7 @@ import click
 import logging
 
 # Local
-from acrossfc import root_logger
+from acrossfc import ROOT_LOG
 from acrossfc.core.model import CommandConfig
 from .update_fflogs_fc import update_fflogs_fc
 from .fc_clears_etl import fc_clears_etl
@@ -14,7 +14,7 @@ from .fc_roster_etl import fc_roster_etl
               help="Turn on verbose logging")
 def etl(verbose):
     if verbose:
-        root_logger.setLevel(logging.DEBUG)
+        ROOT_LOG.setLevel(logging.DEBUG)
 
 
 NAME_TO_CMD_CONFIG_MAP = {

@@ -20,11 +20,15 @@ def _call(requests_method, path, **kwargs):
     resp = requests_method(url, headers=headers, **kwargs)
     if resp.status_code >= 300:
         raise Exception(f"API call failed {resp.status_code}: {resp.text}")
-    return resp.json()
+    return resp
 
 
-def _post(path, data={}):
-    return _call(requests.post, path, json=data)
+def _post(path, json={}):
+    return _call(requests.post, path, json=json)
+
+
+def _patch(path, json={}):
+    return _call(requests.patch, path, json=json)
 
 
 def _get(path, params={}):
@@ -36,23 +40,27 @@ def _delete(path, params={}):
 
 
 def get_user(user_id):
-    return _get(f"users/{user_id}")
+    resp = _get(f"users/{user_id}")
+    return resp.json()
 
 
 def get_guild_commands():
-    return _get(f"applications/{APP_ID}/guilds/{GUILD_ID}/commands")
+    resp = _get(f"applications/{APP_ID}/guilds/{GUILD_ID}/commands")
+    return resp.json()
 
 
 def delete_guild_command(command_id):
-    return _delete(f"applications/{APP_ID}/guilds/{GUILD_ID}/commands/{command_id}")
+    _delete(f"applications/{APP_ID}/guilds/{GUILD_ID}/commands/{command_id}")
 
 
 def get_guild_member(user_id):
-    return _get(f"guilds/{GUILD_ID}/members/{user_id}")
+    resp = _get(f"guilds/{GUILD_ID}/members/{user_id}")
+    return resp.json()
 
 
 def get_guild_members():
-    return _get(f"guilds/{GUILD_ID}/members?limit=500")
+    resp = _get(f"guilds/{GUILD_ID}/members?limit=500")
+    return resp.json()
 
 
 class InteractionResponseType(Enum):
@@ -67,13 +75,13 @@ class InteractionResponseType(Enum):
 
 class Interaction:
     def __init__(self, interaction_id, interaction_token):
-        self.interaaction_id = interaction_id
+        self.interaction_id = interaction_id
         self.interaction_token = interaction_token
 
     def _callback(
         self,
         response_type: InteractionResponseType,
-        msg: str,
+        msg: str = '',
         ephemeral: bool = True
     ):
         _post(f"interactions/{self.interaction_id}/{self.interaction_token}/callback", {
@@ -87,20 +95,22 @@ class Interaction:
     def respond(self, msg: str, ephemeral: bool = True):
         self._callback(
             InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            msg,
+            msg=msg,
             ephemeral=ephemeral
         )
 
-    def thinking(self, msg: str, ephemeral: bool = True):
+    def thinking(self, ephemeral: bool = True):
         self._callback(
-            InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
-            msg,
-            ephemeral=ephemeral
-        )
+            InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+            ephemeral=ephemeral)
+
+    def update_msg(self, msg: str):
+        _patch(f"webhooks/{FC_CONFIG.discord_app_id}/{self.interaction_token}/messages/@original", {
+            'content': msg
+        })
 
     def followup(self, msg: str, ephemeral: bool = True):
-        self._callback(
-            InteractionResponseType.UPDATE_MESSAGE,
-            msg,
-            ephemeral=ephemeral
-        )
+        _post(f"webhooks/{FC_CONFIG.discord_app_id}/{self.interaction_token}", {
+            'content': msg,
+            'flags': (1 << 6) if ephemeral else 0
+        })

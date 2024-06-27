@@ -27,7 +27,7 @@ class DynamoDBClient:
         if len(members) == 0:
             return None
         else:
-            return members[0]['member_id']
+            return int(members[0]['member_id'])
 
     def get_member_total_points(self, member_id: int, tier: str):
         response = self.ppts_table.get_item(

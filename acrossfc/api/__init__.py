@@ -3,7 +3,7 @@ import click
 import logging
 
 # Local
-from acrossfc import root_logger
+from acrossfc import ROOT_LOG
 from .submissions import submit_fflogs
 
 
@@ -12,7 +12,7 @@ from .submissions import submit_fflogs
               help="Turn on verbose logging")
 def axs(verbose):
     if verbose:
-        root_logger.setLevel(logging.DEBUG)
+        ROOT_LOG.setLevel(logging.DEBUG)
 
 
 cmd = submit_fflogs

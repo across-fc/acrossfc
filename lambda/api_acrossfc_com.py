@@ -10,7 +10,7 @@ from decimal import Decimal
 from collections.abc import MutableMapping, MutableSequence
 
 # Local
-from acrossfc import root_logger as LOG
+from acrossfc import ROOT_LOG as LOG
 from acrossfc.api import submissions, participation_points, fc_roster
 from acrossfc.core.model import PointsCategory
 from acrossfc.core.config import FC_CONFIG
