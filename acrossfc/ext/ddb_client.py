@@ -1,5 +1,5 @@
 # stdlib
-from typing import Dict
+from typing import Dict, Optional
 
 # 3rd-party
 import boto3
@@ -16,6 +16,32 @@ class DynamoDBClient:
         self.subs_table = self.ddb.Table(FC_CONFIG.ddb_submissions_table)
         self.subs_q_table = self.ddb.Table(FC_CONFIG.ddb_submissions_queue_table)
         self.members_table = self.ddb.Table(FC_CONFIG.ddb_members_table)
+
+    def delete_member(self, member_id: int):
+        self.members_table.delete_item(
+            Key={
+                'member_id': member_id
+            }
+        )
+
+    def add_member(
+        self,
+        member_id: int,
+        member_name: str,
+        discord_user_id: int,
+        discord_server_name: Optional[str] = None,
+        discord_global_name: Optional[str] = None,
+        discord_user_name: Optional[str] = None
+    ):
+        record = {
+            'member_id': member_id,
+            'name': member_name,
+            'discord_user_id': discord_user_id,
+            'discord_server_name': discord_server_name,
+            'discord_global_name': discord_global_name,
+            'discord_user_name': discord_user_name
+        }
+        self.members_table.put_item(Item=record)
 
     def get_member_id(self, discord_user_id: int):
         response = self.members_table.query(
