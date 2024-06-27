@@ -26,7 +26,6 @@ def register_guild_commands():
     DISCORD_API._post(
         f"channels/{FC_CONFIG.discord_fc_action_channel_id}/messages",
         {
-            "content": "Points for the current tier are now closed. The next tier will begin on <t:1719565200:f>.",
             "components": [
                 {
                     "type": 1,
@@ -36,7 +35,6 @@ def register_guild_commands():
                             "label": "FC Points",
                             "style": 1,
                             "custom_id": "fc_points_button",
-                            "disabled": True
                         }
                     ]
                 }
