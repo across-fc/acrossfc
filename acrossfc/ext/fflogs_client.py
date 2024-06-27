@@ -1,7 +1,7 @@
 # stdlib
 import re
 import logging
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -32,6 +32,7 @@ class FFLogsAPIClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self._cached_roster: Optional[List[Member]] = None
+        self._cached_member_id_to_member_map: Optional[Dict[int, Member]] = None
 
         resp = requests.post(
             "https://www.fflogs.com/oauth/token",
@@ -55,6 +56,29 @@ class FFLogsAPIClient:
         self.gql_client = Client(
             transport=gql_transport, fetch_schema_from_transport=True
         )
+
+    def is_member_in_guild(self, member_id) -> bool:
+        if self._cached_member_id_to_member_map is not None:
+            return member_id in self._cached_member_id_to_member_map
+        else:
+            query = gql(
+                """
+                query getCharacterData($id: Int!) {
+                    characterData {
+                        character(id: $id) {
+                            guilds {
+                                id
+                            }
+                        }
+                    }
+                }
+                """
+            )
+            result = self.gql_client.execute(query, variable_values={"id": member_id})
+            c = result["characterData"]['character']
+            if c is None:
+                return False
+            return FC_CONFIG.fflogs_guild_id in [g['id'] for g in c['guilds']]
 
     def get_fc_roster(self) -> List[Member]:
         # Use cached value if possible
