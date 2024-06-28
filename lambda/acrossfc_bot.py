@@ -203,6 +203,7 @@ def lambda_handler(event, context):
         else:
             logging.warn(f"Unidentified custom_id type: {custom_id}")
     elif body['type'] == 5:
+        ANALYTICS_LOG.info(f"{discord_user_id} submit_fflogs_modal")
         handle_submit_fflogs_submission(body, interaction, discord_user_id)
 
     return {
