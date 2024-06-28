@@ -13,7 +13,7 @@ import requests
 from acrossfc import analytics
 from acrossfc.core.config import FC_CONFIG
 from acrossfc.core.model import Clear, Member
-from acrossfc.core.constants import TRACKED_ENCOUNTERS
+from acrossfc.core.constants import ACTIVE_TRACKED_ENCOUNTERS
 from acrossfc.core.database import ClearDatabase
 from acrossfc.ext.fflogs_client import FFLOGS_CLIENT
 
@@ -25,7 +25,7 @@ def fc_clears_etl():
     fc_clears: List[Clear] = []
     for member in fc_roster:
         fc_clears.extend(
-            FFLOGS_CLIENT.get_clears_for_member(member, TRACKED_ENCOUNTERS)
+            FFLOGS_CLIENT.get_clears_for_member(member, ACTIVE_TRACKED_ENCOUNTERS)
         )
 
     # Needs to be in /tmp for it to work in Lambda

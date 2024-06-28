@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 # Local
 from acrossfc.core.database import ClearDatabase
-from acrossfc.core.constants import TRACKED_ENCOUNTER_NAMES, JOB_CATEGORIES
+from acrossfc.core.constants import ACTIVE_TRACKED_ENCOUNTER_NAMES, JOB_CATEGORIES
 from .report_base import Report
 
 
@@ -19,7 +19,7 @@ class ClearedRoles(Report):
         cleared_jobs = database.get_cleared_jobs(include_echo=include_echo)
 
         table = []
-        for encounter_name in TRACKED_ENCOUNTER_NAMES:
+        for encounter_name in ACTIVE_TRACKED_ENCOUNTER_NAMES:
             cleared_members_by_role = {cat.name: set() for cat in JOB_CATEGORIES}
             for cleared_job in cleared_jobs[encounter_name]:
                 # TODO: Dedupe by person

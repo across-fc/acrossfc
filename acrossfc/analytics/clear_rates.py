@@ -8,7 +8,7 @@ from tabulate import tabulate
 # Local
 from acrossfc.core.database import ClearDatabase
 from acrossfc.core.model import TrackedEncounterName, ClearRate
-from acrossfc.core.constants import TRACKED_ENCOUNTER_NAMES
+from acrossfc.core.constants import ACTIVE_TRACKED_ENCOUNTER_NAMES
 from .report_base import Report
 
 
@@ -22,7 +22,7 @@ class ClearRates(Report):
 
         table = []
         self.data_dict = {}
-        for encounter_name in TRACKED_ENCOUNTER_NAMES:
+        for encounter_name in ACTIVE_TRACKED_ENCOUNTER_NAMES:
             cr = clear_rates[encounter_name]
             table.append(
                 [

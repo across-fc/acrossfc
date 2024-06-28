@@ -3,6 +3,7 @@ from itertools import groupby
 from typing import Dict, List
 
 # Local
+from acrossfc.core.config import FC_CONFIG
 from .model import (
     Member,
     Clear,
@@ -39,25 +40,31 @@ EW_EX_3 = create(TrackedEncounter, "EW_EX_3", "ENDSINGER", 1063)
 EW_EX_2 = create(TrackedEncounter, "EW_EX_2", "HYDAELYN", 1059)
 EW_EX_1 = create(TrackedEncounter, "EW_EX_1", "ZODIARK", 1058)
 
-CURRENT_EXTREMES = [
+ALL_EXTREMES = [
     EW_EX_7,
     EW_EX_6,
     EW_EX_5,
     EW_EX_4,
     EW_EX_3,
     EW_EX_2,
-    EW_EX_1,
+    EW_EX_1
 ]
 
 # Unreal
 
-EW_UNREAL_5 = create(TrackedEncounter, "EW_UNREAL_5", "THORDAN", 3008)
-EW_UNREAL_4 = create(TrackedEncounter, "EW_UNREAL_4", "ZURVAN", 3007)
-EW_UNREAL_3 = create(TrackedEncounter, "EW_UNREAL_3", "SOPHIA", 3006)
-EW_UNREAL_2 = create(TrackedEncounter, "EW_UNREAL_2", "SEPHIROT", 3005)
-EW_UNREAL_1 = create(TrackedEncounter, "EW_UNREAL_1", "ULTIMA", 3004)
+EW_UNREAL_5 = create(TrackedEncounter, "EW_UNREAL_5", "THORDAN_UNREAL", 3008)
+EW_UNREAL_4 = create(TrackedEncounter, "EW_UNREAL_4", "ZURVAN_UNREAL", 3007)
+EW_UNREAL_3 = create(TrackedEncounter, "EW_UNREAL_3", "SOPHIA_UNREAL", 3006)
+EW_UNREAL_2 = create(TrackedEncounter, "EW_UNREAL_2", "SEPHIROT_UNREAL", 3005)
+EW_UNREAL_1 = create(TrackedEncounter, "EW_UNREAL_1", "ULTIMA_UNREAL", 3004)
 
-CURRENT_UNREAL = EW_UNREAL_5
+ALL_UNREALS = [
+    EW_UNREAL_5,
+    EW_UNREAL_4,
+    EW_UNREAL_3,
+    EW_UNREAL_2,
+    EW_UNREAL_1
+]
 
 # Savage: Anabaseios
 
@@ -67,21 +74,13 @@ P11S = create(TrackedEncounter, "P11S", "P11S", 90, 101)
 P12S_P1 = create(TrackedEncounter, "P12S_P1", "P12S_P1", 91, 101)
 P12S = create(TrackedEncounter, "P12S", "P12S", 92, 101)
 
-CURRENT_SAVAGES = [
+ALL_SAVAGES = [
     P9S,
     P10S,
     P11S,
     P12S_P1,
-    P12S,
+    P12S
 ]
-
-CURRENT_SAVAGE_TO_POINTS_CATEGORY = {
-    P9S: PointsCategory.SAVAGE_1,
-    P10S: PointsCategory.SAVAGE_2,
-    P11S: PointsCategory.SAVAGE_3,
-    P12S_P1: PointsCategory.SAVAGE_4_1,
-    P12S: PointsCategory.SAVAGE_4_2,
-}
 
 # Criterion
 
@@ -89,12 +88,15 @@ EW_CRIT_3 = create(TrackedEncounter, "EW_CRIT_3", "AAI", 4538, 10)
 EW_CRIT_2 = create(TrackedEncounter, "EW_CRIT_2", "AMR", 4536, 10)
 EW_CRIT_1 = create(TrackedEncounter, "EW_CRIT_1", "ASS", 4533, 10)
 
-CURRENT_CRITERIONS = [
-    EW_CRIT_1, EW_CRIT_2, EW_CRIT_3
+ALL_CRITERIONS = [
+    EW_CRIT_3,
+    EW_CRIT_2,
+    EW_CRIT_1
 ]
 
 # Ultimates
 
+# TODO: Add tier when it drops
 UWU_EW = create(TrackedEncounter, "UWU_EW", "UWU", 1061)
 UWU_SHB = create(TrackedEncounter, "UWU_SHB", "UWU", 1048)
 UWU_SB = create(TrackedEncounter, "UWU_SB", "UWU", 1042)
@@ -124,13 +126,6 @@ ULTIMATES = [
 ]
 ULTIMATE_NAMES = list(name for name, _ in groupby(ULTIMATES, key=lambda e: e.name))
 
-ALL_ENCOUNTERS = CURRENT_EXTREMES + CURRENT_SAVAGES + [CURRENT_UNREAL] + CURRENT_CRITERIONS + ULTIMATES
-ALL_ENCOUNTER_NAMES = list(name for name, _ in groupby(ALL_ENCOUNTERS, key=lambda e: e.name))
-
-# Not tracking clear rates for EXs
-TRACKED_ENCOUNTERS = CURRENT_SAVAGES + ULTIMATES
-TRACKED_ENCOUNTER_NAMES = list(name for name, _ in groupby(TRACKED_ENCOUNTERS, key=lambda e: e.name))
-
 TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[str, List[TrackedEncounterName]] = {
     "ANABASEIOS": [
         "P9S",
@@ -138,6 +133,8 @@ TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[str, List[TrackedEncounterName]] = {
         "P11S",
         "P12S_P1",
         "P12S",
+    ],
+    "ARCADION": [
     ],
     "ULTIMATE": [
         "UCOB",
@@ -147,6 +144,9 @@ TIER_NAME_TO_ENCOUNTER_NAMES_MAP: Dict[str, List[TrackedEncounterName]] = {
         "TOP",
     ],
 }
+
+ALL_ENCOUNTERS = ALL_EXTREMES + ALL_SAVAGES + ALL_UNREALS + ALL_CRITERIONS + ULTIMATES
+ALL_ENCOUNTER_NAMES = list(name for name, _ in groupby(ALL_ENCOUNTERS, key=lambda e: e.name))
 
 # -----------------------------------------
 # Jobs
@@ -193,6 +193,7 @@ ROG = Job(tla="ROG", name="Rogue", main_category=DPS.name, sub_category=MELEE_DP
 NIN = Job(tla="NIN", name="Ninja", main_category=DPS.name, sub_category=MELEE_DPS.name)
 SAM = Job(tla="SAM", name="Samurai", main_category=DPS.name, sub_category=MELEE_DPS.name)
 RPR = Job(tla="RPR", name="Reaper", main_category=DPS.name, sub_category=MELEE_DPS.name)
+VPR = Job(tla="VPR", name="Viper", main_category=DPS.name, sub_category=MELEE_DPS.name)
 ARC = Job(tla="ARC", name="Archer", main_category=DPS.name, sub_category=PRANGED_DPS.name)
 BRD = Job(tla="BRD", name="Bard", main_category=DPS.name, sub_category=PRANGED_DPS.name)
 MCH = Job(tla="MCH", name="Machinist", main_category=DPS.name, sub_category=PRANGED_DPS.name)
@@ -202,6 +203,7 @@ BLM = Job(tla="BLM", name="BlackMage", main_category=DPS.name, sub_category=CAST
 ACN = Job(tla="ACN", name="Arcanist", main_category=DPS.name, sub_category=CASTER_DPS.name)
 SMN = Job(tla="SMN", name="Summoner", main_category=DPS.name, sub_category=CASTER_DPS.name)
 RDM = Job(tla="RDM", name="RedMage", main_category=DPS.name, sub_category=CASTER_DPS.name)
+PCT = Job(tla="PCT", name="Pictomancer", main_category=DPS.name, sub_category=CASTER_DPS.name)
 BLU = Job(tla="BLU", name="BlueMage", main_category=DPS.name, sub_category=CASTER_DPS.name)
 
 JOBS = [
@@ -218,14 +220,59 @@ JOBS = [
     ROG, NIN,
     SAM,
     RPR,
+    VPR,
     ARC, BRD,
     MCH,
     DNC,
     THM, BLM,
     ACN, SMN,
     RDM,
+    PCT,
     BLU,
 ]
 
 NAME_TO_JOB_MAP = {job.name: job for job in JOBS}
 TLA_TO_JOB_MAP = {job.tla: job for job in JOBS}
+
+
+if FC_CONFIG.current_submissions_tier == "6_4":
+    CURRENT_EXTREMES = [
+        EW_EX_7,
+        EW_EX_6,
+        EW_EX_5,
+        EW_EX_4,
+        EW_EX_3,
+        EW_EX_2,
+        EW_EX_1
+    ]
+    CURRENT_UNREAL = EW_UNREAL_5
+    CURRENT_SAVAGES = [
+        P9S,
+        P10S,
+        P11S,
+        P12S_P1,
+        P12S,
+    ]
+    CURRENT_SAVAGE_TO_POINTS_CATEGORY = {
+        P9S: PointsCategory.SAVAGE_1,
+        P10S: PointsCategory.SAVAGE_2,
+        P11S: PointsCategory.SAVAGE_3,
+        P12S_P1: PointsCategory.SAVAGE_4_1,
+        P12S: PointsCategory.SAVAGE_4_2,
+    }
+    CURRENT_CRITERIONS = [
+        EW_CRIT_1, EW_CRIT_2, EW_CRIT_3
+    ]
+elif FC_CONFIG.current_submissions_tier == "7_0":
+    CURRENT_EXTREMES = []
+    CURRENT_UNREAL = None
+    CURRENT_SAVAGES = []
+    CURRENT_SAVAGE_TO_POINTS_CATEGORY = {}
+    CURRENT_CRITERIONS = []
+else:
+    raise Exception(f"Domain constants not configured for tier {FC_CONFIG.current_submissions_tier}")
+
+
+# Not tracking clear rates for EXs
+ACTIVE_TRACKED_ENCOUNTERS = CURRENT_SAVAGES + ULTIMATES
+ACTIVE_TRACKED_ENCOUNTER_NAMES = list(name for name, _ in groupby(ACTIVE_TRACKED_ENCOUNTERS, key=lambda e: e.name))

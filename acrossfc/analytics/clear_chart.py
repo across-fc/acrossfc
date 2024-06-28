@@ -31,12 +31,6 @@ class ClearChart(Report):
                 cumulative_cleared += len(datapoint[1])
                 clear_order[encounter_name][i] = (datapoint[0], cumulative_cleared)
 
-        print({
-            k: len(clear_order[k])
-            for k in clear_order
-        })
-        print(list(encounter_names))
-
         # Figure out date boundaries
         earliest_date = sorted(
             [clear_order[encounter_name][0][0] for encounter_name in encounter_names]

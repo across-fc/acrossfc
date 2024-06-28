@@ -5,7 +5,7 @@ import logging
 from acrossfc import ROOT_LOG
 from acrossfc.core.database import ClearDatabase
 from acrossfc.core.constants import (
-    ALL_ENCOUNTER_NAMES,
+    ACTIVE_TRACKED_ENCOUNTER_NAMES,
     TIER_NAME_TO_ENCOUNTER_NAMES_MAP,
     NAME_TO_JOB_CATEGORIES_MAP,
     TLA_TO_JOB_MAP,
@@ -33,7 +33,7 @@ LOG = logging.getLogger(__name__)
 @click.option('-f', '--cleardb-file', required=True,
               help="File to read or write the clear database to")
 @click.option('-e', '--encounter', multiple=True,
-              type=click.Choice(ALL_ENCOUNTER_NAMES, case_sensitive=False),
+              type=click.Choice(ACTIVE_TRACKED_ENCOUNTER_NAMES, case_sensitive=False),
               help="Filter results by encounter")
 @click.option('-t', '--tier',
               type=click.Choice(TIER_NAME_TO_ENCOUNTER_NAMES_MAP.keys(), case_sensitive=False),
@@ -52,7 +52,7 @@ def axr(report, verbose, cleardb_file, encounter, tier, job, job_role, include_e
 
     database = ClearDatabase(db_filename=cleardb_file)
 
-    encounter_names = ALL_ENCOUNTER_NAMES
+    encounter_names = ACTIVE_TRACKED_ENCOUNTER_NAMES
     if tier is not None:
         encounter_names = TIER_NAME_TO_ENCOUNTER_NAMES_MAP[tier]
     elif len(encounter) > 0:

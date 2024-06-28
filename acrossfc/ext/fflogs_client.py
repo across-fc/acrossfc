@@ -20,6 +20,7 @@ from acrossfc.core.model import (
 )
 from acrossfc.core.constants import (
     ALL_ENCOUNTERS,
+    ACTIVE_TRACKED_ENCOUNTERS,
     NAME_TO_JOB_MAP,
 )
 
@@ -114,7 +115,7 @@ class FFLogsAPIClient:
     def get_clears_for_member(
         self,
         member: Member,
-        tracked_encounters: List[TrackedEncounter] = ALL_ENCOUNTERS,
+        tracked_encounters: List[TrackedEncounter] = ACTIVE_TRACKED_ENCOUNTERS,
     ) -> List[Clear]:
         LOG.info(f"Getting clear data for {member.name}...")
 
