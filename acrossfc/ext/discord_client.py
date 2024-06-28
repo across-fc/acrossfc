@@ -1,6 +1,8 @@
 import os
+import time
 import requests
 from enum import Enum
+from typing import Optional, List
 
 # Local
 from acrossfc.core.config import FC_CONFIG
@@ -77,32 +79,25 @@ class Interaction:
     def __init__(self, interaction_id, interaction_token):
         self.interaction_id = interaction_id
         self.interaction_token = interaction_token
+        self._callback_url = f"interactions/{self.interaction_id}/{self.interaction_token}/callback"
 
-    def _callback(
-        self,
-        response_type: InteractionResponseType,
-        msg: str = '',
-        ephemeral: bool = True
-    ):
-        _post(f"interactions/{self.interaction_id}/{self.interaction_token}/callback", {
-            'type': response_type.value,
+    def respond(self, msg: str, components: Optional[List] = None, ephemeral: bool = True):
+        _post(self._callback_url, {
+            'type': InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.value,
             'data': {
                 'content': msg,
-                'flags': (1 << 6) if ephemeral else 0
+                'flags': (1 << 6) if ephemeral else 0,
+                'components': components
             }
         })
 
-    def respond(self, msg: str, ephemeral: bool = True):
-        self._callback(
-            InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            msg=msg,
-            ephemeral=ephemeral
-        )
-
     def thinking(self, ephemeral: bool = True):
-        self._callback(
-            InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-            ephemeral=ephemeral)
+        _post(self._callback_url, {
+            'type': InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.value,
+            'data': {
+                'flags': (1 << 6) if ephemeral else 0
+            }
+        })
 
     def update_msg(self, msg: str):
         _patch(f"webhooks/{FC_CONFIG.discord_app_id}/{self.interaction_token}/messages/@original", {
@@ -114,3 +109,23 @@ class Interaction:
             'content': msg,
             'flags': (1 << 6) if ephemeral else 0
         })
+
+    def modal(
+        self,
+        custom_id: str,
+        title: str,
+        components: List
+    ):
+        _post(self._callback_url, {
+            'type': InteractionResponseType.MODAL.value,
+            'data': {
+                'custom_id': custom_id,
+                'title': title,
+                'components': components
+            }
+        })
+
+    def delete_original_msg(self, delay_s: Optional[int] = None):
+        if delay_s is not None:
+            time.sleep(delay_s)
+        _delete(f"webhooks/{FC_CONFIG.discord_app_id}/{self.interaction_token}/messages/@original")
