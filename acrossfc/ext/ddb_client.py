@@ -72,7 +72,6 @@ class DynamoDBClient:
             'tier': tier,
             'member_id': member_id
         }
-        print(key)
         response = self.ppts_table.get_item(
             Key=key
         )

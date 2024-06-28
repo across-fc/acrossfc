@@ -128,6 +128,11 @@ class PointsEvaluator:
             )
 
     def eval_vet_and_first_clears(self):
+        # First clear: Vets and newbies get points
+        if self.fight_data.encounter not in CURRENT_SAVAGE_TO_POINTS_CATEGORY:
+            LOG.info("Not a tracked encounter. No vet or first-time clear points.")
+            return
+
         veteran_members: List[Member] = []
         first_clear_members: List[Member] = []
 
@@ -145,27 +150,25 @@ class PointsEvaluator:
             else:
                 first_clear_members.append(member)
 
-        # First clear savage points
-        if self.fight_data.encounter in CURRENT_SAVAGE_TO_POINTS_CATEGORY:
-            category = CURRENT_SAVAGE_TO_POINTS_CATEGORY[self.fight_data.encounter]
-            for member in first_clear_members:
-                # Extra check: If member has already been awarded one-time points, skip this one.
-                member_points = DDB_CLIENT.get_member_points(member.fcid, tier=FC_CONFIG.current_submissions_tier)
-                one_time_points_exist = member_points is not None and category in member_points['one_time']
-                if one_time_points_exist:
-                    LOG.info(f"{member.fcid} has already been awarded points for {category.name}. Skipping.")
-                    continue
+        category = CURRENT_SAVAGE_TO_POINTS_CATEGORY[self.fight_data.encounter]
+        for member in first_clear_members:
+            # Extra check: If member has already been awarded one-time points, skip this one.
+            member_points = DDB_CLIENT.get_member_points(member.fcid, tier=FC_CONFIG.current_submissions_tier)
+            one_time_points_exist = member_points is not None and category in member_points['one_time']
+            if one_time_points_exist:
+                LOG.info(f"{member.fcid} has already been awarded points for {category.name}. Skipping.")
+                continue
 
-                self.points_events.append(
-                    PointsEvent(
-                        uuid=str(uuid.uuid4()),
-                        member_id=member.fcid,
-                        points=category.points,
-                        category=category,
-                        description=f"First clear: {self.fight_data.encounter.name}",
-                        ts=int(time.time()),
-                    )
+            self.points_events.append(
+                PointsEvent(
+                    uuid=str(uuid.uuid4()),
+                    member_id=member.fcid,
+                    points=category.points,
+                    category=category,
+                    description=f"First clear: {self.fight_data.encounter.name}",
+                    ts=int(time.time()),
                 )
+            )
 
         if len(first_clear_members) > 0:
             for member in veteran_members:
