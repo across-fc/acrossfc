@@ -47,7 +47,6 @@ class DynamoDBClient:
         response = self.members_table.query(
             IndexName='discord_user_id-index',
             KeyConditionExpression=Key('discord_user_id').eq(discord_user_id),
-
         )
         members = response.get('Items', None)
         if len(members) == 0:
@@ -55,11 +54,11 @@ class DynamoDBClient:
         else:
             return int(members[0]['member_id'])
 
-    def get_member_total_points(self, member_id: int, tier: str):
+    def get_member_total_points(self, tier: str, member_id: int):
         response = self.ppts_table.get_item(
             Key={
-                'member_id': member_id,
-                'tier': tier
+                'tier': tier,
+                'member_id': member_id
             },
             ProjectionExpression='total_points'
         )
@@ -68,11 +67,11 @@ class DynamoDBClient:
             return 0
         return int(ppt_entry['total_points'])
 
-    def get_member_points(self, member_id: int, tier: str):
+    def get_member_points(self, tier: str, member_id: int):
         response = self.ppts_table.get_item(
             Key={
-                'member_id': member_id,
-                'tier': tier
+                'tier': tier,
+                'member_id': member_id
             }
         )
         return response.get('Item', None)
@@ -102,9 +101,9 @@ class DynamoDBClient:
         )
 
     def get_points_leaderboard(self, tier: str):
-        # TODO: Fix this to only get points for the tier
-        response = self.ppts_table.scan(
-            ProjectionExpression='member_id, tier, total_points'
+        response = self.ppts_table.query(
+            KeyConditionExpression=Key('tier').eq(tier),
+            ProjectionExpression='tier, member_id, total_points'
         )
         return response.get('Items', None)
 
