@@ -23,5 +23,5 @@ def get_member_id_by_name(name: str):
         fn, ln = m.name.split(' ')
         if name_parts[0] == fn and name_parts[1] == ln:
             return m.fcid
-    
+
     return None

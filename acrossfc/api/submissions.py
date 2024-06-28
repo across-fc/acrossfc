@@ -103,7 +103,7 @@ def submit_fflogs(
         'ts': timestamp,
         'submitted_by': submitted_by,
         'submission_channel': submission_channel.value,
-        'is_ic_pf': is_fc_pf,
+        'is_fc_pf': is_fc_pf,
         'is_static': is_static,
         'fc_pf_id': fc_pf_id,
         'fflogs_url': fflogs_url,
@@ -129,8 +129,6 @@ def submit_fflogs(
 def review_submission(submission):
     # Add all approved points for member
     user_points_events_to_commit: List[PointsEvent] = []
-    import json
-    print(json.dumps(submission, indent=4))
     for pe in submission['points_events']:
         if pe['status'] == PointsEventStatus.APPROVED.value:
             user_points_events_to_commit.append(PointsEvent(

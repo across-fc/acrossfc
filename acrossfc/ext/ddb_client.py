@@ -68,11 +68,13 @@ class DynamoDBClient:
         return int(ppt_entry['total_points'])
 
     def get_member_points(self, tier: str, member_id: int):
+        key = {
+            'tier': tier,
+            'member_id': member_id
+        }
+        print(key)
         response = self.ppts_table.get_item(
-            Key={
-                'tier': tier,
-                'member_id': member_id
-            }
+            Key=key
         )
         return response.get('Item', None)
 

@@ -97,7 +97,7 @@ class PointsCategory(Enum):
     @property
     def description(self):
         descriptions = {
-            self.FC_PF: "FC PF Listing",
+            self.FC_PF: "Participate in an FC PF Listing",
             self.MENTOR_TICKET: "Put in and finish a mentor ticket",
             self.FC_STATIC: "Be a part of a full / partial FC Savage / Ultimate static",
             self.FC_EXTREME: "FC EX party",
@@ -109,7 +109,7 @@ class PointsCategory(Enum):
             self.SAVAGE_1: "Clear the first floor of Savage",
             self.SAVAGE_2: "Clear the second floor of Savage",
             self.SAVAGE_3: "Clear the third floor of Savage",
-            self.SAVAGE_4_1: "Clear the door boos on the fourth floor of Savage",
+            self.SAVAGE_4_1: "Clear the door boss on the fourth floor of Savage",
             self.SAVAGE_4_2: "Clear the fourth floor of Savage",
             self.VET: "Veteran award: Helping with a first-clear",
             self.CRAFTING_GATHERING: "Crafting / Gathering team member",

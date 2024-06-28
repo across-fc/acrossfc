@@ -129,14 +129,8 @@ def lambda_handler(event, context):
             if PATH[1] == "review":
                 data = submissions.review_submission(**data)
                 return response(200, data=data)
-            elif PATH[1] == "evaluate":
-                eval_results = submissions.evaluate_fflogs(**data)
-                return response(200, data=eval_results)
             elif PATH[1] == "fflogs":
                 submissions.submit_fflogs(**data)
-                return response(200)
-            elif PATH[1] == "manual":
-                submissions.submit_manual(**data)
                 return response(200)
 
     if PATH[0] == "ppts":

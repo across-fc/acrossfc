@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 # Local
 from acrossfc.api import submissions, participation_points, fc_roster
+from acrossfc.core.config import FC_CONFIG
 from acrossfc.core.model import PointsCategory, SubmissionsChannel
 from acrossfc.ext.ddb_client import DDB_CLIENT
 
@@ -33,7 +34,7 @@ def get_current_submissions_tier():
 
 
 @app.get("/submissions")
-def get_submissions(tier: str):
+def get_submissions(tier: str = FC_CONFIG.current_submissions_tier):
     subs = submissions.get_submissions_for_tier(tier)
     return subs
 
@@ -98,7 +99,7 @@ def get_participation_points(member_id: int, tier: str):
 
 
 @app.get("/ppts/leaderboard")
-def get_participation_points_leaderboard(tier: str):
+def get_participation_points_leaderboard(tier: str = FC_CONFIG.current_submissions_tier):
     return participation_points.get_points_leaderboard(tier)
 
 
