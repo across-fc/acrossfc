@@ -92,6 +92,7 @@ class PointsCategory(Enum):
     VET = 400
     CRAFTING_GATHERING = 401
     MENTOR = 402
+    AD_HOC = 777
 
     @property
     def description(self):
@@ -112,7 +113,8 @@ class PointsCategory(Enum):
             self.SAVAGE_4_2: "Clear the fourth floor of Savage",
             self.VET: "Veteran award: Helping with a first-clear",
             self.CRAFTING_GATHERING: "Crafting / Gathering team member",
-            self.MENTOR: "Mentor"
+            self.MENTOR: "Mentor",
+            self.AD_HOC: "Ad hoc"
         }
         return descriptions[self]
 
@@ -152,7 +154,8 @@ class PointsCategory(Enum):
             self.SAVAGE_4_2: 10,
             self.VET: 10,
             self.CRAFTING_GATHERING: 50,
-            self.MENTOR: 25
+            self.MENTOR: 25,
+            self.AD_HOC: None
         }
         return points[self]
 
@@ -234,6 +237,21 @@ class FFLogsFightData(NamedTuple):
     encounter: TrackedEncounter
     start_time: datetime
     player_names: List[str]
+
+    @property
+    def fight_signature(self):
+        """
+        Used to identify potential duplicate submissions.
+        If it's by the same people in the same fight, it might be a dupe.
+        """
+        return hash(
+            tuple(
+                sorted(self.player_names) + [
+                    self.encounter.encounter_id,
+                    self.encounter.difficulty_id
+                ]
+            )
+        )
 
 
 class CommandConfig(NamedTuple):

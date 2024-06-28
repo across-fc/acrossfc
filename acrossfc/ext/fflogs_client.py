@@ -179,7 +179,7 @@ class FFLogsAPIClient:
 
     def get_fight_data(self, fflogs_url: str) -> FFLogsFightData:
         parts = urlparse(fflogs_url)
-        report_id_match = re.match(r'/reports/(.*)$', parts.path)
+        report_id_match = re.match(r'.*/reports/(.*)$', parts.path)
         if not report_id_match:
             raise ValueError(f"FFLogs URL path does not match r'/reports/(.*)$'. Received: {fflogs_url}")
 

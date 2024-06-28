@@ -147,9 +147,6 @@ def lambda_handler(event, context):
                     qs_params['member_id'] = int(qs_params['member_id'])
                     data = participation_points.get_points_for_member(**qs_params)
                     return response(200, data=data)
-                elif 'member_name' in qs_params:
-                    data = participation_points.get_points_for_member_by_name(**qs_params)
-                    return response(200, data=data)
             elif PATH[1] == "leaderboard":
                 data = participation_points.get_points_leaderboard(**qs_params)
                 return response(200, data=data)

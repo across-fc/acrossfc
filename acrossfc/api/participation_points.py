@@ -19,7 +19,7 @@ def commit_member_points_events(
     grouped = groupby(points_events, key=lambda pe: pe.member_id)
 
     for member_id, group in grouped:
-        member_points = DDB_CLIENT.get_member_points(member_id, tier)
+        member_points = DDB_CLIENT.get_member_points(tier, member_id)
         if member_points is None:
             member_points = {
                 'member_id': member_id,
@@ -42,19 +42,19 @@ def commit_member_points_events(
         DDB_CLIENT.update_member_points(member_points)
 
 
-def get_points_for_member(member_id: int, tier: str):
-    return DDB_CLIENT.get_member_points(member_id, tier)
+def get_points_for_member(tier: str, member_id: int):
+    return DDB_CLIENT.get_member_points(tier, member_id)
 
 
-def get_points_for_member_by_name(member_name: str, tier: str):
+def get_points_for_member_by_name(tier: str, member_name: str):
     member_id = get_member_id_by_name(member_name)
     if member_id is None:
         return None
-    return DDB_CLIENT.get_member_points(member_id, tier)
+    return DDB_CLIENT.get_member_points(tier, member_id)
 
 
-def remove_one_time_points(member_id: int, tier: str, category: PointsCategory):
-    member_points = DDB_CLIENT.get_member_points(member_id, tier)
+def remove_one_time_points(tier: str, member_id: int, category: PointsCategory):
+    member_points = DDB_CLIENT.get_member_points(tier, member_id)
     if category.name not in member_points['one_time']:
         LOG.info(f"Member {member_id} does not have {category.name} one-time points. Nothing to remove.")
         return
@@ -65,7 +65,7 @@ def remove_one_time_points(member_id: int, tier: str, category: PointsCategory):
 
 
 def remove_points_event(member_id: int, tier: str, point_event_uuid: str):
-    member_points = DDB_CLIENT.get_member_points(member_id, tier)
+    member_points = DDB_CLIENT.get_member_points(tier, member_id)
     for pe in member_points['points_events']:
         if pe['uuid'] == point_event_uuid:
             member_points['total_points'] -= pe['points']
