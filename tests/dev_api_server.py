@@ -57,8 +57,8 @@ class SubmitFFLogsBody(BaseModel):
     submission_channel: Union[int, str]
     is_static: bool
     is_fc_pf: bool
-    fc_pf_id: Optional[str] = None,
-    notes: Optional[str] = None,
+    fc_pf_id: Optional[str] = None
+    notes: Optional[str] = None
     eval_mode: bool = False
 
 

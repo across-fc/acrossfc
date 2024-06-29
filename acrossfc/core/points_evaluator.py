@@ -43,6 +43,7 @@ class PointsEvaluator:
         self.fc_pf_id = fc_pf_id
         self.fc_members_in_fight: List[Member] = []
         self.points_events = []
+        self.notes = []
 
         self.load_fc_member_ids()
         self.eval_fc_pf()
@@ -76,6 +77,8 @@ class PointsEvaluator:
                         ts=int(time.time()),
                     )
                 )
+        else:
+            self.notes.append("Not an FC PF ticket. No FC PF event participation points awarded.")
 
     def eval_fc_high_end_content(self):
         """
@@ -84,7 +87,7 @@ class PointsEvaluator:
         STATICS DO NOT COUNT (10)
         """
         if self.is_static:
-            LOG.info("Statics do not qualify for FC high-end content points. Skipping.")
+            self.notes.append("Statics do not qualify for FC high-end content points")
             return
 
         full_or_partial_fc = (len(self.fc_members_in_fight) >= 4)
@@ -108,11 +111,14 @@ class PointsEvaluator:
             category = PointsCategory.FC_ULTIMATE
             description = f"FC Ultimate: {e.name}"
         else:
-            LOG.info("Not high end content. No points awarded for FC high end content.")
+            tier_name = FC_CONFIG.current_submissions_tier.replace('_', '.')
+            self.notes.append(f"{e.name} is not a tracked encounter for tier {tier_name}. \
+                              No FC high-end content points awarded.")
             return
 
         if not full_or_partial_fc:
-            LOG.info(f"Not full or partial FC. FC members: {len(self.fc_members_in_fight)}")
+            self.notes.append(f"Not full or partial (4+) FC. FC members: {len(self.fc_members_in_fight)}. \
+                              No FC high-end content points awarded.")
             return
 
         for member in self.fc_members_in_fight:
@@ -129,15 +135,18 @@ class PointsEvaluator:
 
     def eval_vet_and_first_clears(self):
         # First clear: Vets and newbies get points
-        if self.fight_data.encounter not in CURRENT_SAVAGE_TO_POINTS_CATEGORY:
-            LOG.info("Not a tracked encounter. No vet or first-time clear points.")
+        e = self.fight_data.encounter
+        if e not in CURRENT_SAVAGE_TO_POINTS_CATEGORY:
+            tier_name = FC_CONFIG.current_submissions_tier.replace('_', '.')
+            self.notes.append(f"{e.name} is not a tracked encounter for tier {tier_name}. \
+                              No vet or first-time clear points awarded.")
             return
 
         veteran_members: List[Member] = []
         first_clear_members: List[Member] = []
 
         for member in self.fc_members_in_fight:
-            clears: List[Clear] = FFLOGS_CLIENT.get_clears_for_member(member, [self.fight_data.encounter])
+            clears: List[Clear] = FFLOGS_CLIENT.get_clears_for_member(member, [e])
 
             prior_clears: List[Clear] = [
                 c for c in clears
@@ -150,13 +159,13 @@ class PointsEvaluator:
             else:
                 first_clear_members.append(member)
 
-        category = CURRENT_SAVAGE_TO_POINTS_CATEGORY[self.fight_data.encounter]
+        category = CURRENT_SAVAGE_TO_POINTS_CATEGORY[e]
         for member in first_clear_members:
             # Extra check: If member has already been awarded one-time points, skip this one.
             member_points = DDB_CLIENT.get_member_points(member.fcid, tier=FC_CONFIG.current_submissions_tier)
             one_time_points_exist = member_points is not None and category in member_points['one_time']
             if one_time_points_exist:
-                LOG.info(f"{member.fcid} has already been awarded points for {category.name}. Skipping.")
+                self.notes.append(f"{member.name} ({member.fcid}) has already been awarded points for {category.name}. Skipping.")
                 continue
 
             self.points_events.append(
@@ -165,7 +174,7 @@ class PointsEvaluator:
                     member_id=member.fcid,
                     points=category.points,
                     category=category,
-                    description=f"First clear: {self.fight_data.encounter.name}",
+                    description=f"First clear: {e.name}",
                     ts=int(time.time()),
                 )
             )
@@ -178,7 +187,9 @@ class PointsEvaluator:
                         member_id=member.fcid,
                         points=10,
                         category=PointsCategory.VET,
-                        description=f"Veteran support: {self.fight_data.encounter.name}",
+                        description=f"Veteran support: {e.name}",
                         ts=int(time.time()),
                     )
                 )
+        else:
+            self.notes.append("No first-time clearees present. No veteran or first-time clear points awarded.")

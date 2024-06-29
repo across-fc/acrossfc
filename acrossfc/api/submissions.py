@@ -110,6 +110,7 @@ def submit_fflogs(
         'fight_signature': fight_signature,
         'tier': FC_CONFIG.current_submissions_tier,
         'points_events': points_events_json,
+        'evaluator_notes': evaluator.notes,
         'last_update_ts': None,
         'last_update_by': None,
         'notes': notes
