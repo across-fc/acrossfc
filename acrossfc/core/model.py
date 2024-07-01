@@ -219,6 +219,12 @@ class SubmissionsChannel(Enum):
     DEV = 777
 
 
+class SubmissionType(Enum):
+    ADD_FFLOGS = 1
+    ADD_SCREENSHOT = 2
+    ADD_MANUAL = 3
+    REMOVE = 4
+
 # -----------------------------------------------
 # Convenience structs and aliases
 # -----------------------------------------------

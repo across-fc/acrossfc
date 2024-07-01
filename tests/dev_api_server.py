@@ -94,8 +94,14 @@ def review_submission(body: ReviewSubmissionBody):
 
 
 @app.get("/ppts")
-def get_participation_points(member_id: int, tier: str):
-    return DDB_CLIENT.get_member_points(member_id, tier)
+def get_participation_points(member_id: int, tier: str = FC_CONFIG.current_submissions_tier):
+    try:
+        return DDB_CLIENT.get_member_points(tier, member_id)
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+
+
 
 
 @app.get("/ppts/leaderboard")

@@ -42,6 +42,48 @@ def commit_member_points_events(
         DDB_CLIENT.update_member_points(member_points)
 
 
+def remove_points_events(tier: str, member_id: int, pe_uuid_list: List[str]):
+    print(pe_uuid_list)
+    member_points = DDB_CLIENT.get_member_points(tier, member_id)
+    if member_points is None:
+        LOG.warn(f"Trying to remove tier {tier} points from member {member_id} that does not have a PPTS entry.")
+        return
+
+    # Check regular points events
+    for i, pe in enumerate(member_points['points_events']):
+        if pe['uuid'] in pe_uuid_list:
+            del member_points['points_events'][i]
+            member_points['total_points'] -= pe['points']
+
+    # Check one-time points events
+    for category in member_points['one_time']:
+        # otpe: One-time points event
+        otpe = member_points['one_time'][category]['uuid']
+        if otpe['uuid'] in pe_uuid_list:
+            del member_points['one_time'][category]
+            member_points['total_points'] -= pe['points']
+
+    # --- DEBUG
+    import json
+    from collections.abc import MutableMapping, MutableSequence
+    from decimal import Decimal
+    def convert_decimals_to_int(obj):
+        """
+        Recursively converts all Decimal instances in a given object to integers.
+        """
+        if isinstance(obj, MutableMapping):  # If obj is a dictionary
+            return {k: convert_decimals_to_int(v) for k, v in obj.items()}
+        elif isinstance(obj, MutableSequence):  # If obj is a list
+            return [convert_decimals_to_int(i) for i in obj]
+        elif isinstance(obj, Decimal):  # If obj is a Decimal
+            return int(obj)
+        else:
+            return obj
+    print(json.dumps(convert_decimals_to_int(member_points), indent=4))
+    # --- DEBUG
+    DDB_CLIENT.update_member_points(member_points)
+
+
 def get_points_for_member(tier: str, member_id: int):
     return DDB_CLIENT.get_member_points(tier, member_id)
 

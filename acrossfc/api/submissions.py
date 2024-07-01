@@ -14,11 +14,12 @@ from acrossfc.core.model import (
     PointsEvent,
     PointsEventStatus,
     PointsCategory,
-    SubmissionsChannel
+    SubmissionsChannel,
+    SubmissionType
 )
 from acrossfc.core.points_evaluator import PointsEvaluator
 from acrossfc.ext.ddb_client import DDB_CLIENT
-from .participation_points import commit_member_points_events
+from .participation_points import commit_member_points_events, remove_points_events
 
 LOG = logging.getLogger(__name__)
 
@@ -103,6 +104,7 @@ def submit_fflogs(
         'ts': timestamp,
         'submitted_by': submitted_by,
         'submission_channel': submission_channel.value,
+        'submission_type': SubmissionType.ADD_FFLOGS.value,
         'is_fc_pf': is_fc_pf,
         'is_static': is_static,
         'fc_pf_id': fc_pf_id,
@@ -128,6 +130,22 @@ def submit_fflogs(
 
 
 def review_submission(submission):
+    if submission['submission_type'] == SubmissionType.REMOVE.value:
+        _remove_points_submission(submission)
+    else:
+        _add_points_submission(submission)
+
+
+def _remove_points_submission(submission):
+    remove_points_events(
+        tier=submission['tier'],
+        member_id=int(submission['member_id']),
+        pe_uuid_list=[pe['uuid'] for pe in submission['points_events_removed']])
+
+    DDB_CLIENT.upsert_submission(submission)
+
+
+def _add_points_submission(submission):
     # Add all approved points for member
     user_points_events_to_commit: List[PointsEvent] = []
     for pe in submission['points_events']:
