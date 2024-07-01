@@ -63,24 +63,6 @@ def remove_points_events(tier: str, member_id: int, pe_uuid_list: List[str]):
             del member_points['one_time'][category]
             member_points['total_points'] -= pe['points']
 
-    # --- DEBUG
-    import json
-    from collections.abc import MutableMapping, MutableSequence
-    from decimal import Decimal
-    def convert_decimals_to_int(obj):
-        """
-        Recursively converts all Decimal instances in a given object to integers.
-        """
-        if isinstance(obj, MutableMapping):  # If obj is a dictionary
-            return {k: convert_decimals_to_int(v) for k, v in obj.items()}
-        elif isinstance(obj, MutableSequence):  # If obj is a list
-            return [convert_decimals_to_int(i) for i in obj]
-        elif isinstance(obj, Decimal):  # If obj is a Decimal
-            return int(obj)
-        else:
-            return obj
-    print(json.dumps(convert_decimals_to_int(member_points), indent=4))
-    # --- DEBUG
     DDB_CLIENT.update_member_points(member_points)
 
 
